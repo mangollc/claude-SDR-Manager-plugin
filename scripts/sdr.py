@@ -12,17 +12,28 @@ if sys.version_info < (3, 9):
 
 import argparse  # noqa: E402
 import json  # noqa: E402
+from datetime import date  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from sdrlib import environment, file_reader, normalize, profile, scorecard, targets  # noqa: E402
+from sdrlib import (  # noqa: E402
+    coaching,
+    environment,
+    file_reader,
+    history,
+    narrative_check,
+    normalize,
+    profile,
+    scorecard,
+    targets,
+)
 
 EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_NEEDS_INPUT = 2
 # Problems the manager can fix, so skills get a plain message rather than a failure.
-EXPECTED_ERRORS = (file_reader.UnsupportedFile, profile.ProfileError, ValueError)
+EXPECTED_ERRORS = (file_reader.UnsupportedFile, profile.ProfileError, ValueError, OSError)
 
 
 class UsageError(Exception):
@@ -61,6 +72,39 @@ def run_metrics(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, scorecard.summarize(scorecard.build_scorecard(workspace, args.week), workspace)
 
 
+def _read_json(path: str) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _known_rep(workspace: Path, name: str) -> str:
+    """Return the rep's name from the team profile, accepting aliases."""
+    rep = profile.rep_lookup(profile.load_profile(workspace)).get(name.strip().lower())
+    if rep is None:
+        raise ValueError(f"{name} isn't a rep in the team profile.")
+    return rep
+
+
+def _number_problems(args: argparse.Namespace) -> list:
+    workspace = Path(args.workspace)
+    metrics_file = history.read_metrics(workspace, args.week)
+    coaching_text = coaching.read_history(workspace, args.rep) if args.rep else ""
+    return narrative_check.check_narrative(_read_json(args.narrative), metrics_file, coaching_text)
+
+
+def run_check_narrative(args: argparse.Namespace) -> tuple[int, dict]:
+    problems = _number_problems(args)
+    if problems:
+        return EXIT_NEEDS_INPUT, {"status": "needs_input", "problems": problems}
+    return EXIT_OK, {"status": "ok", "problems": []}
+
+
+def run_log_coaching(args: argparse.Namespace) -> tuple[int, dict]:
+    workspace = Path(args.workspace)
+    rep = _known_rep(workspace, args.rep)
+    path = coaching.append_entry(workspace, rep, _read_json(args.entry_file), date.today())
+    return EXIT_OK, {"status": "ok", "path": str(path)}
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = JsonArgumentParser(prog="sdr.py", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -88,6 +132,19 @@ def build_parser() -> argparse.ArgumentParser:
     build_metrics.add_argument("--workspace", required=True)
     build_metrics.add_argument("--week")
     build_metrics.set_defaults(handler=run_metrics)
+
+    check_text = commands.add_parser("check-narrative", help="Check Claude's written numbers")
+    check_text.add_argument("--workspace", required=True)
+    check_text.add_argument("--week", required=True)
+    check_text.add_argument("--narrative", required=True)
+    check_text.add_argument("--rep")
+    check_text.set_defaults(handler=run_check_narrative)
+
+    log_coaching = commands.add_parser("log-coaching", help="Add a coaching history entry")
+    log_coaching.add_argument("--workspace", required=True)
+    log_coaching.add_argument("--rep", required=True)
+    log_coaching.add_argument("--entry-file", required=True)
+    log_coaching.set_defaults(handler=run_log_coaching)
 
     return parser
 
