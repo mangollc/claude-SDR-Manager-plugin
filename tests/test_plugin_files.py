@@ -133,6 +133,34 @@ class ReadmeTests(unittest.TestCase):
     def test_is_honest_about_what_claude_reads(self):
         self.assertIn("Claude plan", self.text)
 
+    def test_states_clearly_that_no_keys_or_services_are_needed(self):
+        self.assertIn("External services, API keys, and environment variables", self.text)
+        self.assertIn("No API keys. No environment variables. No external services.", self.text)
+
+    def test_covers_every_tool_and_operating_system_it_promises(self):
+        for topic in ("Mac", "Windows", "Claude Code", "Codex", "Cursor", "VS Code", "Gemini CLI"):
+            self.assertIn(topic, self.text, topic)
+
+    def test_documents_every_user_command(self):
+        for command in (
+            "/sdr-manager:setup",
+            "/sdr-manager:scorecard",
+            "/sdr-manager:one-on-one",
+            "--log",
+            "sdr-setup",
+            "sdr-scorecard",
+            "sdr-one-on-one",
+        ):
+            self.assertIn(command, self.text, command)
+
+    def test_every_internal_link_points_to_a_real_section(self):
+        headings = re.findall(r"^#{2,4} (.+)$", self.text, flags=re.MULTILINE)
+        anchors = {
+            re.sub(r"[^a-z0-9 -]", "", heading.lower()).replace(" ", "-") for heading in headings
+        }
+        for anchor in re.findall(r"\]\(#([a-z0-9-]+)\)", self.text):
+            self.assertIn(anchor, anchors, anchor)
+
 
 if __name__ == "__main__":
     unittest.main()

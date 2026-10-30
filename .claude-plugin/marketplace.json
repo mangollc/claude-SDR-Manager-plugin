@@ -1,0 +1,14 @@
+{
+  "name": "mango-plugins",
+  "description": "Claude Code plugins from Mango LLC.",
+  "owner": {
+    "name": "Manish Singh"
+  },
+  "plugins": [
+    {
+      "name": "sdr-manager",
+      "source": "./",
+      "description": "Coach SDR teams from exported sales data: weekly scorecards, one coaching focus per rep, and 1:1 prep."
+    }
+  ]
+}

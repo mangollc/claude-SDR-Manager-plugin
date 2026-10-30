@@ -567,7 +567,7 @@ The sample exports are deliberately messy and use tool-neutral column names, so 
 
 The first build stores daily activity counts, so the later activity timeline can start from existing history.
 
-**Release:** publishing to GitHub or a plugin marketplace is a separate step that happens after testing and needs its own approval. It also needs a license, a final author name, and confirmation that the Andy Gheewalla name can be used publicly.
+**Release:** published publicly at `mangollc/claude-SDR-Manager-plugin` under the MIT license, with a plugin marketplace for Claude Code and `install.py` for tools that read `~/.agents/skills`, such as Codex, Cursor, VS Code Copilot, and Gemini CLI.
 
 ## 17. Sources
 

@@ -1001,4 +1001,4 @@ The tasks above are the original plan. These changes came out of building and te
 - **Pronouns:** report text is rejected if it uses gendered pronouns, after a session guessed one from a rep's name.
 - **1:1 layout:** the five steps came back out, and the page now fits on one sheet, with notes filling whatever room is left. The data sources moved to the team report's last page.
 - **Code review:** one Sonnet review found ten real issues, all fixed with tests: data loss from stray dates, weekly and daily double counting, duplicate meetings files, holidays misread as partial weeks, Sunday-start weeks, an unvalidated `--week`, an overwritten `.gitignore`, header detection and free-text masking gaps, and shared coaching files.
-
+- **Cross-tool install:** added `install.py`, which rewrites the skills for tools without `${CLAUDE_PLUGIN_ROOT}` and copies the program to `~/.sdr-manager`. Claude Code users get the plugin through `.claude-plugin/marketplace.json`.

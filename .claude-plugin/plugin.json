@@ -5,5 +5,13 @@
   "author": {
     "name": "Manish Singh"
   },
-  "keywords": ["sales", "sdr", "coaching", "scorecard"]
+  "keywords": [
+    "sales",
+    "sdr",
+    "coaching",
+    "scorecard"
+  ],
+  "homepage": "https://github.com/mangollc/claude-SDR-Manager-plugin",
+  "repository": "https://github.com/mangollc/claude-SDR-Manager-plugin",
+  "license": "MIT"
 }

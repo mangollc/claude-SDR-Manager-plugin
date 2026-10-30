@@ -62,7 +62,7 @@ def run_init_workspace(args: argparse.Namespace) -> tuple[int, dict]:
 def run_status(args: argparse.Namespace) -> tuple[int, dict]:
     found = [Path(args.workspace)] if args.workspace else find_workspaces(Path.cwd())
     if not found:
-        message = "There's no team workspace in this folder. Run /sdr-manager:setup first."
+        message = "There's no team workspace in this folder. Run the SDR Manager setup first."
         return EXIT_NEEDS_INPUT, {"status": "needs_input", "error": message}
     others = [str(path) for path in found[1:]]
     return EXIT_OK, {**describe_workspace(found[0], datetime.now()), "other_workspaces": others}

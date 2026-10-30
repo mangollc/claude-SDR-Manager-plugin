@@ -51,7 +51,9 @@ def load_profile(workspace: Path) -> dict:
     """Read and validate the team profile."""
     path = workspace / PROFILE_FILE
     if not path.exists():
-        raise ProfileError(f"No team profile found in {workspace}. Run /sdr-manager:setup first.")
+        raise ProfileError(
+            f"No team profile found in {workspace}. Run the SDR Manager setup first."
+        )
     try:
         profile = json.loads(path.read_text(encoding="utf-8"))
     except ValueError as error:
