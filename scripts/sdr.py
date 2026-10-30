@@ -30,6 +30,7 @@ from sdrlib import (  # noqa: E402
     scorecard,
     targets,
 )
+from sdrlib.workspace import init_workspace  # noqa: E402
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -51,6 +52,10 @@ class JsonArgumentParser(argparse.ArgumentParser):
 
 def run_check_env(_args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, environment.report()
+
+
+def run_init_workspace(args: argparse.Namespace) -> tuple[int, dict]:
+    return EXIT_OK, init_workspace(Path(args.path), args.sample)
 
 
 def run_inspect(args: argparse.Namespace) -> tuple[int, dict]:
@@ -89,7 +94,8 @@ def _known_rep(workspace: Path, name: str) -> str:
 def _number_problems(args: argparse.Namespace) -> list:
     workspace = Path(args.workspace)
     metrics_file = history.read_metrics(workspace, args.week)
-    coaching_text = coaching.read_history(workspace, args.rep) if args.rep else ""
+    rep = _known_rep(workspace, args.rep) if args.rep else None
+    coaching_text = coaching.read_history(workspace, rep) if rep else ""
     return narrative_check.check_narrative(_read_json(args.narrative), metrics_file, coaching_text)
 
 
@@ -148,6 +154,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     check_env = commands.add_parser("check-env", help="Check Python, openpyxl, and browser")
     check_env.set_defaults(handler=run_check_env)
+
+    init = commands.add_parser("init-workspace", help="Create a workspace for a team")
+    init.add_argument("--path", required=True)
+    init.add_argument("--sample", action="store_true")
+    init.set_defaults(handler=run_init_workspace)
 
     inspect = commands.add_parser("inspect", help="Preview an export safely")
     inspect.add_argument("file")

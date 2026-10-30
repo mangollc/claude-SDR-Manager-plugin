@@ -1,0 +1,14 @@
+{
+  "file": "linkedin-activity.csv",
+  "kind": "activities",
+  "header_row": 1,
+  "date_format": "%Y-%m-%d",
+  "columns": {"date": "Date", "rep": "Rep", "action": "Action"},
+  "values": {
+    "action": {"Connection Request": "li_request", "Message": "li_message"}
+  },
+  "flags": {
+    "accepted": {"column": "Result", "true": ["Accepted"], "false": ["Pending"]},
+    "replied": {"column": "Result", "true": ["Replied"], "false": ["No Reply"]}
+  }
+}

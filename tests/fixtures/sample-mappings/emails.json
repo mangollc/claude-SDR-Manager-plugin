@@ -1,0 +1,12 @@
+{
+  "file": "sequencer-emails.csv",
+  "kind": "activities",
+  "header_row": 1,
+  "date_format": "%Y-%m-%d %H:%M",
+  "columns": {"date": "Sent At", "rep": "Owner"},
+  "fixed": {"action": "email"},
+  "flags": {
+    "replied": {"column": "Replied", "true": ["Yes"], "false": ["No"]},
+    "bounced": {"column": "Bounced", "true": ["Yes"], "false": ["No"]}
+  }
+}

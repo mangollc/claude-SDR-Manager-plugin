@@ -1,0 +1,60 @@
+{
+  "company": "Example Analytics",
+  "product": "Forecasting software that helps retailers plan inventory.",
+  "ideal_customer": "Operations leaders at retailers with 50 to 500 stores.",
+  "channels": [
+    "call",
+    "email",
+    "linkedin"
+  ],
+  "reps": [
+    {
+      "name": "Ava Reyes",
+      "start_date": "2025-02-03",
+      "aliases": [],
+      "active": true
+    },
+    {
+      "name": "Ben Carter",
+      "start_date": "2025-06-16",
+      "aliases": [
+        "B. Carter"
+      ],
+      "active": true
+    },
+    {
+      "name": "Chloe Nguyen",
+      "start_date": "2025-04-07",
+      "aliases": [],
+      "active": true
+    },
+    {
+      "name": "Diego Marin",
+      "start_date": "2025-09-01",
+      "aliases": [],
+      "active": true
+    },
+    {
+      "name": "Nina Patel",
+      "start_date": "2026-10-12",
+      "aliases": [],
+      "active": true
+    },
+    {
+      "name": "Priya Shah",
+      "start_date": "2025-03-10",
+      "aliases": [],
+      "active": true
+    },
+    {
+      "name": "Sam Okafor",
+      "start_date": "2025-08-04",
+      "aliases": [],
+      "active": true
+    }
+  ],
+  "ignored_names": [
+    "Morgan Lee"
+  ],
+  "targets": {}
+}

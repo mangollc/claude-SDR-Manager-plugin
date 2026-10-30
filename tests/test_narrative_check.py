@@ -150,6 +150,15 @@ class CheckNarrativeCommandTests(unittest.TestCase):
 
         self.assertEqual(code, 0)
 
+    def test_an_alias_finds_the_rep_s_coaching_history(self):
+        coaching = self.workspace / "coaching"
+        coaching.mkdir()
+        (coaching / "ava-reyes.md").write_text("- Agreed: 50 dials\n")
+
+        code, _ = self.run_check({"headline": "Agreed to 50 dials"}, "--rep", "A. Reyes")
+
+        self.assertEqual(code, 0)
+
     def test_missing_scorecard_needs_the_manager(self):
         code, output = run_cli(
             "check-narrative",

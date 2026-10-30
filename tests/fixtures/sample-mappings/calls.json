@@ -1,0 +1,15 @@
+{
+  "file": "crm-calls.csv",
+  "kind": "activities",
+  "header_row": 3,
+  "date_format": "%m/%d/%Y",
+  "columns": {"date": "Activity Date", "rep": "Assigned To"},
+  "fixed": {"action": "dial"},
+  "flags": {
+    "connected": {
+      "column": "Call Result",
+      "true": ["Connected"],
+      "false": ["No Answer", "Voicemail", "Busy"]
+    }
+  }
+}

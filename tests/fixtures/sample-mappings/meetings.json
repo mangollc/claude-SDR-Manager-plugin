@@ -1,0 +1,22 @@
+{
+  "file": "crm-meetings.csv",
+  "kind": "meetings",
+  "header_row": 1,
+  "date_format": "%m/%d/%Y",
+  "columns": {
+    "rep": "Owner Name",
+    "booked_date": "Date Booked",
+    "due_date": "Meeting Date",
+    "status": "Meeting Status",
+    "accepted": "AE Decision"
+  },
+  "values": {
+    "status": {
+      "Completed": "held",
+      "No Show": "no_show",
+      "Cancelled": "cancelled",
+      "Scheduled": "scheduled"
+    },
+    "accepted": {"Accepted": "yes", "Rejected": "no"}
+  }
+}
