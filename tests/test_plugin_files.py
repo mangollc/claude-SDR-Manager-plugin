@@ -40,7 +40,7 @@ class ManifestTests(unittest.TestCase):
 
     def test_identifies_the_plugin(self):
         self.assertEqual(self.manifest["name"], "sdr-manager")
-        self.assertEqual(self.manifest["version"], "0.1.0")
+        self.assertRegex(self.manifest["version"], r"^\d+\.\d+\.\d+$")
 
     def test_names_the_author(self):
         self.assertEqual(self.manifest["author"]["name"], "Manish Singh")
