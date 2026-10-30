@@ -10,6 +10,7 @@ from pathlib import Path
 
 from . import focus, history, metrics
 from .profile import VALID_CHANNELS, active_reps, load_profile, rep_slug
+from .reports import focus_text
 from .targets import WORKING_DAYS_PER_WEEK, load_defaults, month_in_role, resolve_targets
 
 SCHEMA_VERSION = 1
@@ -309,12 +310,13 @@ def summarize(scorecard: dict, workspace: Path) -> dict:
         "path": str(history.metrics_path(workspace, scorecard["week"])),
         "partial_week": scorecard["partial_week"],
         "channels_present": scorecard["channels_present"],
+        "status_counts": scorecard["team"]["status_counts"],
         "team_pattern": scorecard["team"]["pattern"],
         "reps": [
             {
                 "name": rep["name"],
                 "status": rep["status"],
-                "focus": rep["focus"],
+                "focus_text": focus_text(rep),
                 "flags": rep["flags"],
             }
             for rep in scorecard["reps"]

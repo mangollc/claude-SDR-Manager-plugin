@@ -1,7 +1,7 @@
 # sdr-manager: First Build Design
 
 - **Date:** 2026-10-30
-- **Status:** Waiting for review
+- **Status:** Built. Section 10's statistics rule changed during final testing
 - **Plugin name:** `sdr-manager`
 - **First version:** 0.1.0
 
@@ -85,7 +85,7 @@ Run weekly. It accepts an optional folder or file path and an optional week, suc
 6. Normalize the files. Stop and ask if there are unknown rep names, unknown values, or too many rejected rows (section 11).
 7. Calculate metrics, statuses, and coaching focus.
 8. Write short observations using the coaching playbook.
-9. Check every number in those observations against the calculator's output.
+9. Confirm those observations state no statistics of their own.
 10. Build the PDF and summarize it in chat: team status, who needs attention, the file location, and any data warnings.
 
 ### 4.3 `/sdr-manager:one-on-one`
@@ -96,8 +96,8 @@ Takes a rep's name. It has two modes.
 
 1. Load the rep's latest metrics, trends, and coaching history. If the rep has no metrics, send the manager to the scorecard. If the latest metrics are more than 7 days old, warn but continue.
 2. Offer to include call notes, transcripts, or the manager's own observations. These shape the questions and are not scored in this version.
-3. Write the prep: recent wins, the coaching focus with evidence, progress on last time's commitments, questions to ask, and agenda topics.
-4. Check every number against the calculator's output.
+3. Write the prep: praise for the rep, why the focus matters, progress on last time's commitments, questions to ask, and agenda topics. The calculator supplies the wins and evidence that carry numbers.
+4. Confirm the text states no statistics of its own.
 5. Build a one-page PDF.
 
 **After the meeting (`--log`):**
@@ -125,7 +125,7 @@ normalize ──► daily counts per rep, with prospect details removed
 metrics ──► numbers, statuses, and coaching focus (JSON)
       │
       ▼
-Claude writes observations ──► check-narrative blocks unmatched numbers
+Claude writes observations ──► check-narrative blocks any statistic
       │
       ▼
 report ──► HTML ──► PDF through Chrome or Edge
@@ -462,7 +462,9 @@ Both reports use US Letter and system fonts, so they work offline. Status always
 
 **PDF creation:** the plugin finds Chrome, Edge, Chromium, or Brave and prints the report with a 60-second time limit. If that fails, it keeps the HTML file and tells the manager to open it and choose Save as PDF.
 
-**Number checking:** Claude's text is saved separately from the numeric sections of the report. Before rendering, `check-narrative` finds every number in that text and confirms it matches a value in the metrics file or the rep's coaching history at display rounding. Dates, step numbers, and the term 1:1 are ignored. Claude spells out any other number in words, such as "four-week". Any mismatch blocks the report until the text is corrected. Fixed agenda timings live in the template, so they aren't checked.
+**Statistics rule:** Claude's written text states no statistics. It carries judgment only, and every number on a page comes from the calculator. Before rendering, `check-narrative` rejects any number in that text, in digits or in words. Dates, step numbers, the term 1:1, the word "one", and the fixed "four-week" period are allowed. So are numbers from the rep's own coaching history, such as an agreed "50 dials". Questions and agenda topics may use number words, because they're suggestions rather than claims, but no digits. Fixed agenda timings live in the template.
+
+This replaced an earlier rule that only checked each number existed somewhere in the metrics file. A real test session showed why that wasn't enough: it wrote "960 this week" for a four-week total, and "Thirteen held this week but only three accepted", mixing periods. Both passed. A number can be real and still be attached to the wrong rep or period, so numbers now only appear where the calculator puts them.
 
 ## 11. Error handling
 
@@ -543,7 +545,7 @@ The sample exports are deliberately messy and use tool-neutral column names, so 
 2. All seven sample reps get their expected status and focus.
 3. Calculator results match every hand-worked answer exactly.
 4. A messy export maps correctly after one round of manager confirmation.
-5. Every number in Claude's written text matches a value from the calculator or the coaching history.
+5. Every number in a report comes from the calculator or the coaching history, and Claude's written text states no statistics of its own.
 6. A saved commitment from one 1:1 appears in the next prep with its progress.
 
 ## 15. Risks

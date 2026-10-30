@@ -6,3 +6,4 @@ htmlcov/
 sdr-workspace/
 sdr-demo/
 .DS_Store
+.impeccable/

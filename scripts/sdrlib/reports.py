@@ -187,17 +187,21 @@ def _date_range(metrics: dict) -> str:
     return f"{_short_date(start)} to {_short_date(end)}, {end.year}"
 
 
-def _focus_text(rep: dict) -> str:
+def focus_text(rep: dict) -> str:
+    """Describe a rep's coaching focus in one sentence, in words shared by reports and chat."""
     focus = rep["focus"]
     if focus is None:
         return NO_FOCUS_TEXT.get(rep["status"], "")
     metric = focus["metric"]
     label = METRIC_LABELS[metric]
+    step = STEP_NAMES[focus["step"]]
     actual = format_value(metric, focus["actual"])
     target = format_target(metric, focus["target"])
     if focus["kind"] == "stretch":
         return f"Stretch: {label} is {actual}. Top performers reach {target}."
-    return f"{STEP_NAMES[focus['step']]}: {label} is {actual} against a target of {target}."
+    if metric == "touches":
+        return f"{step}: {actual} touches in four weeks against a target of {target}."
+    return f"{step}: {label} is {actual} against a target of {target}."
 
 
 def _team_row(label: str, metric: str, actual: float | None, target: float | None) -> str:
@@ -247,12 +251,16 @@ def _team_numbers(metrics: dict) -> str:
     )
 
 
+def _held_against_target(outcome: dict) -> str:
+    target = format_value("held", outcome["target"]) if outcome["target"] else "none"
+    return f'{format_value("held", outcome["actual"])} / {target}'
+
+
 def _rep_overview(metrics: dict) -> str:
     rows = "".join(
         f"<tr><td>{escape(rep['name'])}</td><td>{_rep_status_html(rep['status'])}</td>"
-        f"<td>{escape(_focus_text(rep))}</td>"
-        f'<td class="number">{format_value("held", rep["outcome"]["actual"])}'
-        f' / {format_value("held", rep["outcome"]["target"])}</td></tr>'
+        f"<td>{escape(focus_text(rep))}</td>"
+        f'<td class="number">{_held_against_target(rep["outcome"])}</td></tr>'
         for rep in metrics["reps"]
     )
     return (
@@ -470,7 +478,7 @@ def _rep_page(rep: dict, metrics: dict, narrative: dict, brand: str) -> str:
         f'<h1>{escape(rep["name"])}</h1></div>'
         f'<p class="rep-status">{_rep_status_html(rep["status"])}</p></div>'
         '<div class="split"><div class="focus-panel"><h2>Coaching focus</h2>'
-        f'<p class="focus-line">{escape(_focus_text(rep))}</p>'
+        f'<p class="focus-line">{escape(focus_text(rep))}</p>'
         f'<p class="rep-note">{escape(note)}</p>{warning}</div>'
         f"<div><h2>The five steps</h2>{_steps_list(rep)}</div></div>"
         f'<h2>Numbers</h2>{_numbers_table(rep, metrics["targets"])}'
@@ -539,6 +547,34 @@ def _agenda_rows(topics: Sequence[str]) -> str:
     )
 
 
+def _win_lines(rep: dict) -> list[str]:
+    """Return the steps that are on target. New hires' numbers aren't judged."""
+    if rep["status"] == ONBOARDING:
+        return []
+    return [_step_detail(step) for step in rep["steps"] if step["status"] == ON_TARGET]
+
+
+def _evidence_lines(rep: dict) -> list[str]:
+    """Return the calculator's facts behind the coaching focus."""
+    lines = []
+    focus = rep["focus"]
+    if focus:
+        metric = focus["metric"]
+        label = METRIC_LABELS[metric]
+        actual = format_value(metric, focus["actual"])
+        lines.append(f'{label}: {actual} against {format_target(metric, focus["target"])}')
+        weekly = rep["trend"].get(metric)
+        if weekly:
+            shown = ", ".join(format_value(metric, value) for value in weekly)
+            lines.append(f"{label} by week: {shown}")
+    outcome = rep["outcome"]
+    lines.append(
+        f'Meetings held: {format_value("held", outcome["actual"])} '
+        f'against {format_value("held", outcome["target"])}'
+    )
+    return lines
+
+
 def render_one_on_one(metrics: dict, rep: str, narrative: dict, coaching_text: str) -> str:
     """Return the one-page 1:1 prep as HTML."""
     match = next((item for item in metrics["reps"] if item["name"] == rep), None)
@@ -553,10 +589,10 @@ def render_one_on_one(metrics: dict, rep: str, narrative: dict, coaching_text: s
         meta=escape(_rep_meta(match, metrics)),
         rep=escape(rep),
         status=_rep_status_html(match["status"]),
-        focus=escape(_focus_text(match)),
+        focus=escape(focus_text(match)),
         focus_summary=escape(narrative.get("focus_summary", "")),
-        evidence=_list_items(narrative.get("evidence", [])),
-        wins=_list_items(narrative.get("wins", [])),
+        evidence=_list_items(_evidence_lines(match)),
+        wins=_list_items(_win_lines(match) + narrative.get("wins", [])),
         commitments=_list_items(commitments),
         progress=_list_items(narrative.get("commitment_progress", [])),
         questions=_list_items(narrative.get("questions", [])),

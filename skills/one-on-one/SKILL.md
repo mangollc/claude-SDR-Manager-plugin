@@ -22,7 +22,7 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 
 ## Rules
 
-- **Every number comes from the metrics file or the coaching history.** Never calculate one yourself.
+- **Never write a statistic.** The page shows every number itself, so your text carries judgment only. Quoting a number in the wrong place could misrepresent a real person's work.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Never compare the rep with teammates.**
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts, say that's a decision for the manager, and suggest involving HR.
@@ -54,20 +54,23 @@ Save to `reports/<week>/one-on-one-<slug>-narrative.json` in the workspace:
 
 ```json
 {
-  "wins": ["Real, specific things this rep did well"],
-  "focus_summary": "One or two sentences on the coaching focus",
-  "evidence": ["The numbers behind the focus"],
-  "commitment_progress": ["For each past commitment, what the numbers show"],
+  "wins": ["Praise for something the rep did, in words"],
+  "focus_summary": "One or two sentences on why this focus matters now",
+  "commitment_progress": ["For each past commitment, whether things moved the right way"],
   "questions": ["Open questions that help the rep find the cause"],
   "agenda": ["Check-in", "Wins and commitments", "Coaching focus", "Next steps"]
 }
 ```
 
+The page adds the numbers itself: every on-target step is listed as a win, and the focus metric and its weekly values are listed as evidence.
+
 Follow these rules:
 
-- Always include at least one real win, drawn from the metrics.
-- Use only numbers from the metrics file or the coaching history, in the form they appear there.
-- Spell out any other number, such as "two calling blocks".
+- **Write no numbers in `wins`, `focus_summary`, or `commitment_progress`, in digits or in words.** The only exception is a number from the rep's coaching history, such as an agreed "50 dials".
+- `questions` and `agenda` may use words like "two calling blocks", but no digits.
+- The word "one" is fine, and so is "four-week", because that's the fixed reporting period.
+- Only describe what the metrics file shows. Base every claim on a status or a step.
+- Include at least one win that's true of this rep, drawn from a step on target.
 - Write three to five questions from the playbook, adapted to this rep.
 - Give four agenda topics, in the order they'll be covered.
 - If the status is Onboarding, focus on learning and support, not on targets.
@@ -80,11 +83,11 @@ Follow these rules:
 Run these in order, using the same narrative file:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <folder> --week <week> --rep "<name>" --narrative <file>
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <folder> --rep "<name>" --narrative <file>
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" report one-on-one --workspace <folder> --week <week> --rep "<name>" --narrative <file>
 ```
 
-If `check-narrative` lists problems, rewrite those sentences, then run it again. Never work around a failed check.
+If `check-narrative` lists problems, remove each number and say the same thing in words, then run it again. Never work around a failed check.
 
 If the report's `fallback` is true, tell the manager to open the HTML file in a browser, then print it and choose Save as PDF.
 

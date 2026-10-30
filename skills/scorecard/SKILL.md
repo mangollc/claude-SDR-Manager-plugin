@@ -23,7 +23,7 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 ## Rules
 
 - **Never open an export file directly.** Use `inspect`, which masks prospect details. Full exports only ever go through the scripts.
-- **Never do the math yourself.** Every number comes from the metrics file.
+- **Never write a statistic.** The report's tables show every number, so your text carries judgment only. Quoting a number in the wrong place is the worst mistake this plugin can make.
 - **Never rank reps** or compare them with each other in your text.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts and suggest involving HR.
@@ -96,35 +96,39 @@ Save to `reports/<week>/team-narrative.json` in the workspace:
 
 Follow these rules:
 
-- Use only numbers from the metrics file, in the form they appear on the report.
-- Spell out any other number, such as "four-week".
-- Don't calculate differences or new percentages.
+- **Write no numbers, in digits or in words.** Say "activity is the first gap", not "960 touches". Say "several reps", not "five reps". The tables sit right beside your text, so you never need to repeat them.
+- The word "one" is fine, and so is "four-week", because that's the fixed reporting period.
+- Only describe what the metrics file shows. Base every claim on a status, a focus, or a flag.
+- A touch is one outreach attempt, not a prospect. Don't say how many prospects were reached.
 - Lead with what the manager should do, not what the numbers are.
+- Match each rep's note to their focus step, using the playbook for that step.
 - If `team.pattern` is set, mention it. A shared problem usually points to the list, messaging, or targets.
 - If a rep has `bounce_warning`, suggest checking list quality before coaching on replies.
 - If a rep is Onboarding, leave their note out.
 
-## Step 7: Check the numbers and build the report
+## Step 7: Check the text and build the report
 
 Run these in order:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <folder> --week <week> --narrative <file>
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <folder> --narrative <file>
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" report team --workspace <folder> --week <week> --narrative <file>
 ```
 
-If `check-narrative` lists problems, rewrite those sentences using numbers from the metrics file, then run it again. Never work around a failed check.
+If `check-narrative` lists problems, remove each number and say the same thing in words, then run it again. Never work around a failed check.
 
 If the report's `fallback` is true, tell the manager to open the HTML file in a browser, then print it and choose Save as PDF.
 
 ## Step 8: Summarize in chat
 
-Keep it short:
+Keep it short, and use the output of `metrics`:
 
-1. The team's status, including how many reps are in each status
-2. Who needs attention, with each rep's one focus
+1. The team's status, using `status_counts`
+2. Each rep's status and `focus_text`, copied word for word
 3. Any team pattern
 4. Where the PDF is
 5. Any data warnings, such as a partial week, missing channels, rejected rows, or missing meetings
+
+Don't add other numbers, and don't reword, convert, or round `focus_text`.
 
 Then suggest `/sdr-manager:one-on-one` for the rep who needs it most.

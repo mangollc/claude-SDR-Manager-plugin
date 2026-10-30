@@ -94,10 +94,9 @@ def _known_rep(workspace: Path, name: str) -> str:
 
 def _number_problems(args: argparse.Namespace) -> list:
     workspace = Path(args.workspace)
-    metrics_file = history.read_metrics(workspace, args.week)
     rep = _known_rep(workspace, args.rep) if args.rep else None
     coaching_text = coaching.read_history(workspace, rep) if rep else ""
-    return narrative_check.check_narrative(_read_json(args.narrative), metrics_file, coaching_text)
+    return narrative_check.check_narrative(_read_json(args.narrative), coaching_text)
 
 
 def run_check_narrative(args: argparse.Namespace) -> tuple[int, dict]:
@@ -181,8 +180,8 @@ COMMANDS = (
     (
         "check-narrative",
         run_check_narrative,
-        "Check Claude's written numbers",
-        (WORKSPACE, WEEK, NARRATIVE, OPTIONAL_REP),
+        "Check that Claude's text states no statistics",
+        (WORKSPACE, NARRATIVE, OPTIONAL_REP),
     ),
     (
         "report",

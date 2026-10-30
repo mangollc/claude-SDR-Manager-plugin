@@ -338,6 +338,13 @@ class MetricsCommandTests(ScorecardTest):
         self.assertEqual(output["reps"][0]["status"], "Watch")
         self.assertTrue(Path(output["path"]).exists())
 
+    def test_summary_gives_ready_made_wording_for_the_chat(self):
+        code, output = run_cli("metrics", "--workspace", str(self.seeded()))
+
+        self.assertEqual(code, 0)
+        self.assertIn("LinkedIn reply rate is 10.0%", output["reps"][0]["focus_text"])
+        self.assertEqual(output["status_counts"]["Watch"], 1)
+
     def test_week_with_no_activity_needs_the_manager(self):
         workspace = self.seeded()
 

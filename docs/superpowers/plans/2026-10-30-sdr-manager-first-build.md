@@ -986,3 +986,14 @@ Confirm each of the six criteria in spec section 14 with evidence, and list anyt
 - A logo or brand colors. Only the brand name has been supplied, and teams can't yet set their own.
 - Testing on Windows, Linux, or Cowork. The README states what was tested.
 - Stages 2 to 4 from the spec.
+
+## Changes made during the build
+
+The tasks above are the original plan. These changes came out of building and testing it:
+
+- **Tools:** the user's Python rules call for `pytest`, `ruff`, `black`, `isort`, and `bandit`, so they joined `coverage` in `.venv`. Tests stay in `unittest` form, so they still run with no installs.
+- **Inspection:** `inspect` finds the real header row by itself, so report lines above it can't push prospect details past the masking.
+- **Mappings:** added the `skip` action for notes and tasks, and the `any` flag for columns such as `Replied At` timestamps.
+- **Reports:** targets show their exact value, so 3.41% against 3.43% can't read as 3.4% against 3.4%. The 1:1 page gained the five steps and a notes area.
+- **Statistics rule:** a real Haiku session wrote numbers that were real but attached to the wrong period, which the original check allowed. Claude's text now states no statistics, the calculator writes the 1:1's wins and evidence, and `check-narrative` no longer takes `--week`. See spec section 10.
+- **Chat summary:** `metrics` now returns `focus_text` and `status_counts`, so the summary can repeat exact wording.

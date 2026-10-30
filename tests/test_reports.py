@@ -30,7 +30,6 @@ TEAM_NARRATIVE = {
 ONE_ON_ONE_NARRATIVE = {
     "wins": ["Held meetings stayed close to goal"],
     "focus_summary": "Replies on LinkedIn are the first soft spot",
-    "evidence": ["Message replies are under target"],
     "commitment_progress": ["Started calling earlier"],
     "questions": ["What gets in the way of follow-ups?"],
     "agenda": ["Check-in", "Wins", "Focus", "Next steps"],
@@ -347,6 +346,77 @@ class OneOnOneTests(ReportTest):
     def test_unknown_rep_is_named(self):
         with self.assertRaisesRegex(ValueError, "Nobody Here"):
             render_one_on_one(self.metrics, "Nobody Here", ONE_ON_ONE_NARRATIVE, "")
+
+
+class FocusTextTests(ReportTest):
+    def rep_with(self, **changes):
+        return {**self.metrics["reps"][0], **changes}
+
+    def test_activity_focus_names_the_four_week_period(self):
+        gap = {"step": 1, "metric": "touches", "actual": 960, "target": 2080, "kind": "gap"}
+
+        self.assertEqual(
+            reports.focus_text(self.rep_with(focus=gap)),
+            "Activity: 960 touches in four weeks against a target of 2,080.",
+        )
+
+    def test_a_rate_focus_reads_as_a_rate(self):
+        gap = {"step": 4, "metric": "show_rate", "actual": 0.467, "target": 0.8, "kind": "gap"}
+
+        self.assertEqual(
+            reports.focus_text(self.rep_with(focus=gap)),
+            "Meetings held: Show rate is 46.7% against a target of 80%.",
+        )
+
+    def test_overview_shows_no_target_for_a_new_hire(self):
+        outcome = {"actual": 1, "target": 0.0, "status": "Not available"}
+        rep = self.rep_with(status="Onboarding", focus=None, outcome=outcome)
+
+        output = render_team(self.changed(reps=[rep]), TEAM_NARRATIVE)
+
+        self.assertIn("1 / none", output)
+
+
+class CalculatedFactsTests(ReportTest):
+    """A 1:1's facts come from the calculator, so they can't be misquoted."""
+
+    def render(self, rep=None):
+        metrics = self.changed(reps=[rep]) if rep else self.metrics
+        return render_one_on_one(metrics, "Ava Reyes", ONE_ON_ONE_NARRATIVE, "")
+
+    def test_steps_on_target_become_wins(self):
+        self.assertIn("<li>Touches: 2,080 against 2,080</li>", self.render())
+
+    def test_claude_wins_follow_the_calculated_ones(self):
+        output = self.render()
+
+        self.assertLess(
+            output.index("Touches: 2,080 against 2,080"), output.index("Held meetings stayed")
+        )
+
+    def test_a_new_hire_gets_no_calculated_wins(self):
+        rep = {**self.metrics["reps"][0], "status": "Onboarding", "focus": None}
+
+        self.assertNotIn("<li>Touches: 2,080 against 2,080</li>", self.render(rep))
+
+    def test_the_focus_metric_is_the_evidence(self):
+        self.assertIn("<li>LinkedIn reply rate: 10.0% against 10.4%</li>", self.render())
+
+    def test_the_outcome_is_always_evidence(self):
+        self.assertIn("<li>Meetings held: 9 against 9.2</li>", self.render())
+
+    def test_a_focus_with_a_weekly_trend_shows_each_week(self):
+        focus = {"step": 2, "metric": "connect_rate", "actual": 0.05, "target": 0.054, "kind": "gap"}
+        rep = {**self.metrics["reps"][0], "focus": focus}
+
+        self.assertIn("Connect rate by week:", self.render(rep))
+
+    def test_evidence_written_by_claude_is_ignored(self):
+        narrative = {**ONE_ON_ONE_NARRATIVE, "evidence": ["Invented claim"]}
+
+        output = render_one_on_one(self.metrics, "Ava Reyes", narrative, "")
+
+        self.assertNotIn("Invented claim", output)
 
 
 class ReportCommandTests(ReportTest):

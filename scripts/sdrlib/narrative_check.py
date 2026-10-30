@@ -1,4 +1,10 @@
-"""Confirm that every number in Claude's written text came from the calculator."""
+"""Keep statistics out of Claude's written text, so only the calculator states them.
+
+A check that a number exists somewhere in the data isn't enough. A real test run wrote
+"960 this week" for a four-week total, and "Thirteen held" as a word. Both passed that kind
+of check, and both were wrong. So written text carries judgment, and numbers come from the
+report's own tables.
+"""
 
 from __future__ import annotations
 
@@ -16,11 +22,20 @@ IGNORED_TEXT = re.compile(
             rf"\b\d{{1,2}}\s+{MONTHS}(?:\s+\d{{4}})?\b",  # 30 October 2026
             r"\b[Ss]tep\s+\d\b",  # Step 3
             r"\b1:1s?\b",  # the term 1:1
+            r"\bfour[- ]weeks?\b",  # the fixed reporting window
         )
-    )
+    ),
+    re.IGNORECASE,
 )
 NUMBER = re.compile(r"(?<![\w.])\d+(?:,\d{3})*(?:\.\d+)?%?(?!\w)")
-SKIPPED_KEYS = ("generated_at", "schema_version")
+NUMBER_WORD = re.compile(
+    r"\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen"
+    r"|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy"
+    r"|eighty|ninety|hundred|thousand|half|twice|dozen)\b",
+    re.IGNORECASE,
+)
+# These fields hold suggestions rather than claims, so "two calling blocks" is fine there.
+SUGGESTION_FIELDS = ("questions", "agenda")
 
 
 def extract_numbers(text: str) -> list[str]:
@@ -28,37 +43,13 @@ def extract_numbers(text: str) -> list[str]:
     return NUMBER.findall(IGNORED_TEXT.sub(" ", text))
 
 
+def extract_number_words(text: str) -> list[str]:
+    """Return every spelled-out count. `one` is allowed, because it's rarely a statistic."""
+    return NUMBER_WORD.findall(IGNORED_TEXT.sub(" ", text))
+
+
 def _normal(token: str) -> str:
-    """Make `2,080` match `2080`, and `80.0%` match `80%`."""
-    return re.sub(r"\.0+(?=%?$)", "", token.replace(",", ""))
-
-
-def _display_forms(value: float) -> set[str]:
-    forms = {f"{value:.1f}", f"{value:.2f}", f"{value:.0f}" if float(value).is_integer() else ""}
-    if 0 <= value <= 1:
-        percent = value * 100
-        forms |= {f"{percent:.1f}", f"{percent:.1f}%", f"{percent:.2f}%"}
-    return {_normal(form) for form in forms if form}
-
-
-def _numbers_in(value: object) -> Iterator[float]:
-    if isinstance(value, dict):
-        for key, item in value.items():
-            if key not in SKIPPED_KEYS:
-                yield from _numbers_in(item)
-    elif isinstance(value, list):
-        for item in value:
-            yield from _numbers_in(item)
-    elif isinstance(value, (int, float)) and not isinstance(value, bool):
-        yield value
-
-
-def allowed_numbers(metrics: dict, coaching_text: str = "") -> set[str]:
-    """Return every number the written text may use, in its displayed forms."""
-    allowed: set[str] = set()
-    for value in _numbers_in(metrics):
-        allowed |= _display_forms(value)
-    return allowed | {_normal(token) for token in extract_numbers(coaching_text)}
+    return token.replace(",", "").lower()
 
 
 def _strings(value: object, path: str = "") -> Iterator[tuple[str, str]]:
@@ -72,12 +63,24 @@ def _strings(value: object, path: str = "") -> Iterator[tuple[str, str]]:
             yield from _strings(item, f"{path}[{index}]")
 
 
-def check_narrative(narrative: dict, metrics: dict, coaching_text: str = "") -> list[dict]:
-    """Return a problem for each written number that has no source."""
-    allowed = allowed_numbers(metrics, coaching_text)
-    return [
-        {"field": field, "text": text, "number": token}
-        for field, text in _strings(narrative)
-        for token in extract_numbers(text)
-        if _normal(token) not in allowed
-    ]
+def _is_suggestion(field: str) -> bool:
+    return field.split("[")[0] in SUGGESTION_FIELDS
+
+
+def check_narrative(narrative: dict, coaching_text: str = "") -> list[dict]:
+    """Return a problem for each statistic. Only the rep's own coaching history may be quoted."""
+    allowed = {
+        _normal(token)
+        for token in extract_numbers(coaching_text) + extract_number_words(coaching_text)
+    }
+    problems = []
+    for field, text in _strings(narrative):
+        found = extract_numbers(text)
+        if not _is_suggestion(field):
+            found = found + extract_number_words(text)
+        problems += [
+            {"field": field, "text": text, "number": token}
+            for token in found
+            if _normal(token) not in allowed
+        ]
+    return problems

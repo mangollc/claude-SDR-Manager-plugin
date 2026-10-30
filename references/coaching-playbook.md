@@ -4,6 +4,7 @@ Each rep gets one focus: the first of five steps that's behind target. Fixing an
 
 ## Language rules
 
+- Write no statistics in report text. The tables show the numbers, and a misquoted number misrepresents a real person's work.
 - Treat every cause as a question. The numbers show where, not why.
 - Start with what's working.
 - Coach one thing at a time.

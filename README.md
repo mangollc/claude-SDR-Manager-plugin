@@ -66,7 +66,7 @@ Privacy matters here, because this plugin touches both employee performance and 
 - Send messages or change anything in your sales tools
 - Rank reps against each other
 - Recommend hiring, firing, pay, or formal performance action
-- Put a number in a report that didn't come from the calculator or your coaching history
+- Write statistics into a report. The calculator produces every number, and a check blocks any report where Claude's text states one of its own. The one exception is a number from your own coaching notes, such as an agreed "50 dials"
 
 ## Targets
 
