@@ -131,6 +131,8 @@ For a tool with no skills feature, install with `install.py`, then tell it: *"Fo
 
 Removing it never touches a team's workspace folder. If you used `--tool` or `--skills-dir`, pass the same option to `--uninstall`.
 
+When you publish a change, raise `version` in `.claude-plugin/plugin.json`. Plugin installs only update when that number changes.
+
 ## Allowing it in a managed Claude organization
 
 On Team and Enterprise plans, an owner can limit which marketplaces members can add. To allow it, add `mangollc/claude-SDR-Manager-plugin` as a permitted source, or distribute it to your organization as a plugin. See Anthropic's [Manage plugins for your organization](https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization).
