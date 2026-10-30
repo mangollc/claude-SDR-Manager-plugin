@@ -86,7 +86,16 @@ def run_normalize(args: argparse.Namespace) -> tuple[int, dict]:
 
 def run_metrics(args: argparse.Namespace) -> tuple[int, dict]:
     workspace = Path(args.workspace)
-    return EXIT_OK, scorecard.summarize(scorecard.build_scorecard(workspace, args.week), workspace)
+    week = args.week or history.latest_week(workspace)
+    if week and not history.has_time_off(workspace, week):
+        # Otherwise a rep who was out gets judged against a full week.
+        message = f"Ask the manager about holidays and time off in {week}, then save the answer."
+        return EXIT_NEEDS_INPUT, {
+            "status": "needs_input",
+            "time_off_missing": week,
+            "error": message,
+        }
+    return EXIT_OK, scorecard.summarize(scorecard.build_scorecard(workspace, week), workspace)
 
 
 def _read_json(path: str) -> dict:
@@ -157,7 +166,13 @@ def run_log_coaching(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, {"status": "ok", "path": str(path)}
 
 
-WORKSPACE = (("--workspace",), {"required": True})
+def full_path(value: str) -> Path:
+    """Expand a short folder name, because skills save files beside the paths reported here."""
+    return Path(value).absolute()
+
+
+WORKSPACE = (("--workspace",), {"required": True, "type": full_path})
+OPTIONAL_WORKSPACE = (("--workspace",), {"type": full_path})
 WEEK = (("--week",), {"required": True})
 OPTIONAL_WEEK = (("--week",), {})
 NARRATIVE = (("--narrative",), {"required": True})
@@ -170,19 +185,22 @@ COMMANDS = (
         "init-workspace",
         run_init_workspace,
         "Create a workspace for a team",
-        ((("--path",), {"required": True}), (("--sample",), {"action": "store_true"})),
+        (
+            (("--path",), {"required": True, "type": full_path}),
+            (("--sample",), {"action": "store_true"}),
+        ),
     ),
     (
         "status",
         run_status,
         "Find the workspace and its latest scorecard",
-        ((("--workspace",), {}),),
+        (OPTIONAL_WORKSPACE,),
     ),
     (
         "inspect",
         run_inspect,
         "Preview an export safely",
-        ((("file",), {}), (("--header-row",), {"type": int}), (("--workspace",), {})),
+        ((("file",), {}), (("--header-row",), {"type": int}), OPTIONAL_WORKSPACE),
     ),
     ("targets", run_targets, "Check the profile and print targets", (WORKSPACE,)),
     (

@@ -244,6 +244,20 @@ class TimeOffTests(StorageTest):
 
         self.assertEqual(result["rep_days_off"]["Ben Carter"], 2)
 
+    def test_knows_when_the_question_is_unanswered(self):
+        self.assertFalse(history.has_time_off(self.workspace, "2026-W44"))
+
+    def test_counts_an_answer_of_none_as_answered(self):
+        folder = self.workspace / "history" / "time-off"
+        folder.mkdir(parents=True)
+        (folder / "2026-W44.json").write_text(json.dumps({"team_days_off": 0}))
+
+        self.assertTrue(history.has_time_off(self.workspace, "2026-W44"))
+
+    def test_refuses_anything_but_a_week_name(self):
+        with self.assertRaises(ValueError):
+            history.has_time_off(self.workspace, "../../secrets")
+
 
 if __name__ == "__main__":
     unittest.main()

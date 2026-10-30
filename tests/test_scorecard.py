@@ -339,8 +339,16 @@ class TeamTests(ScorecardTest):
 
 
 class MetricsCommandTests(ScorecardTest):
-    def test_prints_a_short_summary_and_saves_the_file(self):
+    def answered(self, week="2026-W44"):
+        """Return a workspace where the manager has answered the time-off question."""
         workspace = self.seeded()
+        folder = workspace / "history" / "time-off"
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / f"{week}.json").write_text(json.dumps({"team_days_off": 0}))
+        return workspace
+
+    def test_prints_a_short_summary_and_saves_the_file(self):
+        workspace = self.answered()
 
         code, output = run_cli("metrics", "--workspace", str(workspace))
 
@@ -351,19 +359,36 @@ class MetricsCommandTests(ScorecardTest):
         self.assertTrue(Path(output["path"]).exists())
 
     def test_summary_gives_ready_made_wording_for_the_chat(self):
-        code, output = run_cli("metrics", "--workspace", str(self.seeded()))
+        code, output = run_cli("metrics", "--workspace", str(self.answered()))
 
         self.assertEqual(code, 0)
         self.assertIn("LinkedIn reply rate is 10.0%", output["reps"][0]["focus_text"])
         self.assertEqual(output["status_counts"]["Watch"], 1)
 
     def test_week_with_no_activity_needs_the_manager(self):
-        workspace = self.seeded()
+        workspace = self.answered("2026-W40")
 
         code, output = run_cli("metrics", "--workspace", str(workspace), "--week", "2026-W40")
 
         self.assertEqual(code, 2)
-        self.assertIn("2026-W40", output["error"])
+        self.assertIn("no activity", output["error"])
+
+    def test_waits_for_the_time_off_answer_before_calculating(self):
+        workspace = self.seeded()
+
+        code, output = run_cli("metrics", "--workspace", str(workspace))
+
+        self.assertEqual(code, 2)
+        self.assertEqual(output["time_off_missing"], "2026-W44")
+        self.assertFalse((workspace / "history" / "metrics" / "2026-W44.json").exists())
+
+    def test_refuses_a_week_name_that_is_not_a_week(self):
+        code, output = run_cli(
+            "metrics", "--workspace", str(self.seeded()), "--week", "../../secrets"
+        )
+
+        self.assertEqual(code, 2)
+        self.assertNotIn("time_off_missing", output)
 
 
 if __name__ == "__main__":

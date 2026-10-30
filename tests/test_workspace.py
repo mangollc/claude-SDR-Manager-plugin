@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from datetime import datetime
@@ -191,6 +192,46 @@ class InitWorkspaceCommandTests(WorkspaceTest):
 
         self.assertEqual(code, 0)
         self.assertTrue((self.path / "imports" / SAMPLE_WEEK / "crm-calls.csv").exists())
+
+
+class FullPathTests(WorkspaceTest):
+    """Skills save files beside the paths these commands report, so short ones lead them astray."""
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(os.chdir, os.getcwd())
+        os.chdir(self.path.parent)
+
+    def test_creating_a_workspace_reports_full_paths(self):
+        _, output = run_cli("init-workspace", "--path", "sdr-demo", "--sample")
+
+        self.assertTrue(Path(output["path"]).is_absolute())
+        self.assertTrue(Path(output["imports"]).is_absolute())
+
+    def test_status_reports_full_paths(self):
+        run_cli("init-workspace", "--path", "sdr-demo", "--sample")
+
+        _, output = run_cli("status", "--workspace", "sdr-demo")
+
+        self.assertTrue(Path(output["workspace"]).is_absolute())
+        self.assertTrue(Path(output["reps"][0]["coaching_file"]).is_absolute())
+
+    def test_commands_that_save_files_report_full_paths(self):
+        run_cli("init-workspace", "--path", "sdr-demo", "--sample")
+        entry = {"focus": "Activity", "agreed": ["Protect calling time"], "check_by": "2026-11-13"}
+        Path("entry.json").write_text(json.dumps(entry))
+
+        _, output = run_cli(
+            "log-coaching",
+            "--workspace",
+            "sdr-demo",
+            "--rep",
+            "Ava Reyes",
+            "--entry-file",
+            "entry.json",
+        )
+
+        self.assertTrue(Path(output["path"]).is_absolute())
 
 
 if __name__ == "__main__":

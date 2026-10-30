@@ -190,3 +190,9 @@ def read_time_off(workspace: Path, week: str) -> dict:
     if not path.exists():
         return empty
     return {**empty, **json.loads(path.read_text(encoding="utf-8"))}
+
+
+def has_time_off(workspace: Path, week: str) -> bool:
+    """Return True once the manager has answered the time-off question for a week."""
+    week_bounds(week)
+    return (_folder(workspace, "time-off") / f"{week}.json").exists()
