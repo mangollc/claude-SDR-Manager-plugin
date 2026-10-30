@@ -1,244 +1,203 @@
 # SDR Manager
 
-**A coaching and reporting assistant for sales development managers.** It turns your team's sales exports into a weekly scorecard, gives each rep one clear coaching focus, and prepares and records your 1:1s.
+**Your weekly coaching assistant for SDR teams.**
 
-It works in Claude Code, Codex, Cursor, VS Code Copilot, and other AI tools that support skills, on Mac and Windows.
+Download your team's activity from your sales tools, hand it to Claude, and get:
 
-No API keys. No environment variables. No external services. [See exactly what it uses](#external-services-api-keys-and-environment-variables).
+- A scorecard for every rep
+- The one thing to coach each rep on
+- A one-page prep sheet for every 1:1
+
+You don't need to be technical. There's no code to write, and you talk to it in normal English.
 
 ```text
-  Your sales exports            SDR Manager                  What you get
- ┌──────────────────┐      ┌──────────────────────┐      ┌────────────────────┐
- │ Calls            │      │ 1. Understands your  │      │ Team report PDF    │
- │ Emails           │ ───► │    columns           │ ───► │ One page per rep   │
- │ LinkedIn         │      │ 2. Calculates        │      │ One coaching focus │
- │ Meetings         │      │ 3. Finds each rep's  │      │ 1:1 prep sheet     │
- │ (CSV or Excel)   │      │    first weak step   │      │ Coaching history   │
- └──────────────────┘      └──────────────────────┘      └────────────────────┘
+   Files from your            SDR Manager                What you get
+   sales tools
+ ┌────────────────┐      ┌────────────────────┐      ┌────────────────────┐
+ │ Calls          │      │ Reads your files   │      │ Team report (PDF)  │
+ │ Emails         │ ───► │ Does the math      │ ───► │ One page per rep   │
+ │ LinkedIn       │      │ Finds each rep's   │      │ What to coach      │
+ │ Meetings       │      │ biggest gap        │      │ 1:1 prep sheets    │
+ └────────────────┘      └────────────────────┘      └────────────────────┘
 ```
 
 ## Contents
 
-- [What it is](#what-it-is)
-- [External services, API keys, and environment variables](#external-services-api-keys-and-environment-variables)
-- [Install](#install)
-- [Try it with sample data](#try-it-with-sample-data)
-- [Commands](#commands)
+- [What it does for you](#what-it-does-for-you)
+- [What you need](#what-you-need)
+- [Install in 5 minutes](#install-in-5-minutes)
+- [Try it with the sample team](#try-it-with-the-sample-team)
+- [Use it with your real team](#use-it-with-your-real-team)
+- [What you can ask for](#what-you-can-ask-for)
 - [What the reports look like](#what-the-reports-look-like)
-- [How the coaching focus works](#how-the-coaching-focus-works)
-- [What to export from your sales tools](#what-to-export-from-your-sales-tools)
+- [How it decides what to coach](#how-it-decides-what-to-coach)
+- [What to download from your sales tools](#what-to-download-from-your-sales-tools)
 - [Your weekly routine](#your-weekly-routine)
-- [Targets](#targets)
-- [Privacy: how your data is handled](#privacy-how-your-data-is-handled)
-- [Customizing](#customizing)
-- [Troubleshooting](#troubleshooting)
-- [What's tested](#whats-tested)
-- [For developers](#for-developers)
-- [Roadmap](#roadmap)
+- [Where the targets come from](#where-the-targets-come-from)
+- [Costs, accounts, and API keys](#costs-accounts-and-api-keys)
+- [Privacy](#privacy)
+- [Common questions](#common-questions)
+- [What's been tested](#whats-been-tested)
+- [Technical details](#technical-details)
+- [What's coming next](#whats-coming-next)
 - [License](#license)
 
-## What it is
+## What it does for you
 
-SDRs, or sales development reps, make first contact with potential customers and book meetings for account executives (AEs). An SDR manager coaches those reps and reports on their results.
-
-That job usually means hours in spreadsheets, trying to work out why a rep's numbers are down. SDR Manager does that part for you:
-
-- **Weekly scorecard:** reads exports from any sales tool and produces a branded PDF.
-- **One coaching focus per rep:** finds the first place each rep falls behind, so you know what to talk about.
-- **1:1 prep:** builds a one-page sheet with wins, evidence, questions, and an agenda.
-- **Coaching history:** records what each rep agreed to, so the next 1:1 starts from there.
-
-It covers outbound email, cold calls, and LinkedIn. You don't need to be technical to use it, and it works with any CRM or outreach tool that can export a file.
-
-Reports are branded Andy Gheewalla. See [Customizing](#customizing) to change that.
-
-## External services, API keys, and environment variables
-
-**SDR Manager needs none of these.** Its code was audited for network use before release.
-
-| Question | Answer |
+| Without SDR Manager | With SDR Manager |
 |---|---|
-| API keys | **None** |
-| Environment variables | **None** |
-| External services or APIs | **None.** The program makes no network calls |
-| Accounts to create | **None**, apart from the AI tool you already use |
-| Paid services | **None** |
-| Python packages to install | **None.** It uses Python's standard library |
+| Hours in spreadsheets every week | A finished report in minutes |
+| Guessing why a rep's numbers are down | One clear thing to coach each rep on |
+| 1:1s that start from scratch | A prep sheet with what was agreed last time |
+| Numbers scattered across different tools | One report, from any sales tool |
 
-**What it does use, all on your own computer:**
+It covers cold calls, email, and LinkedIn. It works with any sales tool that lets you download your data, such as Salesforce, HubSpot, Outreach, Salesloft, or Apollo.
 
-| Program | Why | Required? |
-|---|---|---|
-| Python 3.9 or newer | Does the calculations | Yes |
-| Chrome, Edge, Chromium, or Brave | Turns reports into PDFs, working offline | Optional. Without one, you get a web page you can save as a PDF |
-| `openpyxl` Python package | Reads Excel files directly | Optional. Without it, save Excel files as CSV |
-| Your AI tool | Runs the skills and writes the coaching notes | Yes |
+## What you need
 
-The AI tool is the one outside connection, because it's how you talk to the plugin. It sends what it reads to its own provider, under your plan's terms. See [Privacy: how your data is handled](#privacy-how-your-data-is-handled) for exactly what that includes.
+| You need | Details |
+|---|---|
+| A computer | Mac or Windows |
+| The Claude desktop app | Free to download |
+| A paid Claude plan | Any paid plan works. Plugins aren't available on the free plan |
+| Python | A free program that does the math. You may already have it, and Claude will tell you if you don't |
+| Chrome or Edge | Used to create PDFs. You probably already have one of these |
 
-## Install
+## Install in 5 minutes
 
-### Requirements
+A plugin is an add-on for Claude. You only need to add this one once.
 
-- A Mac or Windows computer
-- Python 3.9 or newer
-- An AI tool: Claude Code, Codex, Cursor, VS Code with Copilot, or similar
-- Optional: Chrome, Edge, Chromium, or Brave, to create PDFs
+### Step 1: Get the Claude app
 
-### Step 1: Check for Python
+If you don't have it yet, download it from [claude.ai/download](https://claude.ai/download), install it, and sign in.
 
-**Mac**
+### Step 2: Add SDR Manager to Claude
 
-```bash
-python3 --version
-```
+1. Open the Claude app.
+2. Click **Customize** in the left sidebar.
+3. Click the **Plugins** tab.
+4. Click **Add**, then **Add marketplace**.
+5. Choose **Add from a repository**.
+6. Paste this, then confirm:
 
-**Windows (PowerShell)**
+   ```text
+   mangollc/claude-SDR-Manager-plugin
+   ```
 
-```powershell
-py -3 --version
-```
+7. Open the **Discover** tab.
+8. Find **sdr-manager**, and click **Add**.
 
-You need version 3.9 or newer. If it's missing, install it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick **Add python.exe to PATH** on the first installer screen.
+That's it. The plugin is saved to your Claude account, so it stays with you.
 
-### Step 2: Install for your AI tool
+If your company manages your Claude account and this doesn't work, your administrator may need to allow it. Send them the [technical guide](docs/technical-guide.md).
 
-#### Claude Code (Mac and Windows)
+### Using a different AI tool?
 
-This is the recommended route for Claude Code. It installs globally, so it's available in every project.
+If you use Cursor, Codex, VS Code with Copilot, or Gemini CLI, your AI assistant can install SDR Manager for you. It works on Mac and Windows.
 
-```bash
-claude plugin marketplace add mangollc/claude-SDR-Manager-plugin
-claude plugin install sdr-manager@mango-plugins
-```
-
-Then start a new session. You can also run these from inside Claude Code by starting each with `/plugin` instead of `claude plugin`.
-
-#### Codex, Cursor, VS Code Copilot, and Gemini CLI
-
-One installer covers all of these, because they share one global skills folder.
-
-**Mac**
-
-```bash
-git clone https://github.com/mangollc/claude-SDR-Manager-plugin.git
-cd claude-SDR-Manager-plugin
-python3 install.py
-```
-
-**Windows (PowerShell)**
-
-```powershell
-git clone https://github.com/mangollc/claude-SDR-Manager-plugin.git
-cd claude-SDR-Manager-plugin
-py -3 install.py
-```
-
-No Git? Use **Code > Download ZIP** on this page, unzip it, and run the last line from inside that folder.
-
-Then restart your AI tool. The installer doesn't touch your projects:
+Open your AI tool, paste this message, and approve anything it asks to do:
 
 ```text
- ~/.agents/skills/            The three skills your AI tools read
-   sdr-setup/
-   sdr-scorecard/
-   sdr-one-on-one/
- ~/.sdr-manager/              The program behind them
+Please install SDR Manager on this computer so I can use it in all my
+projects. Download https://github.com/mangollc/claude-SDR-Manager-plugin
+and follow the "Instructions for AI assistants" section of
+docs/technical-guide.md.
 ```
 
-On Windows, `~` means your user folder, such as `C:\Users\you`.
+Then close your AI tool and open it again.
 
-#### Which option for which tool?
+This also works in Claude if SDR Manager doesn't appear after Step 2.
 
-| Tool | Command | Global folder |
+## Try it with the sample team
+
+Before using real data, try it with a made-up team of seven reps. All the names, companies, and numbers are fake. It takes about two minutes.
+
+1. In the Claude app, click the **Code** tab at the top of the sidebar. Don't let the name put you off, because you won't write any code. This is the part of Claude that can work with files on your computer.
+2. Just under the message box, click the first button and choose the top option under **Local**. This keeps the work on your own computer.
+3. Click the button next to it and choose **Open folder…**. Create a new folder called **SDR Reports**, and open it. SDR Manager keeps everything in this folder.
+4. Type this and press Enter:
+
+   ```text
+   Set up SDR Manager with the sample team.
+   ```
+
+5. Claude will ask for permission before it runs something or saves a file, and it may ask several times. Allow it each time. This is SDR Manager's calculator, running on your own computer.
+6. Now type:
+
+   ```text
+   Run my SDR scorecard.
+   ```
+
+7. Claude shows you how it's reading each file. Say **yes** if it looks right, or just tell it what's wrong.
+8. Claude asks about holidays and time off. For the sample team, say there weren't any.
+9. Claude tells you where your PDF report is. Open it and have a look.
+10. Finally, try a 1:1 prep sheet:
+
+   ```text
+   Prepare my 1:1 with Chloe Nguyen.
+   ```
+
+The sample team shows each situation the plugin looks for:
+
+| Sample rep | What's going on | What SDR Manager says |
 |---|---|---|
-| Claude Code | `claude plugin install` (above) | Managed by Claude Code |
-| Claude Code, without the plugin | `install.py --tool claude` | `~/.claude/skills` |
-| Codex | `install.py` | `~/.agents/skills` |
-| Cursor | `install.py` | `~/.agents/skills` |
-| VS Code with Copilot | `install.py` | `~/.agents/skills` |
-| Gemini CLI | `install.py` | `~/.agents/skills` |
-| Any other tool with a skills folder | `install.py --skills-dir <folder>` | The folder you name |
+| Ava Reyes | Doing well | On track, with a stretch goal |
+| Ben Carter | Not enough outreach | Coach on activity |
+| Chloe Nguyen | Busy, but few replies | Coach on responses, and check the email list |
+| Diego Marin | Good replies, few meetings | Coach on booking meetings |
+| Priya Shah | Many no-shows | Coach on getting meetings to happen |
+| Sam Okafor | AEs reject the meetings | Coach on who gets booked |
+| Nina Patel | New hire | Onboarding, so no judgment yet |
 
-For a tool with no skills feature, install with `install.py` and tell it: *"Follow the instructions in `~/.agents/skills/sdr-scorecard/SKILL.md`."*
+## Use it with your real team
 
-### Update or remove
+1. Open the **Code** tab, and open a new folder for your team, such as **My SDR Team**.
+2. Type:
 
-| Task | Claude Code | Other tools |
-|---|---|---|
-| Update | `claude plugin update sdr-manager@mango-plugins` | `git pull`, then run `install.py` again |
-| Remove | `claude plugin uninstall sdr-manager@mango-plugins` | `install.py --uninstall` |
+   ```text
+   Set up SDR Manager for my team.
+   ```
 
-Removing the plugin never touches your team's data.
+3. Answer a few questions about your product, your customers, and your reps.
+4. Download your files. See [what to download](#what-to-download-from-your-sales-tools).
+5. Type this, using wherever you saved your files:
 
-## Try it with sample data
+   ```text
+   Run my SDR scorecard. My files are in my Downloads folder.
+   ```
 
-The plugin includes a made-up team of seven reps, each showing a different situation. All names, companies, and numbers are fake.
+The first time, Claude checks that it understands your files. After that, it remembers.
 
-**In Claude Code:**
+## What you can ask for
 
-```text
-/sdr-manager:setup sample
-/sdr-manager:scorecard
-/sdr-manager:one-on-one Chloe Nguyen
-```
+There are three things SDR Manager does. Just ask in your own words, or use the shortcut if you prefer.
 
-**In other tools,** ask in plain words:
+| What you want | What to type | Shortcut in Claude | Name in other AI tools |
+|---|---|---|---|
+| Set up or change your team | "Set up SDR Manager for my team" | `/sdr-manager:setup` | `sdr-setup` |
+| Get the weekly report | "Run my SDR scorecard" | `/sdr-manager:scorecard` | `sdr-scorecard` |
+| Prepare for a 1:1 | "Prepare my 1:1 with Chloe" | `/sdr-manager:one-on-one` | `sdr-one-on-one` |
+| Record what you agreed | "Log my 1:1 with Chloe" | `/sdr-manager:one-on-one Chloe --log` | `sdr-one-on-one` |
 
-```text
-Set up SDR Manager with the sample team.
-Run the SDR scorecard.
-Prepare my 1:1 with Chloe Nguyen.
-```
+### Set up your team
 
-This takes about two minutes. You'll confirm how the sample columns are read, then get a PDF report.
+**What it does:** saves the details Claude needs to give you useful advice.
 
-| Sample rep | Situation | What the plugin finds |
-|---|---|---|
-| Ava Reyes | Healthy performer | On track, with a stretch goal |
-| Ben Carter | Not enough outreach | Step 1: Activity |
-| Chloe Nguyen | Busy, but few replies | Step 2: Response, plus a bounce warning |
-| Diego Marin | Good replies, few meetings | Step 3: Meetings booked |
-| Priya Shah | Many no-shows | Step 4: Meetings held |
-| Sam Okafor | AEs reject the meetings | Step 5: Meetings accepted |
-| Nina Patel | New hire | Onboarding, with no judgment |
+**When to use it:** once at the start, then whenever a rep joins or leaves, or you want to change a target.
 
-## Commands
+**What Claude asks:**
 
-There are three. The names differ slightly by tool:
-
-| Purpose | Claude Code plugin | Other tools |
-|---|---|---|
-| Set up your team | `/sdr-manager:setup` | `sdr-setup` |
-| Build the weekly report | `/sdr-manager:scorecard` | `sdr-scorecard` |
-| Prepare and record a 1:1 | `/sdr-manager:one-on-one` | `sdr-one-on-one` |
-
-In other tools, you can always just ask in plain words. VS Code also lists them as slash commands, such as `/sdr-scorecard`.
-
-### Setup
-
-**What it does:** checks your computer, creates a folder for your team's data, and saves your team profile.
-
-**When to use it:** once at the start, then whenever a rep joins or leaves, or a target changes.
-
-```text
-/sdr-manager:setup          Set up a real team, or update an existing one
-/sdr-manager:setup sample   Try the plugin with the made-up team
-```
-
-**What it asks you:**
-
-1. Your company and product, in a sentence or two
+1. What your company sells
 2. Who your ideal customer is
-3. Each rep's name and start date, and any other spelling of their name in your tools
+3. Your reps' names and start dates, and any other spelling of their names in your tools
 4. Which channels your team uses: calls, email, LinkedIn
-5. Anyone in your exports who isn't a rep, such as you
-6. Whether to keep each starting target or replace it
+5. Anyone in your files who isn't a rep, such as you
+6. Whether to keep the starting targets or use your own
 
 **Example:**
 
 ```text
-You:     /sdr-manager:setup
+You:     Set up SDR Manager for my team.
 Claude:  Your computer is ready. Where should I keep your team's data?
          The default is a folder called sdr-workspace, right here.
 You:     That's fine.
@@ -249,36 +208,19 @@ You:     Maria Lopez, March 2025. Tom Becker, started two weeks ago.
 Claude:  Thanks. Here are your starting targets and where each comes from...
 ```
 
-**What you get:** a team profile saved in your workspace. Your data stays there, separate from the plugin, so updates can't erase it.
+### Get the weekly scorecard
 
-### Scorecard
-
-**What it does:** reads your exports, calculates every metric, finds each rep's coaching focus, and builds a PDF.
+**What it does:** turns your files into a PDF report, and picks one thing to coach for each rep.
 
 **When to use it:** once a week.
-
-```text
-/sdr-manager:scorecard                          Use the exports in your workspace
-/sdr-manager:scorecard ~/Downloads/week-44      Use a folder of exports
-/sdr-manager:scorecard 2026-W44                 Report on a particular week
-```
-
-**What happens:**
-
-1. It looks at each file's column names and a masked preview.
-2. On the first run, it explains what it thinks each column means and asks you to confirm.
-3. It asks about holidays and time off.
-4. It calculates everything and checks the data for problems.
-5. It writes short coaching notes, then builds the PDF.
-6. It summarizes the results in chat.
 
 **Example:**
 
 ```text
-You:     /sdr-manager:scorecard ~/Downloads/week-44
-Claude:  I found four exports. In the call file, I'm counting "Connected"
-         as a live conversation. "Voicemail", "No Answer", and "Busy" count
-         as dials without a connection. Does that match how your team works?
+You:     Run my SDR scorecard. My files are in my Downloads folder.
+Claude:  I found four files. In the call file, I'm counting "Connected" as a
+         real conversation. "Voicemail" and "No Answer" count as attempts.
+         Does that match how your team works?
 You:     Yes.
 Claude:  Were there any holidays or time off this week?
 You:     Tom was out on Friday.
@@ -289,53 +231,42 @@ Claude:  Team status: 1 on track, 5 need attention, 1 onboarding.
          Chloe Nguyen: Response: Email reply rate is 1.3% against a target
          of 3.43%.
          ...
-         Your report is ready: sdr-workspace/reports/2026-W44/team-report.pdf
+         Your report is ready.
 ```
 
-Next time, it remembers your columns and skips the questions.
+**If something looks wrong,** Claude stops and asks rather than guessing. For example, it asks if it finds a name it doesn't know, or if two files seem to count the same calls.
 
-**If something's wrong,** it stops and asks rather than guessing:
+### Prepare for a 1:1
 
-| Situation | What happens |
-|---|---|
-| A name it doesn't recognize | Asks whether it's a new rep, another spelling, or someone to ignore |
-| A new value, such as a new call outcome | Asks what it means |
-| Two files cover the same channel | Asks which to use, so nothing is counted twice |
-| Many unreadable rows | Shows examples, with personal details hidden, and asks how to proceed |
-| No meetings file | Still builds the report, and says which steps need one |
+**What it does:** builds a one-page sheet with wins, the coaching focus, questions to ask, and an agenda.
 
-### One-on-one
+**When to use it:** before each 1:1.
 
-**What it does:** prepares a one-page sheet for a 1:1, then records what was agreed.
-
-**When to use it:** before and after each 1:1.
+**Example:**
 
 ```text
-/sdr-manager:one-on-one Chloe Nguyen         Prepare for the meeting
-/sdr-manager:one-on-one Chloe Nguyen --log   Record what was agreed
-```
-
-**Before the meeting:**
-
-```text
-You:     /sdr-manager:one-on-one Chloe Nguyen
+You:     Prepare my 1:1 with Chloe Nguyen.
 Claude:  Do you have any call notes or observations to include?
 You:     No.
 Claude:  Chloe's prep sheet is ready. Activity is on target, and the focus
          is email replies, starting with list quality.
-         Come back with --log after the meeting to record what was agreed.
 ```
 
-**After the meeting:**
+### Record what you agreed
+
+**What it does:** saves what you and your rep agreed, so it appears on their next prep sheet.
+
+**When to use it:** after each 1:1.
+
+**Example:**
 
 ```text
-You:     /sdr-manager:one-on-one Chloe Nguyen --log
-         We agreed Chloe will clean the list and verify 50 addresses
-         before each send. Check back on November 13.
+You:     Log my 1:1 with Chloe. We agreed on cleaning the list and checking
+         50 addresses before each send. Let's review on November 13.
 Claude:  Here's the entry. Shall I save it?
 
            Focus: Response (email reply rate)
-           Agreed: Clean the list and verify 50 addresses before each send
+           Agreed: Clean the list and check 50 addresses before each send
            Check by: 2026-11-13
 
 You:     Yes.
@@ -344,7 +275,7 @@ Claude:  Saved. It'll appear on Chloe's next prep sheet.
 
 ## What the reports look like
 
-These are simplified. Real reports are formatted PDFs. The numbers come from the sample team.
+These are simplified versions. The real reports are formatted PDFs. All the numbers come from the sample team.
 
 ### Team report: first page
 
@@ -406,14 +337,9 @@ These are simplified. Real reports are formatted PDFs. The numbers come from the
  Connect rate                     2.9%               2.9%      5.4%
  Email reply rate                 1.3%               1.3%     3.43%
  Meetings held                       2                  6       9.2
-
- Weekly trend
- Touches      Connect rate     Email reply     Meetings held
- ───────      ────────────     ───────────     ──╲__╱──
- 570          2.9%             1.3%            2
 ```
 
-The last page lists the data used and every target with its source.
+The last page of the report lists the files used and where every target comes from.
 
 ### 1:1 prep sheet
 
@@ -436,7 +362,7 @@ The last page lists the data used and every target with its source.
  Commitments from last time          Questions to ask
  ───────────────────────────────     ──────────────────────────────────
  • Clean the prospect list and       1. Where did these bad addresses
-   verify 50 addresses before          come from?
+   check 50 addresses before           come from?
    each send                         2. Which emails got replies, and
                                        what did they have in common?
 
@@ -450,205 +376,227 @@ The last page lists the data used and every target with its source.
  Andy Gheewalla | 1:1 prep | Chloe Nguyen | 2026-W44
 ```
 
-## How the coaching focus works
+## How it decides what to coach
 
-The scorecard follows each rep through the same five steps over the last four weeks. The first step behind target becomes their one coaching focus, because fixing an early step often lifts everything after it.
+SDR Manager looks at the last four weeks and follows each rep through the same five steps. The first step that's behind target becomes their one coaching focus, because fixing an early problem often helps everything after it.
 
 ```text
-  1 Activity        Are they reaching enough people?
-       │            Touches against target
+  1 Activity            Are they reaching out to enough people?
+       │
        ▼
-  2 Response        Are people responding?
-       │            Connect, email reply, and LinkedIn rates
+  2 Response            Are people picking up and replying?
+       │
        ▼
-  3 Meetings booked Are conversations becoming meetings?
-       │            Meeting rate
+  3 Meetings booked     Are conversations turning into meetings?
+       │
        ▼
-  4 Meetings held   Are prospects showing up?
-       │            Show rate
+  4 Meetings held       Are prospects showing up?
+       │
        ▼
-  5 Meetings accepted  Do AEs accept them?
-                       Acceptance rate
+  5 Meetings accepted   Do your AEs accept those meetings?
 ```
 
-| First weak step | Usual cause | What the 1:1 works on |
+| First step behind target | Usual cause | What to work on in the 1:1 |
 |---|---|---|
-| Activity | Time or focus | Daily plan and protected calling time |
-| Response | Poor prospect list or timing | Who they target and when they call |
-| Meetings booked | Talk track or objection handling | Practice on the moment calls go wrong |
-| Meetings held | Weak qualification or no confirmation | How they qualify and confirm |
-| Meetings accepted | Wrong prospects | What a good prospect looks like |
+| Activity | Time or focus | A daily plan and protected calling time |
+| Response | A poor prospect list, or bad timing | Who they contact, and when |
+| Meetings booked | Weak talk track or objection handling | Practice the moment calls go wrong |
+| Meetings held | Weak qualifying, or no confirmation | How they qualify and confirm |
+| Meetings accepted | Booking the wrong prospects | What a good prospect looks like |
 
-These causes are starting points for a conversation, not verdicts.
+These causes are places to start the conversation, not verdicts. The numbers show where a rep is behind, not why.
 
-### Rep statuses
+**What the statuses mean:**
 
 | Status | Meaning |
 |---|---|
-| On track | Meeting goal met, and meetings are being accepted |
-| Watch | A step is slightly behind, and none is far behind |
+| On track | Hitting the meeting goal, and AEs are accepting those meetings |
+| Watch | A step is slightly behind |
 | Needs attention | At least one step is well behind |
 | Review | Short of the goal, but no step explains why |
-| Onboarding | In the first 30 days, so numbers aren't judged |
+| Onboarding | In their first 30 days, so the numbers aren't judged |
 | Limited data | Not enough information, usually because a file is missing |
 
-A step is **Near** from 85% to under 100% of target, and **Below** under 85%. Small samples show **Not enough data** instead of a judgment.
+New hires get lower targets: none in their first 30 days, then 50%, then 75%, and full targets from month four.
 
-New hires have lower count targets: none in their first 30 days, then 50%, 75%, and full targets from month 4.
+## What to download from your sales tools
 
-## What to export from your sales tools
+In most sales tools, open a report and look for **Export** or **Download**, then choose **CSV** or **Excel**. Don't worry about the column names. Claude works out what each one means, and checks with you.
 
-Export from whatever you use, such as Salesforce, HubSpot, Outreach, Salesloft, or Apollo. Column names don't matter, because the plugin works out what each one means and checks with you.
-
-| Export | What it needs to show | Example columns |
+| Download | It should show | Where to find it |
 |---|---|---|
-| Calls | Date, rep, call result | `Activity Date`, `Assigned To`, `Call Result` |
-| Emails | Date, rep, replied, bounced | `Sent At`, `Owner`, `Replied`, `Bounced` |
-| LinkedIn | Date, rep, action, result | `Date`, `Rep`, `Action`, `Result` |
-| Meetings | Rep, date booked, meeting date, status, AE decision | `Owner Name`, `Date Booked`, `Meeting Status` |
+| Calls | Date, rep, and how each call went | Your dialer, CRM, or outreach tool |
+| Emails | Date, rep, and whether it got a reply or bounced | Your outreach tool |
+| LinkedIn | Date, rep, what was sent, and the result | Your LinkedIn or outreach tool |
+| Meetings | Rep, date booked, meeting date, whether it happened, and whether the AE accepted it | Your CRM |
 
-Good to know:
+A few tips:
 
-- **First run:** export the last four full weeks plus the current week, so trends work from day one.
-- **Meetings:** always cover at least the last six weeks, because statuses change after booking.
-- **One file per channel:** if two tools log the same calls, choose one, or they'd be counted twice.
-- **Weekly totals work too:** a file with one row per rep per week is fine.
-- **Missing a channel?** The report still works. It leaves that channel out of the targets.
+- **First time:** download the last four full weeks plus this week, so you get trends right away.
+- **Meetings:** always include at least the last six weeks, because meetings change status after they're booked.
+- **Use one file per channel:** if two tools both track the same calls, pick one. Otherwise, calls get counted twice.
+- **Missing something?** That's fine. The report still works, and it tells you what's missing.
+- **Can't get a daily list?** A weekly summary with one row per rep works too.
 
 ## Your weekly routine
 
 ```text
  Monday                                              During the week
  ┌───────────────────┐   ┌─────────────────────┐   ┌─────────────────────┐
- │ Export last week  │ ► │ Run the scorecard   │ ► │ Prep each 1:1       │
- │ from your tools   │   │ and read the PDF    │   │ then log what was   │
+ │ Download last     │ ► │ Ask for your        │ ► │ Prepare each 1:1,   │
+ │ week's files      │   │ scorecard           │   │ then log what you   │
  └───────────────────┘   └─────────────────────┘   │ agreed              │
                                                    └─────────────────────┘
 ```
 
-## Targets
+## Where the targets come from
 
-Starting targets are published figures, and each one is listed with its source on the report's last page.
+To start with, SDR Manager uses published industry figures, so you don't need to know what good looks like. The last page of every report shows where each one comes from.
 
 | Target | Starting value | Source |
 |---|---|---|
-| Dials, emails, and LinkedIn touches per day | 44, 41, and 19 | [The Bridge Group 2025](https://www.bridgegroupinc.com/research/2025-sdr-models-metrics-report-the-bridge-group), median |
-| Connect rate | 5.4% | [Gong Labs 2024](https://www.gong.io/blog/the-hidden-power-of-cold-calling-insights-from-300m-calls), average |
-| Email reply rate | 3.43% | [Instantly 2026](https://instantly.ai/cold-email-benchmark-report-2026), average |
-| LinkedIn acceptance and reply rates | 28.5% and 10.4% | [Expandi 2026](https://expandi.io/blog/linkedin-outreach-benchmarks-2026/), average |
-| Meeting rate | About 12.1% | Calculated so the funnel adds up to the meeting goal |
-| Meetings held per month | 10 | The Bridge Group 2025, median quota |
+| Daily dials, emails, and LinkedIn touches | 44, 41, and 19 | [The Bridge Group 2025](https://www.bridgegroupinc.com/research/2025-sdr-models-metrics-report-the-bridge-group) |
+| Connect rate | 5.4% | [Gong Labs 2024](https://www.gong.io/blog/the-hidden-power-of-cold-calling-insights-from-300m-calls) |
+| Email reply rate | 3.43% | [Instantly 2026](https://instantly.ai/cold-email-benchmark-report-2026) |
+| LinkedIn acceptance and reply rates | 28.5% and 10.4% | [Expandi 2026](https://expandi.io/blog/linkedin-outreach-benchmarks-2026/) |
+| Meeting rate | About 12.1% | Worked out from the other targets |
+| Meetings held per month | 10 | The Bridge Group 2025 |
 | Show rate | 80% | [Operatix 2021](https://www.operatix.net/blogs/sdr-metrics-outbound-inbound-teams/) |
-| Acceptance rate | 60% | Derived from The Bridge Group 2025 median quotas |
+| Acceptance rate | 60% | Worked out from The Bridge Group 2025 |
 | Email bounce rate limit | Under 2% | Instantly 2026 |
 
-**Replace these with your own numbers as soon as you can.** Most sources are vendors reporting their own data, and definitions vary. On target means typical, not excellent. The meeting rate is higher than published figures for calls alone, so that step may appear often until you set your own number.
+**Use your own numbers as soon as you can.** Just ask: *"Change our connect rate target to 8%."* These are averages, so on target means typical, not excellent. Most come from companies reporting on their own customers, so treat them as a starting point.
 
-## Privacy: how your data is handled
+## Costs, accounts, and API keys
 
-This plugin touches both employee performance and prospect details, so here's exactly what happens.
+**SDR Manager is free, and it needs no extra accounts or services.**
+
+| Question | Answer |
+|---|---|
+| Does it cost anything? | No. You only need your paid Claude plan, or your other AI tool |
+| Do I need API keys or passwords? | **No API keys, no passwords, and no special settings** |
+| Does it connect to my CRM or sales tools? | No. You download the files yourself, and it never logs in to anything |
+| Does it use any outside services? | **No.** SDR Manager itself never connects to the internet |
+| What does it use on my computer? | Python for the math, and Chrome or Edge to make PDFs |
+
+The one outside connection is your AI tool, because that's how you talk to it. See [Privacy](#privacy) for what your AI tool sees.
+
+**For your IT team:** no API keys, no environment variables, and no external services. The [technical guide](docs/technical-guide.md) has the full details.
+
+## Privacy
+
+Your files include real people's information, so here's exactly what happens to it.
 
 **What stays on your computer:**
 
-- Your full export files. Scripts read them locally
-- Everything in your team's workspace folder
+- Your full downloaded files. A small program on your computer reads them
+- Everything in your team's folder
 
-**What your AI tool reads, and sends to its provider:**
+**What your AI tool sees, and sends to the company behind it:**
 
-- Column names and a masked preview of each export. Prospect names, emails, phone numbers, companies, and free-text notes are hidden
-- Your team profile, including rep names and start dates
-- The calculated metrics for each rep
-- Coaching notes, when you prepare a 1:1
-- Anything you paste into the chat, such as call notes
+- The column names in your files, plus a preview with prospect names, emails, phone numbers, companies, and notes hidden
+- Your team details, including your reps' names and start dates
+- Each rep's numbers
+- Your coaching notes, when you prepare a 1:1
+- Anything you type into the chat
 
-Anything your AI tool reads is handled under the terms of your plan with that tool. With Claude, that's your Claude plan.
+This is covered by your agreement with your AI tool. For Claude, that's your Claude plan.
 
-**What's stored:**
+**What's kept in your team's folder:**
 
-- History holds counts and rep names. Prospect names, emails, phone numbers, and companies are not kept
-- Exports you leave in the workspace's `imports` folder stay there until you delete them
-- Coaching notes are plain text files on your computer
+- Activity counts and rep names. Prospect names, emails, phone numbers, and companies are not kept
+- Any downloaded files you leave in there. You can delete them whenever you like
+- Coaching notes, as simple text files
 
-**Please keep your workspace folder private.** Don't put it in a shared drive. It's set up so Git ignores it.
+**Please keep your team's folder private,** and out of shared drives. Coaching notes are sensitive.
 
-### What it won't do
+**What SDR Manager won't do:**
 
 - Send messages, or change anything in your sales tools
-- Rank reps against each other
-- Recommend hiring, firing, pay, or formal performance action. If asked, it offers the facts and suggests involving HR
-- Write statistics into a report. The calculator produces every number, and a check blocks any report where the written notes state one of their own. The one exception is a number from your own coaching notes, such as an agreed "50 dials"
-- Guess anyone's gender from their name
+- Rank your reps against each other
+- Recommend hiring, firing, pay, or formal performance action. If you ask, it gives you the facts and suggests involving HR
+- Make up numbers. A built-in check stops Claude writing its own statistics into a report, so every number comes from your data, or from your own coaching notes
+- Guess anyone's gender from their name. Reports are checked for this automatically. If Claude slips up in chat, just correct it
 
-## Customizing
+## Common questions
 
-| To change | Do this |
-|---|---|
-| Your targets | Run setup and say what to change |
-| A rep's details | Run setup and say what changed |
-| The report brand | Edit `name` in `assets/brand.json`. For a Claude Code install, fork this repository first, or your change will be lost on update |
-| The report's look | Edit `assets/templates/report.css` |
-| The coaching advice | Edit `references/coaching-playbook.md` |
+**I can't find Customize or Plugins in Claude.**
+Make sure the Claude app is up to date and you're on a paid plan. If your company manages your account, your administrator may need to allow it.
 
-## Troubleshooting
+**SDR Manager doesn't appear, or Claude doesn't know what it is.**
+Close the Claude app completely and open it again. Then, in the **Code** tab, click **+** next to the message box and choose **Add plugins**. If you see **Plugins** instead, choose that, then **Browse plugins**. Find **sdr-manager** and add it for your user account. If it still isn't there, use the message under [Using a different AI tool?](#using-a-different-ai-tool), which also works in Claude.
 
-| Problem | Fix |
-|---|---|
-| "Python not found" | Install it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick **Add python.exe to PATH** |
-| The skills don't appear | Restart your AI tool. For other tools, confirm that `~/.agents/skills/sdr-setup/SKILL.md` exists |
-| You got a web page instead of a PDF | No browser was found. Open the file in any browser, print it, and choose **Save as PDF** |
-| An Excel file won't open | Save it as CSV from Excel, or run `pip install openpyxl` |
-| "There's no team workspace in this folder" | Open your AI tool in the folder that holds `sdr-workspace`, or run setup |
-| A report says "Partial week" | Your exports stop before the end of the week. Export again once the week is over |
-| Everything shows "Not enough data" | The sample is too small to judge fairly. Export more weeks |
-| Every rep shows the same weak step | The report calls this a team pattern. Look at the list, messaging, or targets first |
+**Claude says Python is missing.**
+It's free and safe to install:
 
-## What's tested
+- **Mac:** go to [python.org/downloads](https://www.python.org/downloads/), click the yellow **Download** button, open the file, and click through the installer.
+- **Windows:** do the same, but tick **Add python.exe to PATH** on the first screen before you click **Install Now**.
+
+Then close Claude, open it again, and carry on.
+
+**On Windows, Claude says Git is required.**
+Update the Claude app first, because recent versions no longer ask for this. If you still see the message, install [Git for Windows](https://git-scm.com/download/win) and accept the default options. It's a free program, and you won't need to use it yourself.
+
+**Claude keeps asking for permission. Is that normal?**
+Yes. Claude checks with you before it runs anything on your computer or changes a file. For SDR Manager, these requests are its calculator and report builder, so it's fine to allow them. If you'd like fewer pop-ups, use the mode button just under the message box. **Accept edits** stops the questions about saving files, and **Auto**, if you see it, stops most of the others.
+
+**I got a web page instead of a PDF.**
+That means it couldn't find Chrome or Edge. Open the file in any browser, choose **Print**, then choose **Save as PDF**.
+
+**My Excel file won't open.**
+In Excel, choose **Save As**, pick **CSV**, then try again.
+
+**Can I use the Cowork tab instead of the Code tab?**
+It should work, but it hasn't been tested yet. It may give you a web page instead of a PDF. The Code tab is the tested route.
+
+**Why does it say "Not enough data"?**
+Claude won't judge a rep on just a few calls or meetings, because that wouldn't be fair. Download more weeks and try again.
+
+**Why does the report say "Partial week"?**
+Your files stop before the end of the week. It's fine to use, or you can download them again once the week is over.
+
+**Every rep has the same problem. What does that mean?**
+The report calls this a team pattern. When everyone struggles at the same step, look at the prospect list, the messaging, or the targets before coaching each rep.
+
+**How do I change the name on the reports?**
+Reports are branded Andy Gheewalla. To use your own name, ask whoever looks after your technical setup to follow the [technical guide](docs/technical-guide.md).
+
+**How do I remove SDR Manager?**
+Open **Customize**, then **Plugins**, and remove it. Your team's folder and reports stay on your computer.
+
+**Something else went wrong.**
+Tell Claude what happened in your own words. It can usually work it out. If not, [let us know here](https://github.com/mangollc/claude-SDR-Manager-plugin/issues).
+
+## What's been tested
+
+We want to be upfront about this, because the plugin is new.
 
 | Area | Status |
 |---|---|
-| Plugin in Claude Code on macOS | Tested end to end with real sessions |
-| Standalone skills, using `install.py` | Tested end to end in a real session |
-| Python 3.9 and 3.12 | Over 450 automated tests pass, with 97% coverage of the program's code |
-| PDF creation with Chrome | Tested |
-| Gemini CLI | Confirmed it finds the skills. No full session has been run |
-| Codex, Cursor, and VS Code Copilot | Their official docs confirm the skills folder. No full session has been run |
-| Windows and Linux | **Not tested yet.** Steps are based on each tool's documentation |
-| Edge, Chromium, and Brave for PDFs | **Not tested yet** |
-| Cowork in the Claude desktop app | **Not tested yet** |
-| Real company exports | **Not tested yet.** Tested with deliberately messy sample files |
+| Reports, coaching focus, and 1:1 sheets | Tested in full with the sample team |
+| Using it in plain English in Claude Code on a Mac | Tested in full |
+| Installing it from GitHub with Claude Code commands | Tested in full |
+| Adding it through the Claude app's Plugins screen | **Not tested yet.** The steps come from Anthropic's help pages |
+| Cowork | **Not tested yet** |
+| Windows | **Not tested yet** |
+| Cursor, Codex, and VS Code with Copilot | **Not tested in full.** Their official guides confirm how skills are installed |
+| Gemini CLI | Confirmed it finds SDR Manager, but not tested in full |
+| Real company files | **Not tested yet.** Tested with deliberately messy sample files |
 
-If you try an untested setup, please [open an issue](https://github.com/mangollc/claude-SDR-Manager-plugin/issues) with what happened.
+If you try something from this list, please [tell us how it went](https://github.com/mangollc/claude-SDR-Manager-plugin/issues).
 
-## For developers
+## Technical details
 
-```text
-.claude-plugin/   Plugin and marketplace files
-skills/           The three skills: setup, scorecard, one-on-one
-references/       Coaching playbook, metric definitions, file mapping guide
-scripts/          The calculator and report builder (standard library only)
-assets/           Starting targets, brand, and report templates
-sample-data/      The made-up team and messy exports
-install.py        Installs the skills for tools other than Claude Code
-tests/            The test suite
-docs/             The design spec and build plan
-```
+If you're in IT, you're a developer, or you'd rather install it by hand, see the [technical guide](docs/technical-guide.md).
 
-Claude writes judgment, and scripts do the math. Every number on a report comes from `scripts/sdrlib/metrics.py`, and `scripts/sdrlib/narrative_check.py` rejects any written text that states its own.
+## What's coming next
 
-```bash
-python3 -m unittest discover -s tests -t .
-```
+- **Next:** review your outreach sequences, rewrite weak emails and call scripts, check email deliverability, and flag legal limits
+- **After that:** new-hire onboarding plans, cold call practice, and call scoring
+- **Later:** team schedules, prospect journey maps, leadership slides, capacity planning, and direct connections to sales tools
 
-The tests need nothing installed. To regenerate the sample data, run `python3 tests/make_sample_data.py`.
-
-## Roadmap
-
-- **Stage 2:** cadence audits, rewriting email, call, and LinkedIn steps, deliverability checks, and legal limits
-- **Stage 3:** new-hire onboarding plans, cold call role-play, and call scoring
-- **Stage 4:** team work rhythm, prospect journey, leadership slides, capacity planning, and live connections to sales tools
-
-Not included yet: inbound leads, pipeline dollar values, and compensation.
+Not included yet: inbound leads, pipeline value, and commission.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). You're free to use it, change it, and share it.

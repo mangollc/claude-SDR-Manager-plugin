@@ -2,7 +2,7 @@
 """Install the SDR Manager skills globally for Codex, Cursor, VS Code, and other agent tools.
 
 Claude Code users should install the plugin instead, because it stays up to date on its own.
-See the README for both routes.
+See docs/technical-guide.md for both routes.
 
 This file skips `from __future__ import annotations` on purpose: the version check below has
 to run before anything that a very old Python can't compile.
@@ -44,8 +44,6 @@ def python_ok(version_info: Sequence[int]) -> bool:
 def adapt_skill(text: str, skill: str, runtime: Path) -> str:
     """Turn a plugin skill into a standalone one that any agent tool can load."""
     adapted = text.replace(PLUGIN_ROOT_PLACEHOLDER, runtime.as_posix())
-    for name in SKILLS:
-        adapted = adapted.replace(f"/sdr-manager:{name}", f"{SKILL_PREFIX}{name}")
     adapted = re.sub(
         rf"^name: {re.escape(skill)}$",
         f"name: {SKILL_PREFIX}{skill}",

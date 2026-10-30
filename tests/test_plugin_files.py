@@ -114,17 +114,80 @@ class SafetyRuleTests(unittest.TestCase):
         for name in ("scorecard", "one-on-one"):
             self.assertIn("Run `status`", skill_text(name), name)
 
+    def test_gender_rule_covers_chat_as_well_as_reports(self):
+        for name in ("scorecard", "one-on-one"):
+            self.assertIn("in reports and in chat", skill_text(name), name)
+
+    def test_skills_save_files_in_the_managers_folder(self):
+        for name in SKILLS:
+            self.assertIn("every file you save", skill_text(name), name)
+
+    def test_scorecard_waits_for_the_manager_before_saving_their_answers(self):
+        text = skill_text("scorecard")
+
+        self.assertIn("stop and wait for their answer", text)
+        self.assertIn("Never assume there was none", text)
+
+    def test_scorecard_goes_back_for_a_missing_time_off_answer(self):
+        self.assertIn("`time_off_missing`", skill_text("scorecard"))
+
+    def test_scorecard_leaves_unknown_names_to_the_import_step(self):
+        self.assertIn("Don't ask about names here", skill_text("scorecard"))
+
+
+class PlainLanguageTests(unittest.TestCase):
+    """Managers aren't technical, so every skill keeps Claude's replies in everyday words."""
+
+    def test_every_skill_tells_claude_to_use_everyday_words(self):
+        for name in SKILLS:
+            text = skill_text(name)
+            self.assertIn("Talk to the manager in everyday words", text, name)
+            self.assertIn("your team's folder", text, name)
+
+    def test_next_steps_are_sentences_a_manager_can_type(self):
+        for name, sentence in (
+            ("setup", "Run my SDR scorecard."),
+            ("scorecard", "Set up SDR Manager for my team."),
+            ("scorecard", "Prepare my 1:1 with <name>."),
+            ("one-on-one", "Set up SDR Manager for my team."),
+            ("one-on-one", "Run my SDR scorecard."),
+            ("one-on-one", "Log my 1:1 with <name>."),
+        ):
+            self.assertIn(sentence, skill_text(name), sentence)
+
+    def test_skills_never_send_a_manager_to_a_slash_command(self):
+        for name in SKILLS:
+            self.assertNotIn("/sdr-manager:", skill_text(name), name)
+
+    def test_skills_recognize_the_sentences_in_the_guide(self):
+        for name, sentence in (
+            ("setup", "set up sdr manager for my team"),
+            ("setup", "set up sdr manager with the sample team"),
+            ("scorecard", "run my sdr scorecard"),
+            ("one-on-one", "prepare my 1:1 with"),
+            ("one-on-one", "log my 1:1"),
+        ):
+            self.assertIn(sentence, skill_text(name).split("---")[1].lower(), sentence)
+
+
+def internal_anchors(text):
+    """Return the link anchors that a document's headings create."""
+    headings = re.findall(r"^#{2,4} (.+)$", text, flags=re.MULTILINE)
+    return {re.sub(r"[^a-z0-9 -]", "", item.lower()).replace(" ", "-") for item in headings}
+
 
 class ReadmeTests(unittest.TestCase):
+    """The README is for sales managers, so it has to stay free of developer steps."""
+
     def setUp(self):
         self.text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
     def test_covers_what_a_new_user_needs(self):
         for topic in (
-            "Requirements",
+            "What you need",
             "Install",
             "Privacy",
-            "Tested",
+            "tested",
             "sample",
             "Andy Gheewalla",
         ):
@@ -134,11 +197,16 @@ class ReadmeTests(unittest.TestCase):
         self.assertIn("Claude plan", self.text)
 
     def test_states_clearly_that_no_keys_or_services_are_needed(self):
-        self.assertIn("External services, API keys, and environment variables", self.text)
-        self.assertIn("No API keys. No environment variables. No external services.", self.text)
+        self.assertIn("Costs, accounts, and API keys", self.text)
+        self.assertIn("no API keys, no environment variables, and no external services", self.text)
+
+    def test_explains_the_click_by_click_install(self):
+        for step in ("**Customize**", "**Plugins**", "**Add marketplace**", "**Discover**"):
+            self.assertIn(step, self.text, step)
+        self.assertIn("mangollc/claude-SDR-Manager-plugin", self.text)
 
     def test_covers_every_tool_and_operating_system_it_promises(self):
-        for topic in ("Mac", "Windows", "Claude Code", "Codex", "Cursor", "VS Code", "Gemini CLI"):
+        for topic in ("Mac", "Windows", "Claude", "Codex", "Cursor", "VS Code", "Gemini CLI"):
             self.assertIn(topic, self.text, topic)
 
     def test_documents_every_user_command(self):
@@ -153,13 +221,66 @@ class ReadmeTests(unittest.TestCase):
         ):
             self.assertIn(command, self.text, command)
 
+    def test_keeps_developer_steps_out(self):
+        for term in (
+            "git clone",
+            "git pull",
+            "python3",
+            "PowerShell",
+            "pip install",
+            "install.py",
+            "command line",
+            "${CLAUDE_PLUGIN_ROOT}",
+            "unittest",
+        ):
+            self.assertNotIn(term, self.text, term)
+
+    def test_tells_every_reader_how_to_ask_in_plain_english(self):
+        for phrase in (
+            "Set up SDR Manager with the sample team.",
+            "Run my SDR scorecard.",
+            "Prepare my 1:1 with Chloe Nguyen.",
+        ):
+            self.assertIn(phrase, self.text, phrase)
+
     def test_every_internal_link_points_to_a_real_section(self):
-        headings = re.findall(r"^#{2,4} (.+)$", self.text, flags=re.MULTILINE)
-        anchors = {
-            re.sub(r"[^a-z0-9 -]", "", heading.lower()).replace(" ", "-") for heading in headings
-        }
+        anchors = internal_anchors(self.text)
         for anchor in re.findall(r"\]\(#([a-z0-9-]+)\)", self.text):
             self.assertIn(anchor, anchors, anchor)
+
+    def test_every_local_link_points_to_a_real_file(self):
+        for target in re.findall(r"\]\((?!https?:|#)([^)#]+)\)", self.text):
+            self.assertTrue((REPO_ROOT / target).exists(), target)
+
+
+class TechnicalGuideTests(unittest.TestCase):
+    def setUp(self):
+        self.path = REPO_ROOT / "docs" / "technical-guide.md"
+        self.text = self.path.read_text(encoding="utf-8")
+
+    def test_states_clearly_that_no_keys_or_services_are_needed(self):
+        self.assertIn("External services, API keys, and environment variables", self.text)
+
+    def test_has_install_steps_for_each_operating_system(self):
+        for topic in ("### Mac", "### Windows", "python3 install.py", "py -3 install.py"):
+            self.assertIn(topic, self.text, topic)
+
+    def test_gives_ai_assistants_steps_they_can_follow(self):
+        self.assertIn("## Instructions for AI assistants", self.text)
+        self.assertIn("python3 install.py --tool claude", self.text)
+
+    def test_lists_every_command_of_the_program(self):
+        for command in command_names():
+            self.assertIn(f"`{command}", self.text, command)
+
+    def test_every_internal_link_points_to_a_real_section(self):
+        anchors = internal_anchors(self.text)
+        for anchor in re.findall(r"\]\(#([a-z0-9-]+)\)", self.text):
+            self.assertIn(anchor, anchors, anchor)
+
+    def test_every_local_link_points_to_a_real_file(self):
+        for target in re.findall(r"\]\((?!https?:|#)([^)#]+)\)", self.text):
+            self.assertTrue((self.path.parent / target).exists(), target)
 
 
 if __name__ == "__main__":

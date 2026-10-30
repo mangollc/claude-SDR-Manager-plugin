@@ -1,6 +1,6 @@
 ---
 name: one-on-one
-description: This skill should be used when an SDR manager says "prep my 1:1 with", "get ready for my one-on-one", "what should I cover with", "how is this rep doing", "log my 1:1", or "record what we agreed". It prepares a one-page 1:1 PDF and keeps each rep's coaching history.
+description: This skill should be used when an SDR manager says "prepare my 1:1 with", "prep my 1:1 with", "get ready for my one-on-one", "what should I cover with", "how is this rep doing", "log my 1:1", or "record what we agreed". It prepares a one-page 1:1 PDF and keeps each rep's coaching history.
 argument-hint: "<rep name> [--log]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "<rep name> [--log]"
 
 Help a manager coach one rep. Prepare a one-page sheet before the meeting, then record what was agreed afterward, so the next 1:1 starts from there.
 
-Use plain language, and write as a thoughtful manager would speak.
+Talk to the manager in everyday words, because they may not be technical. Say "your team's folder", not "workspace", and "your files", not "exports" or "mappings". Don't show commands, code, JSON, or folder structures unless they ask. When you suggest a next step, give them a sentence to type. Write as a thoughtful manager would speak.
 
 ## How to run the tool
 
@@ -25,7 +25,7 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 - **Never write a statistic.** The page shows every number itself, so your text carries judgment only. Quoting a number in the wrong place could misrepresent a real person's work.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Never compare the rep with teammates.**
-- **Refer to the rep by name or as "they".** Never guess anyone's gender from a name.
+- **Refer to the rep by name or as "they", in reports and in chat.** Never guess anyone's gender from a name. Unless you've been told the rep's pronouns, repeat their name or use "they", even in a quick reply.
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts, say that's a decision for the manager, and suggest involving HR.
 - **Keep it private.** Coaching notes are sensitive, so don't copy them anywhere else.
 
@@ -33,21 +33,21 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 
 Do this first, before or after the meeting.
 
-Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
+Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the full `workspace` path from the output for every later command and every file you save.
 
-- If `status` exits with code 2, send the manager to `/sdr-manager:setup`.
-- If `other_workspaces` isn't empty, check that this rep is in the workspace you're using. If not, look in the others with `status --workspace <folder>`, and say which one you're using.
+- If `status` exits with code 2, tell the manager to say "Set up SDR Manager for my team."
+- If `other_workspaces` isn't empty, check that this rep is in the workspace you're using. If not, look in the others with `status --workspace <folder>`, and say which team's folder you're using.
 
 ## Before the meeting
 
-Use this when the arguments don't include `--log`.
+Use this unless the manager is recording a meeting that has already happened.
 
 ### Step 1: Load what's known
 
-- If `latest_week` is null, send the manager to `/sdr-manager:scorecard`.
+- If `latest_week` is null, tell the manager to say "Run my SDR scorecard."
 - If `metrics_age_days` is more than 7, say so and continue.
 
-Read the file at `metrics_path`. Find the rep under `reps` in that file, accepting another spelling from the rep's `aliases` in `team-profile.json`. If they aren't there, send the manager to `/sdr-manager:scorecard`.
+Read the file at `metrics_path`. Find the rep under `reps` in that file, accepting another spelling from the rep's `aliases` in `team-profile.json`. If they aren't there, tell the manager to say "Run my SDR scorecard."
 
 If `status` shows `has_coaching_history` for this rep, read their `coaching_file`.
 
@@ -99,11 +99,11 @@ If `check-narrative` lists problems, fix each one and run it again. For a `stati
 
 If the report's `fallback` is true, tell the manager to open the HTML file in a browser, then print it and choose Save as PDF.
 
-Give the manager the file location and a two-line summary, then remind them to come back with `--log` after the meeting.
+Give the manager the file location and a two-line summary, then remind them to come back after the meeting and say "Log my 1:1 with <name>."
 
 ## After the meeting
 
-Use this when the arguments include `--log`, or when the manager says what was agreed.
+Use this when the arguments include `--log`, or when the manager asks to log a 1:1 or says what was agreed.
 
 1. Ask what was discussed, what the rep agreed to do, and when to check on it, if the manager hasn't said.
 2. Show the entry and ask for confirmation, unless the manager has already confirmed it. Don't save anything until the manager agrees.

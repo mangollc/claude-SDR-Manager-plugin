@@ -45,13 +45,6 @@ class AdaptSkillTests(unittest.TestCase):
         self.assertIn('python3 "/home/rep/.sdr-manager/scripts/sdr.py"', text)
         self.assertIn("/home/rep/.sdr-manager/references/coaching-playbook.md", text)
 
-    def test_renames_references_to_the_other_skills(self):
-        text = self.adapted()
-
-        self.assertNotIn("/sdr-manager:", text)
-        self.assertIn("sdr-setup", text)
-        self.assertIn("sdr-one-on-one", text)
-
     def test_removes_the_field_that_only_some_tools_accept(self):
         self.assertNotIn("argument-hint", self.adapted())
 

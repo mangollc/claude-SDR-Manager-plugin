@@ -1,6 +1,6 @@
 ---
 name: scorecard
-description: This skill should be used when an SDR manager says "run the scorecard", "build the weekly report", "how did my reps do this week", "analyze my team's numbers", "import these sales exports", or shares CSV or Excel exports of SDR activity. It turns exports into a team report PDF with one coaching focus per rep.
+description: This skill should be used when an SDR manager says "run my SDR scorecard", "run the scorecard", "build the weekly report", "how did my reps do this week", "analyze my team's numbers", "import these sales exports", or shares CSV or Excel exports of SDR activity. It turns exports into a team report PDF with one coaching focus per rep.
 argument-hint: "[folder or files] [week, such as 2026-W44]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[folder or files] [week, such as 2026-W44]"
 
 Turn a team's sales exports into a PDF report. Scripts do all the math. Your job is to work out what the exports mean, confirm it with the manager, and write short, honest observations.
 
-Use plain language. The manager may not be technical.
+Talk to the manager in everyday words, because they may not be technical. Say "your team's folder", not "workspace", and "your files", not "exports" or "mappings". Don't show commands, code, JSON, or folder structures unless they ask. When you suggest a next step, give them a sentence to type.
 
 ## How to run the tool
 
@@ -25,16 +25,16 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 - **Never open an export file directly.** Use `inspect`, which masks prospect details. Full exports only ever go through the scripts.
 - **Never write a statistic.** The report's tables show every number, so your text carries judgment only. Quoting a number in the wrong place is the worst mistake this plugin can make.
 - **Never rank reps** or compare them with each other in your text.
-- **Refer to reps by name or as "they".** Never guess anyone's gender from a name.
+- **Refer to reps by name or as "they", in reports and in chat.** Never guess anyone's gender from a name. Unless you've been told a rep's pronouns, repeat their name or use "they", even in a quick reply.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts and suggest involving HR.
 - **Never send anything or change anything in a sales tool.**
 
 ## Step 1: Find the workspace and exports
 
-Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
+Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the full `workspace` path from the output for every later command and every file you save.
 
-If `status` exits with code 2, send the manager to `/sdr-manager:setup`. If `other_workspaces` isn't empty, say which workspace you're using.
+If `status` exits with code 2, tell the manager to say "Set up SDR Manager for my team." If `other_workspaces` isn't empty, say which team's folder you're using.
 
 Use any folder or files given as arguments. Otherwise use the exports listed under `imports`, then ask.
 
@@ -49,7 +49,9 @@ Run `inspect <file> --workspace <folder>` for each file.
 - If `matched_mapping` has a name, the file is already understood. Move on.
 - If not, read `${CLAUDE_PLUGIN_ROOT}/references/file-mapping-guide.md` and work out a mapping. Use the `header_row` and `signature` from the output.
 
-Explain each new mapping in plain language and ask the manager to confirm it. Name the choices that change the numbers:
+Don't ask about names here. Step 4 reports anyone it doesn't recognize.
+
+Explain each new mapping in plain language and ask the manager to confirm it, then stop and wait for their answer. Do this for the sample team too, and save nothing until they agree. Name the choices that change the numbers:
 
 > In the call file, I'm counting "Connected" as a live conversation. "Voicemail", "No Answer", and "Busy" count as dials without a connection. Does that match how your team works?
 
@@ -57,7 +59,7 @@ Save each confirmed mapping to `mappings/<short-name>.json` in the workspace.
 
 ## Step 3: Ask about time off
 
-If `history/time-off/<week>.json` doesn't exist, ask about holidays and time off that week, then save it, even when the answer is none:
+If `history/time-off/<week>.json` doesn't exist, ask about holidays and time off that week, and wait for the answer. Never assume there was none. Then save it, even when the answer is none:
 
 ```json
 {"team_days_off": 1, "rep_days_off": {"Ben Carter": 2}}
@@ -81,7 +83,7 @@ Nothing is stored unless every file passes. If `status` is `needs_input`, resolv
 
 ## Step 5: Calculate
 
-Run `metrics --workspace <folder> --week <week>`, leaving out `--week` to use the latest week with data.
+Run `metrics --workspace <folder> --week <week>`, leaving out `--week` to use the latest week with data. If the output has `time_off_missing`, go back to step 3 for that week.
 
 Read the file at `path`. Also read `${CLAUDE_PLUGIN_ROOT}/references/coaching-playbook.md`, and `${CLAUDE_PLUGIN_ROOT}/references/metric-definitions.md` if the manager asks what a number means.
 
@@ -134,4 +136,4 @@ Keep it short, and use the output of `metrics`:
 
 Don't add other numbers, and don't reword, convert, or round `focus_text`.
 
-Then suggest `/sdr-manager:one-on-one` for the rep who needs it most.
+Then suggest a 1:1 for the rep who needs it most, with a sentence to type: "Prepare my 1:1 with <name>."

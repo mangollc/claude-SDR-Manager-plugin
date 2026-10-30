@@ -1,12 +1,14 @@
 ---
 name: setup
-description: This skill should be used when an SDR manager says "set up sdr-manager", "add my team", "add a rep", "a rep left", "change a target", "update our targets", or "try the sample team". It creates or updates the team's workspace and profile.
+description: This skill should be used when an SDR manager says "set up SDR Manager for my team", "set up SDR Manager with the sample team", "add my team", "add a rep", "a rep left", "change a target", "update our targets", or "try the sample team". It creates or updates the team's folder and profile.
 argument-hint: "[sample]"
 ---
 
 # Set up an SDR team
 
-Help a sales manager get ready to use this plugin. Use plain language, and don't show JSON or folder structures unless asked.
+Help a sales manager get ready to use this plugin.
+
+Talk to the manager in everyday words, because they may not be technical. Say "your team's folder", not "workspace", and "your files", not "exports" or "mappings". Don't show commands, code, JSON, or folder structures unless they ask. When you suggest a next step, give them a sentence to type.
 
 ## How to run the tool
 
@@ -32,9 +34,9 @@ Run `check-env`, then act on the result:
 
 If the arguments say `sample`, or the manager wants to try the plugin first, use the sample path. Otherwise ask which they'd like.
 
-**Sample path:** run `init-workspace --path sdr-demo --sample`. Tell the manager the sample is a made-up team of seven reps, then suggest `/sdr-manager:scorecard`. Stop here.
+**Sample path:** run `init-workspace --path sdr-demo --sample`. Tell the manager the sample is a made-up team of seven reps, then suggest they say "Run my SDR scorecard." Stop here.
 
-**Real team:** ask where to keep the team's data. The default is `sdr-workspace` in the current folder. Run `init-workspace --path <folder>`.
+**Real team:** ask where to keep the team's data. The default is `sdr-workspace` in the current folder. Run `init-workspace --path <folder>`, then use the full `path` from the result for every later command and every file you save.
 
 If the result says `already_exists: true`, this is an update. Read `team-profile.json`, ask what changed, and change only that. Never replace an existing profile.
 
@@ -48,7 +50,7 @@ Ask in small batches, and don't ask for anything the manager already told you:
 4. Which channels the team uses: calls, email, LinkedIn
 5. Anyone who appears in exports but isn't a rep, such as the manager
 
-Save the answers to `team-profile.json`:
+Save the answers to `team-profile.json` in that folder:
 
 ```json
 {
@@ -84,6 +86,6 @@ Leave `meeting_rate` alone unless the team has its own number, because the plugi
 
 Tell the manager:
 
-- Coaching notes and exports are sensitive, so keep this folder out of shared drives.
-- Each team needs its own workspace.
-- The next step is `/sdr-manager:scorecard`.
+- Coaching notes and downloaded files are sensitive, so keep this folder out of shared drives.
+- Each team needs its own folder.
+- The next step is to say "Run my SDR scorecard."
