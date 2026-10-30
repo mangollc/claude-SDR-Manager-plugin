@@ -121,7 +121,7 @@ Before using real data, try it with a made-up team of seven reps. All the names,
    Set up SDR Manager with the sample team.
    ```
 
-5. Claude will ask for permission before it runs something or saves a file, and it may ask several times. Allow it each time. This is SDR Manager's calculator, running on your own computer.
+5. Claude will ask for permission before it runs something or saves a file. Allow it each time. This is SDR Manager's calculator, running on your own computer. A first scorecard can take 15 to 20 of these, and later ones fewer, because it remembers your files.
 6. Now type:
 
    ```text
@@ -133,9 +133,9 @@ Before using real data, try it with a made-up team of seven reps. All the names,
 9. Claude tells you where your PDF report is. Open it and have a look.
 10. Finally, try a 1:1 prep sheet:
 
-   ```text
-   Prepare my 1:1 with Chloe Nguyen.
-   ```
+    ```text
+    Prepare my 1:1 with Chloe Nguyen.
+    ```
 
 The sample team shows each situation the plugin looks for:
 
@@ -576,6 +576,7 @@ We want to be upfront about this, because the plugin is new.
 | Reports, coaching focus, and 1:1 sheets | Tested in full with the sample team |
 | Using it in plain English in Claude Code on a Mac | Tested in full |
 | Installing it from GitHub with Claude Code commands | Tested in full |
+| Installing it with the paste-in message | Tested in Claude Code, but not yet in other AI tools |
 | Adding it through the Claude app's Plugins screen | **Not tested yet.** The steps come from Anthropic's help pages |
 | Cowork | **Not tested yet** |
 | Windows | **Not tested yet** |

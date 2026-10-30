@@ -58,7 +58,7 @@ A person asked you to install SDR Manager so it's available in all their project
 
 5. **Delete the temporary folder.** The installer copied everything it needs to `~/.sdr-manager`.
 
-6. **Tell the person** to close and reopen their AI tool, then say: *"Set up SDR Manager with the sample team."*
+6. **Tell the person** to close and reopen their AI tool, then say: *"Set up SDR Manager with the sample team."* Give them that sentence only, with no commands.
 
 ## Install in Claude Code
 
@@ -212,6 +212,7 @@ The tests need nothing installed. To regenerate the sample data, run `python3 te
 |---|---|
 | Claude Code plugin on macOS | Tested end to end with real sessions, including install from GitHub |
 | Standalone skills from `install.py` | Tested end to end in a real session |
+| The README's paste-in install message | Tested against the published repo in Claude Code on macOS |
 | Python 3.9 and 3.12 | Over 450 automated tests pass, with 97% coverage of `scripts/` |
 | PDF creation with Chrome | Tested |
 | Gemini CLI | Confirmed it discovers the skills. No full session has been run |
