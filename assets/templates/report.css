@@ -238,10 +238,13 @@ li {
 }
 
 .notes-row {
-  display: flex;
-  flex-direction: column;
   flex-grow: 1;
   margin-bottom: 10pt;
+}
+
+.notes-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .ruled {

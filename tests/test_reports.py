@@ -323,6 +323,11 @@ class OneOnOneTests(ReportTest):
         self.assertIn("Newest promise", output)
         self.assertNotIn("Old promise", output)
 
+    def test_leaves_out_the_progress_heading_when_there_is_nothing_to_report(self):
+        output = self.render({**ONE_ON_ONE_NARRATIVE, "commitment_progress": []})
+
+        self.assertNotIn("Progress", output)
+
     def test_says_when_there_are_no_commitments_yet(self):
         self.assertIn("No earlier commitments", self.render())
 

@@ -550,6 +550,10 @@ def _agenda_rows(topics: Sequence[str]) -> str:
     )
 
 
+def _progress_section(items: Sequence[str]) -> str:
+    return f"<h3>Progress</h3><ul>{_list_items(items)}</ul>" if items else ""
+
+
 def _win_lines(rep: dict) -> list[str]:
     """Return the steps that are on target. New hires' numbers aren't judged."""
     if rep["status"] == ONBOARDING:
@@ -597,7 +601,7 @@ def render_one_on_one(metrics: dict, rep: str, narrative: dict, coaching_text: s
         evidence=_list_items(_evidence_lines(match)),
         wins=_list_items(_win_lines(match) + narrative.get("wins", [])[:MAX_WRITTEN_WINS]),
         commitments=_list_items(commitments),
-        progress=_list_items(narrative.get("commitment_progress", [])),
+        progress=_progress_section(narrative.get("commitment_progress", [])),
         questions=_list_items(narrative.get("questions", [])[:MAX_QUESTIONS]),
         agenda=_agenda_rows(narrative.get("agenda", [])),
         footer=_footer(brand, "1:1 prep", rep, metrics["week"]),

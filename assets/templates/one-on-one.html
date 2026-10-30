@@ -26,25 +26,28 @@
     <div>
       <h2>Wins</h2>
       <ul>$wins</ul>
-      <h2>Commitments from last time</h2>
-      <ul>$commitments</ul>
-      <h3>Progress</h3>
-      <ul>$progress</ul>
     </div>
   </div>
   <div class="split split-even">
     <div>
+      <h2>Commitments from last time</h2>
+      <ul>$commitments</ul>
+      $progress
+    </div>
+    <div>
       <h2>Questions to ask</h2>
       <ol class="questions">$questions</ol>
     </div>
+  </div>
+  <div class="split split-even notes-row">
     <div>
       <h2>Agenda</h2>
       <table class="ledger agenda">$agenda</table>
     </div>
-  </div>
-  <div class="notes-row">
-    <h2>Meeting notes</h2>
-    <div class="ruled"></div>
+    <div class="notes-column">
+      <h2>Meeting notes</h2>
+      <div class="ruled"></div>
+    </div>
   </div>
   $footer
 </section>
