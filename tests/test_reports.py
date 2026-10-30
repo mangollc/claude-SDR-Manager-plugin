@@ -216,12 +216,13 @@ class TeamReportTests(ReportTest):
         self.assertNotIn("Partial week", self.render())
         self.assertIn("Partial week", self.render(self.changed(partial_week=True)))
 
-    def test_lists_files_rows_and_date_range(self):
+    def test_lists_files_rows_and_date_range_on_the_final_page(self):
         output = self.render()
 
-        self.assertIn("calls.csv", output)
-        self.assertIn("900", output)
-        self.assertIn("2026-10-05", output)
+        final_page = output[output.rindex("<section") :]
+        self.assertIn("calls.csv", final_page)
+        self.assertIn("900", final_page)
+        self.assertIn("2026-10-05", final_page)
 
     def test_shows_a_team_pattern_when_there_is_one(self):
         pattern = {"step": 2, "name": "Response", "reps": 3, "judged": 5}
@@ -477,6 +478,25 @@ class ReportCommandTests(ReportTest):
 
         self.assertEqual(code, 0)
         self.assertIn("one-on-one-ava-reyes", output["html"])
+
+    def test_a_week_with_path_characters_is_refused(self):
+        path = self.folder / "narrative.json"
+        path.write_text(json.dumps(TEAM_NARRATIVE))
+
+        code, output = run_cli(
+            "report",
+            "team",
+            "--workspace",
+            str(self.workspace),
+            "--week",
+            "../metrics/2026-W44",
+            "--narrative",
+            str(path),
+        )
+
+        self.assertEqual(code, 2)
+        self.assertIn("2026-W44", output["error"])
+        self.assertFalse((self.workspace / "metrics").exists())
 
     def test_a_failed_number_check_writes_no_files(self):
         code, output = self.run_report("team", {**TEAM_NARRATIVE, "headline": "Hit 4,444 dials"})

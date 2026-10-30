@@ -76,7 +76,7 @@ Nothing is stored unless every file passes. If `status` is `needs_input`, resolv
 | `files_without_mapping` | Go back to step 2 |
 | `unknown_reps` | Ask whether it's a new rep, another spelling of a known rep, or someone to ignore. Update `team-profile.json` |
 | `unmapped_values` | Ask what the new value means, then add it to the mapping. Never guess |
-| `channel_conflicts` | Ask which file to use for that channel, and leave the other out |
+| `channel_conflicts` | Ask which file to use for that channel or for meetings, and leave the other out |
 | `too_many_rejected` | Show `rejected_examples` and ask how to proceed. The header row or date format may be wrong |
 
 ## Step 5: Calculate

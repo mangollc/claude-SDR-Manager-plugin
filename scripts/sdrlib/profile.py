@@ -24,10 +24,18 @@ def _validate(profile: dict) -> None:
             f"Unknown channels in {PROFILE_FILE}: {', '.join(invalid)}. "
             "Use call, email, or linkedin."
         )
+    file_names: dict[str, str] = {}
     for rep in profile.get("reps", []):
         name = str(rep.get("name", "")).strip()
         if not name:
             raise ProfileError(f"Every rep in {PROFILE_FILE} needs a name.")
+        slug = rep_slug(name)
+        if slug in file_names:
+            raise ProfileError(
+                f"{file_names[slug]} and {name} would share one coaching file. "
+                f"Tell them apart in {PROFILE_FILE}, for example with a middle initial."
+            )
+        file_names[slug] = name
         start = rep.get("start_date")
         if not start:
             continue

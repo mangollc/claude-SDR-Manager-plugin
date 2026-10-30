@@ -255,6 +255,18 @@ class PartialWeekTests(ScorecardTest):
         self.assertEqual(self.rep(result)["this_week"]["working_days"], 3)
         self.assertEqual(self.rep(result)["window"]["working_days"], 18)
 
+    def test_a_holiday_at_the_end_of_the_week_is_not_a_partial_week(self):
+        workspace = self.workspace()
+        seed_activity(workspace, day="2026-10-28")
+        folder = workspace / "history" / "time-off"
+        folder.mkdir(parents=True)
+        (folder / "2026-W44.json").write_text(json.dumps({"team_days_off": 2, "rep_days_off": {}}))
+
+        result = build_scorecard(workspace, now=NOW)
+
+        self.assertFalse(result["partial_week"])
+        self.assertEqual(self.rep(result)["this_week"]["working_days"], 3)
+
     def test_data_through_friday_is_a_full_week(self):
         result = build_scorecard(self.seeded(), now=NOW)
 

@@ -198,14 +198,17 @@ def _team_notes(
     return notes
 
 
-def _partial_last_date(rows: Sequence[dict], week: str) -> date | None:
-    """Return the last date with daily data if it falls before Friday."""
+def _partial_last_date(rows: Sequence[dict], week: str, team_days_off: int) -> date | None:
+    """Return the last date with daily data if it stops before the team's last working day.
+
+    Team holidays are assumed to end the week, so a Thursday and Friday off isn't missing data.
+    """
     daily = [date.fromisoformat(row["date"]) for row in rows if row["granularity"] == "day"]
     if not daily:
         return None
     monday, _ = history.week_bounds(week)
-    friday = monday + timedelta(days=WORKING_DAYS_PER_WEEK - 1)
-    return max(daily) if max(daily) < friday else None
+    last_working_day = monday + timedelta(days=WORKING_DAYS_PER_WEEK - 1 - team_days_off)
+    return max(daily) if max(daily) < last_working_day else None
 
 
 def _make_context(
@@ -213,14 +216,17 @@ def _make_context(
 ) -> _Context:
     present = {row["channel"] for row in activity}
     channels = tuple(channel for channel in VALID_CHANNELS if channel in present)
+    time_off = {item: history.read_time_off(workspace, item) for item in weeks}
     return _Context(
         week=week,
         weeks=weeks,
         targets=resolve_targets({**team, "channels": list(channels)}),
         settings=load_defaults(),
         channels=channels,
-        time_off={item: history.read_time_off(workspace, item) for item in weeks},
-        partial_last_date=_partial_last_date(_rows_in_week(activity, week), week),
+        time_off=time_off,
+        partial_last_date=_partial_last_date(
+            _rows_in_week(activity, week), week, time_off[week]["team_days_off"]
+        ),
     )
 
 

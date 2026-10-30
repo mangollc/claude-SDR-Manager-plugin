@@ -328,7 +328,6 @@ def _summary_page(metrics: dict, narrative: dict, brand: str) -> str:
         f"{_pattern_section(metrics)}"
         f"<h2>Team numbers, last four weeks</h2>{_team_numbers(metrics)}"
         f"<h2>Reps</h2>{_rep_overview(metrics)}"
-        f"<h2>Data used</h2>{_coverage(metrics)}"
         f'{_footer(brand, "Team report", metrics["week"])}'
         "</section>"
     )
@@ -510,8 +509,9 @@ def _targets_page(metrics: dict, brand: str) -> str:
     )
     return (
         '<section class="page">'
-        f'{_masthead(brand, "Targets and sources")}'
-        '<p class="headline">Where these targets come from</p>'
+        f'{_masthead(brand, "Data and targets")}'
+        f"<h2>Data used</h2>{_coverage(metrics)}"
+        "<h2>Where these targets come from</h2>"
         "<p>Starting targets are published figures, so being on target means typical, not "
         "excellent. Most come from vendors reporting their own data, and definitions vary. "
         "Each team should replace them with its own numbers.</p>"

@@ -32,6 +32,14 @@ class InitWorkspaceTests(WorkspaceTest):
         self.assertEqual(profile["reps"], [])
         self.assertFalse(result["already_exists"])
 
+    def test_keeps_a_gitignore_that_is_already_there(self):
+        self.path.mkdir()
+        (self.path / ".gitignore").write_text("node_modules/\n")
+
+        init_workspace(self.path)
+
+        self.assertEqual((self.path / ".gitignore").read_text(), "node_modules/\n")
+
     def test_leaves_an_existing_workspace_untouched(self):
         init_workspace(self.path)
         profile_path = self.path / "team-profile.json"

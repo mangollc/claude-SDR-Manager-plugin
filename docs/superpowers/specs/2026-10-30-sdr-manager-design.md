@@ -200,7 +200,7 @@ sdr-workspace/
 └── coaching/<rep>.md
 ```
 
-An import replaces stored counts only for the channels and dates it covers, so a partial export can't wipe out good history and re-runs always give the same result.
+An import replaces stored counts only for the channels and exact dates it contains, so a partial export or a stray old date can't wipe out good history, and re-runs always give the same result. A weekly summary counts as covering its whole week.
 
 ### 5.3 Team profile
 
@@ -224,7 +224,7 @@ Managers never need to edit this file. They ask Claude or re-run setup.
 | `rep_summary` | One row per rep per week | Tool summary reports |
 | `meetings` | One row per meeting | CRM report |
 
-Each channel must come from exactly one file. If two files cover the same channel, such as a CRM and an outreach tool both logging calls, the plugin stops and asks which to use. This prevents double counting.
+Each channel must come from exactly one file, and so must meetings. If two files cover the same channel, such as a CRM and an outreach tool both logging calls, the plugin stops and asks which to use. This prevents double counting.
 
 A `rep_summary` file must cover one week per row. A summary covering a longer period can't be split into weeks, so the plugin asks for a weekly version.
 
@@ -234,7 +234,7 @@ A `rep_summary` file must cover one week per row. A summary covering a longer pe
 
 It masks two things:
 
-- Columns whose names suggest prospect details: email, phone, mobile, contact, prospect, lead, first name, last name, company, or account. A name that also contains owner, rep, representative, SDR, user, assigned, or agent stays visible, because `Contact Owner` or `Account Owner` is usually the rep. So does a name describing an event rather than a person, such as `Email Status` or `Phone Disposition`, because Claude needs those values to map the file.
+- Columns whose names suggest prospect details or free text: email, phone, mobile, contact, prospect, lead, name, recipient, customer, company, account, organization, subject, notes, description, comments, body, message, title, URL, link, or profile. A name that also contains owner, rep, representative, SDR, user, assigned, or agent stays visible, because `Contact Owner` or `Account Owner` is usually the rep. So does a name describing an event rather than a person, such as `Email Status` or `Phone Disposition`, because Claude needs those values to map the file.
 - Any value that looks like an email address or phone number.
 
 Masked columns never appear in the distinct-value lists.
@@ -451,10 +451,10 @@ Both reports use US Letter and system fonts, so they work offline. Status always
 
 **Team report:**
 
-- Page 1: week and date range, data coverage, team totals against targets, the number of reps in each status, any team pattern, and up to three observations.
+- Page 1: week and date range, team totals against targets, the number of reps in each status, any team pattern, up to three observations, and an overview of every rep.
 - One page per active rep: status, coaching focus, this week and four-week numbers against targets, step-by-step status, data notes, and a small weekly trend for touches, connect rate, email reply rate, meetings booked, and meetings held.
 - Reps appear alphabetically. There are no rankings.
-- A final page lists every target with its source and date.
+- A final page lists the data used, then every target with its source and date.
 
 **1:1 prep:**
 

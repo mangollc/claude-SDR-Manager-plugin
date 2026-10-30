@@ -47,34 +47,18 @@ def previous_weeks(week: str, count: int) -> list[str]:
     return [iso_week(monday - timedelta(weeks=back)) for back in range(count - 1, -1, -1)]
 
 
-def _weeks_between(first: date, last: date) -> list[str]:
-    weeks = []
-    monday = first - timedelta(days=first.weekday())
-    while monday <= last:
-        weeks.append(iso_week(monday))
-        monday += timedelta(days=DAYS_PER_WEEK)
-    return weeks
+def _row_days(row: dict) -> list[date]:
+    """Return the dates a stored row speaks for. A weekly row speaks for its whole week."""
+    day = date.fromisoformat(row["date"])
+    if row["granularity"] != "week":
+        return [day]
+    monday = day - timedelta(days=day.weekday())
+    return [monday + timedelta(days=offset) for offset in range(DAYS_PER_WEEK)]
 
 
 def _covered_days(rows: Iterable[dict]) -> set[tuple[str, date]]:
-    """Return every (channel, date) that an import speaks for."""
-    covered: set[tuple[str, date]] = set()
-    daily: dict[str, list[date]] = {}
-    for row in rows:
-        day = date.fromisoformat(row["date"])
-        if row["granularity"] == "week":
-            monday = day - timedelta(days=day.weekday())
-            covered.update(
-                (row["channel"], monday + timedelta(days=offset)) for offset in range(DAYS_PER_WEEK)
-            )
-        else:
-            daily.setdefault(row["channel"], []).append(day)
-    for channel, days in daily.items():
-        first, last = min(days), max(days)
-        covered.update(
-            (channel, first + timedelta(days=offset)) for offset in range((last - first).days + 1)
-        )
-    return covered
+    """Return each (channel, date) in an import. Dates it doesn't mention stay untouched."""
+    return {(row["channel"], day) for row in rows for day in _row_days(row)}
 
 
 def _activity_order(row: dict) -> tuple[str, str, str]:
@@ -87,7 +71,7 @@ def merge_activity(existing: Sequence[dict], new: Sequence[dict]) -> list[dict]:
     kept = [
         dict(row)
         for row in existing
-        if (row["channel"], date.fromisoformat(row["date"])) not in covered
+        if not any((row["channel"], day) in covered for day in _row_days(row))
     ]
     return sorted(kept + [dict(row) for row in new], key=_activity_order)
 
@@ -127,8 +111,7 @@ def write_activity(workspace: Path, rows: Sequence[dict]) -> None:
     covered = _covered_days(rows)
     if not covered:
         return
-    days = [day for _, day in covered]
-    weeks = _weeks_between(min(days), max(days))
+    weeks = sorted({iso_week(day) for _, day in covered})
     merged = merge_activity(read_activity(workspace, weeks), rows)
     for week in weeks:
         path = _folder(workspace, "activity") / f"{week}.csv"
@@ -158,7 +141,8 @@ def read_latest_meetings(workspace: Path) -> list[dict] | None:
 
 
 def metrics_path(workspace: Path, week: str) -> Path:
-    """Return where a week's metrics file lives."""
+    """Return where a week's metrics file lives, refusing anything but a week name."""
+    week_bounds(week)
     return _folder(workspace, "metrics") / f"{week}.json"
 
 

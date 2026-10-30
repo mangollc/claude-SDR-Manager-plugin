@@ -997,3 +997,8 @@ The tasks above are the original plan. These changes came out of building and te
 - **Reports:** targets show their exact value, so 3.41% against 3.43% can't read as 3.4% against 3.4%. The 1:1 page gained the five steps and a notes area.
 - **Statistics rule:** a real Haiku session wrote numbers that were real but attached to the wrong period, which the original check allowed. Claude's text now states no statistics, the calculator writes the 1:1's wins and evidence, and `check-narrative` no longer takes `--week`. See spec section 10.
 - **Chat summary:** `metrics` now returns `focus_text` and `status_counts`, so the summary can repeat exact wording.
+- **Workspace lookup:** a real session couldn't find the workspace, because the skill left that to search tools, and the workspace's `.gitignore` hides it from them. A `status` command now reports it.
+- **Pronouns:** report text is rejected if it uses gendered pronouns, after a session guessed one from a rep's name.
+- **1:1 layout:** the five steps came back out, and the page now fits on one sheet, with notes filling whatever room is left. The data sources moved to the team report's last page.
+- **Code review:** one Sonnet review found ten real issues, all fixed with tests: data loss from stray dates, weekly and daily double counting, duplicate meetings files, holidays misread as partial weeks, Sunday-start weeks, an unvalidated `--week`, an overwritten `.gitignore`, header detection and free-text masking gaps, and shared coaching files.
+

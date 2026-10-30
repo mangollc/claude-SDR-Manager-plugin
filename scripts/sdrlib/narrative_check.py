@@ -31,7 +31,7 @@ NUMBER = re.compile(r"(?<![\w.])\d+(?:,\d{3})*(?:\.\d+)?%?(?!\w)")
 NUMBER_WORD = re.compile(
     r"\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen"
     r"|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy"
-    r"|eighty|ninety|hundred|thousand|half|twice|dozen)\b",
+    r"|eighty|ninety|hundred|thousand|half|twice|dozen|(?:third|quarter|fifth|tenth)s? of)\b",
     re.IGNORECASE,
 )
 # Reports describe real people, and a name says nothing certain about anyone's gender.

@@ -128,6 +128,14 @@ class MaskingTests(unittest.TestCase):
         for name in ("Email Status", "Lead Status", "Phone Disposition", "Email Sent Date"):
             self.assertFalse(is_masked_column(name), name)
 
+    def test_masks_free_text_columns(self):
+        for name in ("Subject", "Notes", "Organization", "LinkedIn URL", "Description", "Title"):
+            self.assertTrue(is_masked_column(name), name)
+
+    def test_masks_lowercase_hyphenated_headers(self):
+        for name in ("last-name", "contact-email", "E-mail", "first_name"):
+            self.assertTrue(is_masked_column(name), name)
+
     def test_removes_emails_and_phone_numbers_from_text(self):
         masked = mask_text("reach me at a.b@c.co or 415-555-0100 today")
 
@@ -183,6 +191,29 @@ class InspectFileTests(TempFileTest):
 
         self.assertEqual(result["header_row"], 3)
         self.assertNotIn("Jane Doe", json.dumps(result))
+
+    def test_finds_a_header_with_an_unnamed_first_column(self):
+        path = self.write(
+            "a.csv",
+            ",Date,Rep,Outcome,Contact Name,Company\n"
+            "0,2026-10-26,Ava,Connected,Jane Doe,Acme Corp\n",
+        )
+
+        result = inspect_file(path)
+
+        self.assertEqual(result["header_row"], 1)
+        self.assertNotIn("Jane Doe", json.dumps(result))
+        self.assertNotIn("Acme Corp", json.dumps(result))
+
+    def test_never_takes_a_row_with_a_date_for_the_header(self):
+        path = self.write("a.csv", "Calls\n2026-10-26,Ava,Jane Doe\nDate,Rep,Contact Name\n")
+
+        self.assertEqual(inspect_file(path)["header_row"], 3)
+
+    def test_masks_personal_values_used_as_headers(self):
+        path = self.write("a.csv", "Date,jane@acme.io\n2026-10-26,x\n")
+
+        self.assertNotIn("jane@acme.io", json.dumps(inspect_file(path)))
 
     def test_explicit_header_row_wins_over_the_guess(self):
         path = self.write("a.csv", "Date,Rep\nnote only\n2026-10-26,Ava\n")

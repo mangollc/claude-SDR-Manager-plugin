@@ -41,6 +41,12 @@ class ExtractNumberWordTests(unittest.TestCase):
     def test_finds_fractions_of_a_target(self):
         self.assertEqual(extract_number_words("Reached half the target"), ["half"])
 
+    def test_finds_fractions_of_a_group(self):
+        self.assertEqual(
+            extract_number_words("Only a third of them, and a quarter of those"),
+            ["third of", "quarter of"],
+        )
+
     def test_allows_the_word_one(self):
         self.assertEqual(extract_number_words("One clear gap, and one thing to try"), [])
 

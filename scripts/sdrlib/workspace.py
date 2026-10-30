@@ -43,7 +43,8 @@ def init_workspace(path: Path, sample: bool = False) -> dict:
     for name in FOLDERS:
         (path / name).mkdir(parents=True, exist_ok=True)
     # Coaching notes and exports are sensitive, so Git ignores the whole workspace.
-    (path / ".gitignore").write_text("*\n", encoding="utf-8")
+    if not (path / ".gitignore").exists():
+        (path / ".gitignore").write_text("*\n", encoding="utf-8")
     profile = json.dumps(STARTER_PROFILE, indent=2) + "\n"
     (path / PROFILE_FILE).write_text(profile, encoding="utf-8")
     result = {"status": "ok", "path": str(path), "already_exists": False}

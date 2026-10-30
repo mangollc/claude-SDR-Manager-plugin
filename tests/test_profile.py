@@ -53,6 +53,14 @@ class LoadProfileTests(ProfileTest):
         with self.assertRaisesRegex(ProfileError, "Ava Reyes"):
             load_profile(workspace)
 
+    def test_two_reps_sharing_a_file_name_are_rejected(self):
+        workspace = make_workspace(
+            self.folder, reps=[{"name": "Jose Nunez"}, {"name": "José Núñez"}]
+        )
+
+        with self.assertRaisesRegex(ProfileError, "Jose Nunez"):
+            load_profile(workspace)
+
     def test_blank_start_date_is_allowed(self):
         workspace = make_workspace(self.folder, reps=[{"name": "Ava Reyes", "start_date": ""}])
 

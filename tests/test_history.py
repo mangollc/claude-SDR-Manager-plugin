@@ -21,6 +21,10 @@ class WeekTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "2026-W44"):
             history.week_bounds("week 44")
 
+    def test_metrics_path_refuses_path_characters(self):
+        with self.assertRaisesRegex(ValueError, "2026-W44"):
+            history.metrics_path(Path("workspace"), "../metrics/2026-W44")
+
     def test_rejects_a_week_that_does_not_exist(self):
         with self.assertRaises(ValueError):
             history.week_bounds("2026-W99")
@@ -58,13 +62,38 @@ class MergeActivityTests(unittest.TestCase):
 
         self.assertEqual(len(merged), 2)
 
-    def test_removes_old_rows_inside_the_import_range(self):
+    def test_a_rep_missing_from_an_imported_date_loses_the_old_row(self):
         existing = [activity_row("2026-10-08", rep="Ben Carter", dials=4)]
-        new = [activity_row("2026-10-07", dials=1), activity_row("2026-10-09", dials=1)]
+        new = [activity_row("2026-10-08", dials=1)]
 
         merged = history.merge_activity(existing, new)
 
         self.assertNotIn("Ben Carter", [row["rep"] for row in merged])
+
+    def test_a_stray_old_date_does_not_erase_the_days_between(self):
+        existing = [activity_row(day, dials=1) for day in ("2026-10-05", "2026-10-12")]
+        new = [activity_row("2026-09-01", dials=2), activity_row("2026-10-26", dials=2)]
+
+        merged = history.merge_activity(existing, new)
+
+        self.assertEqual(
+            [row["date"] for row in merged],
+            ["2026-09-01", "2026-10-05", "2026-10-12", "2026-10-26"],
+        )
+
+    def test_daily_rows_replace_a_stored_weekly_row_for_that_week(self):
+        existing = [activity_row("2026-10-19", granularity="week", dials=176)]
+        new = [activity_row("2026-10-20", dials=44)]
+
+        merged = history.merge_activity(existing, new)
+
+        self.assertEqual([(row["date"], row["dials"]) for row in merged], [("2026-10-20", 44)])
+
+    def test_a_stored_weekly_row_for_another_week_stays(self):
+        existing = [activity_row("2026-10-12", granularity="week", dials=176)]
+        new = [activity_row("2026-10-20", dials=44)]
+
+        self.assertEqual(len(history.merge_activity(existing, new)), 2)
 
     def test_weekly_rows_replace_the_whole_week_for_that_channel(self):
         existing = [activity_row("2026-10-08", dials=4), activity_row("2026-10-12", dials=4)]
@@ -113,6 +142,19 @@ class ActivityStorageTests(StorageTest):
         names = sorted(p.name for p in (self.workspace / "history" / "activity").iterdir())
 
         self.assertEqual(names, ["2026-W43.csv", "2026-W44.csv"])
+
+    def test_a_stray_date_leaves_the_weeks_between_on_disk(self):
+        history.write_activity(
+            self.workspace, [activity_row(day, dials=1) for day in ("2026-10-05", "2026-10-12")]
+        )
+        history.write_activity(
+            self.workspace,
+            [activity_row("2026-09-01", dials=2), activity_row("2026-10-26", dials=2)],
+        )
+
+        rows = history.read_activity(self.workspace, ["2026-W41", "2026-W42"])
+
+        self.assertEqual(len(rows), 2)
 
     def test_writing_the_same_import_twice_gives_identical_files(self):
         rows = [activity_row("2026-10-26", dials=7), activity_row("2026-10-27", dials=3)]

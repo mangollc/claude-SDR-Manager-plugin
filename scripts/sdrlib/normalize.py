@@ -53,6 +53,7 @@ REQUIRED_COLUMNS = {
     "meetings": ("rep", "booked_date", "status"),
 }
 MAX_REJECTED_SHARE = 0.05
+SUNDAY = 6
 MAX_EXAMPLES = 3
 
 
@@ -176,6 +177,12 @@ def _read_activities(table: Table, mapping: dict, reps: dict, problems: _Problem
     ]
 
 
+def _week_monday(day: date) -> date:
+    """Return the Monday of a summary's week. A week labeled by its Sunday starts next day."""
+    start = day + timedelta(days=1) if day.weekday() == SUNDAY else day
+    return start - timedelta(days=start.weekday())
+
+
 def _summary_counts(row: dict, columns: dict) -> dict | None:
     names = [name for name in ACTIVITY_COUNTS if name in columns]
     counts = {name: _parse_count(row[columns[name]]) for name in names}
@@ -199,7 +206,7 @@ def _read_summary(table: Table, mapping: dict, reps: dict, problems: _Problems) 
         if day is None or counts is None:
             problems.rejected.append(row)
             continue
-        monday = (day - timedelta(days=day.weekday())).isoformat()
+        monday = _week_monday(day).isoformat()
         for channel, names in channels.items():
             channel_counts = {name: counts.get(name, 0) for name in names}
             rows.append(_activity_row(monday, rep, channel, "week", channel_counts))
@@ -291,7 +298,7 @@ def _check_mapping(path: Path, mapping: dict, table: Table) -> None:
 
 def _safe_example(row: dict) -> str:
     cells = (
-        f"{name}: {MASK if is_masked_column(name) else mask_text(value)}"
+        f"{mask_text(name)}: {MASK if is_masked_column(name) else mask_text(value)}"
         for name, value in row.items()
         if value
     )
@@ -338,11 +345,13 @@ def find_mapping(path: Path, mappings_dir: Path) -> dict | None:
 
 
 def channel_conflicts(results: Sequence[FileResult]) -> dict[str, list[str]]:
-    """Return channels covered by more than one file, which would double count."""
+    """Return channels, or meetings, covered by more than one file, which would double count."""
     files_by_channel: dict[str, list[str]] = {}
     for result in results:
         for channel in sorted({row["channel"] for row in result.activity}):
             files_by_channel.setdefault(channel, []).append(result.file)
+        if result.meetings:
+            files_by_channel.setdefault("meetings", []).append(result.file)
     return {channel: files for channel, files in files_by_channel.items() if len(files) > 1}
 
 

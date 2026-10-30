@@ -286,6 +286,13 @@ class SummaryTests(NormalizeTest):
 
         self.assertEqual(normalize_file(path, self.mapping, REPS).activity[0]["date"], "2026-10-26")
 
+    def test_a_sunday_week_start_moves_to_the_following_monday(self):
+        path = self.write(
+            "a.csv", "Week,Rep,Calls,Connects,Sent,Replies\n2026-10-25,Ava Reyes,1,0,1,0\n"
+        )
+
+        self.assertEqual(normalize_file(path, self.mapping, REPS).activity[0]["date"], "2026-10-26")
+
     def test_blank_counts_are_zero(self):
         path = self.write(
             "a.csv", "Week,Rep,Calls,Connects,Sent,Replies\n2026-10-26,Ava Reyes,5,,5,\n"
@@ -373,6 +380,13 @@ class ChannelConflictTests(NormalizeTest):
         second = normalize_file(self.write("dialer.csv", text), CALL_MAPPING, REPS)
 
         self.assertEqual(channel_conflicts([first, second]), {"call": ["crm.csv", "dialer.csv"]})
+
+    def test_names_both_files_when_two_cover_meetings(self):
+        text = "Owner,Booked,Due,State,AE\nAva Reyes,2026-10-20,2026-10-22,Done,Accepted\n"
+        first = normalize_file(self.write("crm.csv", text), MEETING_MAPPING, REPS)
+        second = normalize_file(self.write("tool.csv", text), MEETING_MAPPING, REPS)
+
+        self.assertEqual(channel_conflicts([first, second]), {"meetings": ["crm.csv", "tool.csv"]})
 
     def test_one_file_per_channel_has_no_conflict(self):
         text = "Date,Rep,Result\n2026-10-26,Ava Reyes,Connected\n"

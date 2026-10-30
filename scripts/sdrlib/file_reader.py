@@ -32,6 +32,20 @@ MASKED_WORDS = (
     "customer",
     "company",
     "account",
+    "organization",
+    "org",
+    "subject",
+    "notes",
+    "note",
+    "description",
+    "comment",
+    "comments",
+    "body",
+    "message",
+    "title",
+    "url",
+    "link",
+    "profile",
 )
 VISIBLE_WORDS = (
     "owner",
@@ -55,6 +69,8 @@ VISIBLE_WORDS = (
     "step",
 )
 
+HEADER_FILL_SHARE = 0.8
+DATE_LIKE = re.compile(r"\b\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}\b")
 EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 PHONE_PATTERN = re.compile(
     r"(?<![\w.-])(?:"
@@ -183,9 +199,9 @@ def header_signature(headers: Sequence[str]) -> str:
 
 
 def _plain_words(name: str) -> str:
-    joined = name.replace("-", "")
-    spaced = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", joined)
-    return spaced.replace("_", " ").lower()
+    spaced = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", name)
+    words = re.sub(r"[-_]+", " ", spaced).lower()
+    return re.sub(r"\be mail\b", "email", words)
 
 
 def _contains_word(text: str, words: Sequence[str]) -> bool:
@@ -204,10 +220,19 @@ def mask_text(value: str) -> str:
 
 
 def guess_header_row(rows: Sequence[Sequence[str]]) -> int:
-    """Return the first line among the opening rows that has the most filled cells."""
-    filled = [sum(1 for cell in row if cell.strip()) for row in rows[:PREVIEW_LINES]]
+    """Return the first opening row that's nearly full and holds no dates.
+
+    Getting this wrong would treat a row of prospect details as column names. "Nearly full"
+    allows for an unnamed first column, which is common in exports from data tools.
+    """
+    opening = rows[:PREVIEW_LINES]
+    filled = [sum(1 for cell in row if cell.strip()) for row in opening]
     if not filled or max(filled) == 0:
         return 1
+    needed = max(filled) * HEADER_FILL_SHARE
+    for line, (row, count) in enumerate(zip(opening, filled), start=1):
+        if count >= needed and not any(DATE_LIKE.search(cell) for cell in row):
+            return line
     return filled.index(max(filled)) + 1
 
 
@@ -231,7 +256,7 @@ def _distinct_values(table: Table, visible_headers: Sequence[str]) -> dict[str, 
     for header in visible_headers:
         values = {row[header] for row in table.rows if row[header]}
         if len(values) <= MAX_DISTINCT_VALUES:
-            distinct[header] = sorted(mask_text(value) for value in values)
+            distinct[mask_text(header)] = sorted(mask_text(value) for value in values)
     return distinct
 
 
@@ -262,10 +287,10 @@ def inspect_file(
         "file": path.name,
         "rows": len(table.rows),
         "header_row": chosen_row,
-        "headers": list(table.headers),
+        "headers": [mask_text(header) for header in table.headers],
         "signature": header_signature(table.headers),
         "preview": _preview(rows, chosen_row, masked_positions),
         "distinct": _distinct_values(table, visible),
-        "masked_columns": masked,
+        "masked_columns": [mask_text(header) for header in masked],
         "matched_mapping": matched.name if matched else None,
     }
