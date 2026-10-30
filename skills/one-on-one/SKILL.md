@@ -29,15 +29,21 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts, say that's a decision for the manager, and suggest involving HR.
 - **Keep it private.** Coaching notes are sensitive, so don't copy them anywhere else.
 
+## Find the workspace
+
+Do this first, before or after the meeting.
+
+Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
+
+- If `status` exits with code 2, send the manager to `/sdr-manager:setup`.
+- If `other_workspaces` isn't empty, check that this rep is in the workspace you're using. If not, look in the others with `status --workspace <folder>`, and say which one you're using.
+
 ## Before the meeting
 
 Use this when the arguments don't include `--log`.
 
 ### Step 1: Load what's known
 
-Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
-
-- If `status` exits with code 2, send the manager to `/sdr-manager:setup`.
 - If `latest_week` is null, send the manager to `/sdr-manager:scorecard`.
 - If `metrics_age_days` is more than 7, say so and continue.
 
@@ -101,7 +107,7 @@ Give the manager the file location and a two-line summary, then remind them to c
 Use this when the arguments include `--log`, or when the manager says what was agreed.
 
 1. Ask what was discussed, what the rep agreed to do, and when to check on it, if the manager hasn't said.
-2. Show the entry and ask for confirmation. Don't save anything until the manager agrees.
+2. Show the entry and ask for confirmation, unless the manager has already confirmed it. Don't save anything until the manager agrees.
 3. Write the entry to a temporary JSON file:
 
 ```json
