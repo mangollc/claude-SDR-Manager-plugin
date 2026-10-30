@@ -24,7 +24,9 @@ from sdrlib import (  # noqa: E402
     history,
     narrative_check,
     normalize,
+    pdf,
     profile,
+    reports,
     scorecard,
     targets,
 )
@@ -98,6 +100,41 @@ def run_check_narrative(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, {"status": "ok", "problems": []}
 
 
+def _render_report(args: argparse.Namespace, workspace: Path) -> tuple[str, str]:
+    """Return a report's HTML and its file name without the extension."""
+    metrics_file = history.read_metrics(workspace, args.week)
+    narrative = _read_json(args.narrative)
+    if args.kind == "team":
+        return reports.render_team(metrics_file, narrative), "team-report"
+    rep = _known_rep(workspace, args.rep)
+    text = reports.render_one_on_one(
+        metrics_file, rep, narrative, coaching.read_history(workspace, rep)
+    )
+    return text, f"one-on-one-{profile.rep_slug(rep)}-{date.today().isoformat()}"
+
+
+def run_report(args: argparse.Namespace) -> tuple[int, dict]:
+    if args.kind == "one-on-one" and not args.rep:
+        raise UsageError("A one-on-one report needs --rep with the rep's name.")
+    problems = _number_problems(args)
+    if problems:
+        return EXIT_NEEDS_INPUT, {"status": "needs_input", "problems": problems}
+    workspace = Path(args.workspace)
+    text, name = _render_report(args, workspace)
+    folder = workspace / "reports" / args.week
+    folder.mkdir(parents=True, exist_ok=True)
+    html_path = folder / f"{name}.html"
+    pdf_path = folder / f"{name}.pdf"
+    html_path.write_text(text, encoding="utf-8")
+    printed = pdf.print_to_pdf(html_path, pdf_path)
+    return EXIT_OK, {
+        "status": "ok",
+        "html": str(html_path),
+        "pdf": str(pdf_path) if printed else None,
+        "fallback": not printed,
+    }
+
+
 def run_log_coaching(args: argparse.Namespace) -> tuple[int, dict]:
     workspace = Path(args.workspace)
     rep = _known_rep(workspace, args.rep)
@@ -139,6 +176,14 @@ def build_parser() -> argparse.ArgumentParser:
     check_text.add_argument("--narrative", required=True)
     check_text.add_argument("--rep")
     check_text.set_defaults(handler=run_check_narrative)
+
+    report = commands.add_parser("report", help="Build a team or one-on-one PDF")
+    report.add_argument("kind", choices=["team", "one-on-one"])
+    report.add_argument("--workspace", required=True)
+    report.add_argument("--week", required=True)
+    report.add_argument("--narrative", required=True)
+    report.add_argument("--rep")
+    report.set_defaults(handler=run_report)
 
     log_coaching = commands.add_parser("log-coaching", help="Add a coaching history entry")
     log_coaching.add_argument("--workspace", required=True)
