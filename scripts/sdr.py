@@ -16,13 +16,13 @@ from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from sdrlib import environment, file_reader  # noqa: E402
+from sdrlib import environment, file_reader, normalize, profile, targets  # noqa: E402
 
 EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_NEEDS_INPUT = 2
 # Problems the manager can fix, so skills get a plain message rather than a failure.
-EXPECTED_ERRORS = (file_reader.UnsupportedFile, ValueError)
+EXPECTED_ERRORS = (file_reader.UnsupportedFile, profile.ProfileError, ValueError)
 
 
 class UsageError(Exception):
@@ -45,6 +45,17 @@ def run_inspect(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, file_reader.inspect_file(Path(args.file), args.header_row, mappings_dir)
 
 
+def run_targets(args: argparse.Namespace) -> tuple[int, dict]:
+    team = profile.load_profile(Path(args.workspace))
+    return EXIT_OK, {"status": "ok", "targets": targets.resolve_targets(team)}
+
+
+def run_normalize(args: argparse.Namespace) -> tuple[int, dict]:
+    files = [Path(item) for item in args.files]
+    report = normalize.normalize_files(Path(args.workspace), files, args.week)
+    return (EXIT_OK if report["status"] == "ok" else EXIT_NEEDS_INPUT), report
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = JsonArgumentParser(prog="sdr.py", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -57,6 +68,16 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("--header-row", type=int)
     inspect.add_argument("--workspace")
     inspect.set_defaults(handler=run_inspect)
+
+    show_targets = commands.add_parser("targets", help="Check the profile and print targets")
+    show_targets.add_argument("--workspace", required=True)
+    show_targets.set_defaults(handler=run_targets)
+
+    normalize_exports = commands.add_parser("normalize", help="Store counts from exports")
+    normalize_exports.add_argument("--workspace", required=True)
+    normalize_exports.add_argument("--files", nargs="+", required=True)
+    normalize_exports.add_argument("--week")
+    normalize_exports.set_defaults(handler=run_normalize)
 
     return parser
 
