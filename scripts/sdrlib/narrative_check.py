@@ -34,6 +34,8 @@ NUMBER_WORD = re.compile(
     r"|eighty|ninety|hundred|thousand|half|twice|dozen)\b",
     re.IGNORECASE,
 )
+# Reports describe real people, and a name says nothing certain about anyone's gender.
+PRONOUN = re.compile(r"\b(?:he|she|him|her|hers|his|himself|herself)\b", re.IGNORECASE)
 # These fields hold suggestions rather than claims, so "two calling blocks" is fine there.
 SUGGESTION_FIELDS = ("questions", "agenda")
 
@@ -68,7 +70,10 @@ def _is_suggestion(field: str) -> bool:
 
 
 def check_narrative(narrative: dict, coaching_text: str = "") -> list[dict]:
-    """Return a problem for each statistic. Only the rep's own coaching history may be quoted."""
+    """Return a problem for each statistic or gendered pronoun in the text.
+
+    Only the rep's own coaching history may be quoted.
+    """
     allowed = {
         _normal(token)
         for token in extract_numbers(coaching_text) + extract_number_words(coaching_text)
@@ -79,8 +84,12 @@ def check_narrative(narrative: dict, coaching_text: str = "") -> list[dict]:
         if not _is_suggestion(field):
             found = found + extract_number_words(text)
         problems += [
-            {"field": field, "text": text, "number": token}
+            {"field": field, "text": text, "number": token, "kind": "statistic"}
             for token in found
             if _normal(token) not in allowed
+        ]
+        problems += [
+            {"field": field, "text": text, "number": token, "kind": "pronoun"}
+            for token in PRONOUN.findall(text)
         ]
     return problems

@@ -63,7 +63,7 @@ Save to `reports/<week>/one-on-one-<slug>-narrative.json` in the workspace:
 
 ```json
 {
-  "wins": ["Praise for something the rep did, in words"],
+  "wins": ["Up to three things the numbers can't show, in words"],
   "focus_summary": "One or two sentences on why this focus matters now",
   "commitment_progress": ["For each past commitment, whether things moved the right way"],
   "questions": ["Open questions that help the rep find the cause"],
@@ -71,7 +71,7 @@ Save to `reports/<week>/one-on-one-<slug>-narrative.json` in the workspace:
 }
 ```
 
-The page adds the numbers itself: every on-target step is listed as a win, and the focus metric and its weekly values are listed as evidence.
+The page adds the numbers itself: every on-target step is listed as a win, and the focus metric and its weekly values are listed as evidence. So don't repeat those. Leave `wins` empty if you have nothing to add, and keep every sentence short, because the page has to fit on one sheet.
 
 Follow these rules:
 
@@ -79,8 +79,7 @@ Follow these rules:
 - `questions` and `agenda` may use words like "two calling blocks", but no digits.
 - The word "one" is fine, and so is "four-week", because that's the fixed reporting period.
 - Only describe what the metrics file shows. Base every claim on a status or a step.
-- Include at least one win that's true of this rep, drawn from a step on target.
-- Write three to five questions from the playbook, adapted to this rep.
+- Write three to five short questions from the playbook, adapted to this rep.
 - Give four agenda topics, in the order they'll be covered.
 - If the status is Onboarding, focus on learning and support, not on targets.
 - If the status is On track, celebrate it and explore the stretch focus. If there's no focus, ask what the rep wants to work on next.
@@ -96,7 +95,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <fold
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" report one-on-one --workspace <folder> --week <week> --rep "<name>" --narrative <file>
 ```
 
-If `check-narrative` lists problems, remove each number and say the same thing in words, then run it again. Never work around a failed check.
+If `check-narrative` lists problems, fix each one and run it again. For a `statistic`, remove the number and say the same thing in words. For a `pronoun`, use the rep's name or "they". Never work around a failed check.
 
 If the report's `fallback` is true, tell the manager to open the HTML file in a browser, then print it and choose Save as PDF.
 

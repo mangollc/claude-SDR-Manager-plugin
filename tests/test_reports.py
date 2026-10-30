@@ -300,7 +300,6 @@ class OneOnOneTests(ReportTest):
             "Commitments",
             "Questions",
             "Agenda",
-            "The five steps",
             "Meeting notes",
         )
         for heading in headings:
@@ -416,6 +415,26 @@ class CalculatedFactsTests(ReportTest):
         rep = {**self.metrics["reps"][0], "focus": focus}
 
         self.assertIn("Connect rate by week:", self.render(rep))
+
+    def test_keeps_the_page_short_by_capping_written_wins(self):
+        wins = [f"Written win {letter}" for letter in "ABCD"]
+
+        output = render_one_on_one(
+            self.metrics, "Ava Reyes", {**ONE_ON_ONE_NARRATIVE, "wins": wins}, ""
+        )
+
+        self.assertIn("Written win C", output)
+        self.assertNotIn("Written win D", output)
+
+    def test_keeps_the_page_short_by_capping_questions(self):
+        questions = [f"Question {letter}" for letter in "ABCDEF"]
+
+        output = render_one_on_one(
+            self.metrics, "Ava Reyes", {**ONE_ON_ONE_NARRATIVE, "questions": questions}, ""
+        )
+
+        self.assertIn("Question E", output)
+        self.assertNotIn("Question F", output)
 
     def test_evidence_written_by_claude_is_ignored(self):
         narrative = {**ONE_ON_ONE_NARRATIVE, "evidence": ["Invented claim"]}

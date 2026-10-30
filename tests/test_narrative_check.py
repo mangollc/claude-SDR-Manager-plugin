@@ -110,6 +110,29 @@ class CheckNarrativeTests(unittest.TestCase):
         self.assertEqual(numbers_found({"questions": ["Why only 3 of 13?"]}), ["3", "13"])
 
 
+class PronounTests(unittest.TestCase):
+    def test_gendered_pronouns_are_reported(self):
+        narrative = {"rep_notes": {"Ava": "Ask what she is doing differently with her list"}}
+
+        self.assertEqual(numbers_found(narrative), ["she", "her"])
+
+    def test_problems_say_what_kind_they_are(self):
+        kinds = [
+            problem["kind"] for problem in check_narrative({"headline": "He booked 12 meetings"})
+        ]
+
+        self.assertEqual(sorted(kinds), ["pronoun", "statistic"])
+
+    def test_pronouns_are_reported_in_questions_too(self):
+        self.assertEqual(numbers_found({"questions": ["What stopped him?"]}), ["him"])
+
+    def test_they_and_names_pass(self):
+        self.assertEqual(numbers_found({"headline": "Ava is steady, and they know it"}), [])
+
+    def test_words_containing_a_pronoun_pass(self):
+        self.assertEqual(numbers_found({"headline": "The sheet shows where the shell ends"}), [])
+
+
 class CheckNarrativeCommandTests(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()

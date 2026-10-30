@@ -28,6 +28,9 @@ from .targets import ASSETS_DIR
 TEMPLATES_DIR = ASSETS_DIR / "templates"
 MAX_OBSERVATIONS = 3
 AGENDA_MINUTES = (5, 10, 10, 5)
+# These caps help the 1:1 prep stay on one page.
+MAX_WRITTEN_WINS = 3
+MAX_QUESTIONS = 5
 SPARK_WIDTH = 96
 SPARK_HEIGHT = 24
 SPARK_PADDING = 3
@@ -592,11 +595,10 @@ def render_one_on_one(metrics: dict, rep: str, narrative: dict, coaching_text: s
         focus=escape(focus_text(match)),
         focus_summary=escape(narrative.get("focus_summary", "")),
         evidence=_list_items(_evidence_lines(match)),
-        wins=_list_items(_win_lines(match) + narrative.get("wins", [])),
+        wins=_list_items(_win_lines(match) + narrative.get("wins", [])[:MAX_WRITTEN_WINS]),
         commitments=_list_items(commitments),
         progress=_list_items(narrative.get("commitment_progress", [])),
-        questions=_list_items(narrative.get("questions", [])),
+        questions=_list_items(narrative.get("questions", [])[:MAX_QUESTIONS]),
         agenda=_agenda_rows(narrative.get("agenda", [])),
-        steps=_steps_list(match),
         footer=_footer(brand, "1:1 prep", rep, metrics["week"]),
     )

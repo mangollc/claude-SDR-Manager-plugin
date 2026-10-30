@@ -118,7 +118,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" check-narrative --workspace <fold
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/sdr.py" report team --workspace <folder> --week <week> --narrative <file>
 ```
 
-If `check-narrative` lists problems, remove each number and say the same thing in words, then run it again. Never work around a failed check.
+If `check-narrative` lists problems, fix each one and run it again. For a `statistic`, remove the number and say the same thing in words. For a `pronoun`, use the rep's name or "they". Never work around a failed check.
 
 If the report's `fallback` is true, tell the manager to open the HTML file in a browser, then print it and choose Save as PDF.
 
