@@ -29,6 +29,43 @@ DEFAULT_PROFILE = {
 }
 
 
+# Hand-worked fixture: one rep with 20 working days from 2026-W41 to 2026-W44.
+WINDOW_COUNTS = {
+    "dials": 880,
+    "connected": 48,
+    "emails": 820,
+    "replies": 28,
+    "bounces": 10,
+    "li_requests": 190,
+    "li_accepted": 57,
+    "li_messages": 190,
+    "li_replies": 19,
+    "li_other": 0,
+}
+
+
+def meeting(status: str, accepted: str = "", booked: str = "2026-10-13", due: str = "2026-10-15",
+            rep: str = "Ava Reyes") -> dict:
+    """Build one stored meeting row."""
+    return {
+        "rep": rep,
+        "booked_date": booked,
+        "due_date": due,
+        "status": status,
+        "accepted": accepted,
+    }
+
+
+def window_meetings() -> list[dict]:
+    """Return the fixture's 12 meetings: 9 held (6 yes, 3 no), 2 no-show, 1 cancelled."""
+    return (
+        [meeting("held", "yes") for _ in range(6)]
+        + [meeting("held", "no") for _ in range(3)]
+        + [meeting("no_show", "pending") for _ in range(2)]
+        + [meeting("cancelled", "pending")]
+    )
+
+
 def run_cli(*args: str) -> tuple[int, dict]:
     """Run the command line in-process and return its exit code and JSON output."""
     stdout = io.StringIO()
