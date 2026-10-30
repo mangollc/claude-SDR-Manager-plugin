@@ -59,43 +59,27 @@ It covers cold calls, email, and LinkedIn. It works with any sales tool that let
 |---|---|
 | A computer | Mac or Windows |
 | The Claude desktop app | Free to download |
-| A paid Claude plan | Any paid plan works. Plugins aren't available on the free plan |
+| A paid Claude plan | Any paid plan works. The Code tab isn't available on the free plan |
 | Python | A free program that does the math. You may already have it, and Claude will tell you if you don't |
 | Chrome or Edge | Used to create PDFs. You probably already have one of these |
 
 ## Install in 5 minutes
 
-A plugin is an add-on for Claude. You only need to add this one once.
+You only need to do this once, and Claude does the installing for you.
 
 ### Step 1: Get the Claude app
 
 If you don't have it yet, download it from [claude.ai/download](https://claude.ai/download), install it, and sign in.
 
-### Step 2: Add SDR Manager to Claude
+### Step 2: Open the Code tab
 
-1. Open the Claude app.
-2. Click **Customize** in the left sidebar.
-3. Click the **Plugins** tab.
-4. Click **Add**, then **Add marketplace**.
-5. Choose **Add from a repository**.
-6. Paste this, then confirm:
+1. In the Claude app, click the **Code** tab at the top of the sidebar. Don't let the name put you off, because you won't write any code. This is the part of Claude that can work with files on your computer.
+2. Just under the message box, click the first button and choose the top option under **Local**. This keeps the work on your own computer.
+3. Click the button next to it and choose **Open folder…**. Create a new folder called **SDR Reports**, and open it. SDR Manager keeps everything in this folder.
 
-   ```text
-   mangollc/claude-SDR-Manager-plugin
-   ```
+### Step 3: Ask Claude to install it
 
-7. Open the **Discover** tab.
-8. Find **sdr-manager**, and click **Add**.
-
-That's it. The plugin is saved to your Claude account, so it stays with you.
-
-If your company manages your Claude account and this doesn't work, your administrator may need to allow it. Send them the [technical guide](docs/technical-guide.md).
-
-### Using a different AI tool?
-
-If you use Cursor, Codex, VS Code with Copilot, or Gemini CLI, your AI assistant can install SDR Manager for you. It works on Mac and Windows.
-
-Open your AI tool, paste this message, and approve anything it asks to do:
+Paste this message and press Enter:
 
 ```text
 Please install SDR Manager on this computer so I can use it in all my
@@ -104,38 +88,41 @@ and follow the "Instructions for AI assistants" section of
 docs/technical-guide.md.
 ```
 
-Then close your AI tool and open it again.
+Claude downloads SDR Manager and sets it up, which takes about a minute. It will ask for permission a few times, so allow each one. It tells you when it's finished.
 
-This also works in Claude if SDR Manager doesn't appear after Step 2.
+If your company manages your computer or your Claude account and this doesn't work, send your IT team the [technical guide](docs/technical-guide.md).
+
+### Using a different AI tool?
+
+Paste the same message into Cursor, Codex, VS Code with Copilot, or Gemini CLI. Approve anything it asks to do, then close your AI tool and open it again.
 
 ## Try it with the sample team
 
 Before using real data, try it with a made-up team of seven reps. All the names, companies, and numbers are fake. It takes about two minutes.
 
-1. In the Claude app, click the **Code** tab at the top of the sidebar. Don't let the name put you off, because you won't write any code. This is the part of Claude that can work with files on your computer.
-2. Just under the message box, click the first button and choose the top option under **Local**. This keeps the work on your own computer.
-3. Click the button next to it and choose **Open folder…**. Create a new folder called **SDR Reports**, and open it. SDR Manager keeps everything in this folder.
-4. Type this and press Enter:
+Stay in the **Code** tab, with your **SDR Reports** folder open.
+
+1. Type this and press Enter:
 
    ```text
    Set up SDR Manager with the sample team.
    ```
 
-5. Claude will ask for permission before it runs something or saves a file. Allow it each time. This is SDR Manager's calculator, running on your own computer. A first scorecard can take 15 to 20 of these, and later ones fewer, because it remembers your files.
-6. Now type:
+2. Claude will ask for permission before it runs something or saves a file. Allow it each time. This is SDR Manager's calculator, running on your own computer. A first scorecard can take 15 to 20 of these, and later ones fewer, because it remembers your files.
+3. Now type:
 
    ```text
    Run my SDR scorecard.
    ```
 
-7. Claude shows you how it's reading each file. Say **yes** if it looks right, or just tell it what's wrong.
-8. Claude asks about holidays and time off. For the sample team, say there weren't any.
-9. Claude tells you where your PDF report is. Open it and have a look.
-10. Finally, try a 1:1 prep sheet:
+4. Claude shows you how it's reading each file. Say **yes** if it looks right, or just tell it what's wrong.
+5. Claude asks which week you want and whether anyone had time off. For the sample team, say the latest week, with no time off.
+6. Claude tells you where your PDF report is. Open it and have a look.
+7. Finally, try a 1:1 prep sheet:
 
-    ```text
-    Prepare my 1:1 with Chloe Nguyen.
-    ```
+   ```text
+   Prepare my 1:1 with Chloe Nguyen.
+   ```
 
 The sample team shows each situation the plugin looks for:
 
@@ -172,12 +159,14 @@ The first time, Claude checks that it understands your files. After that, it rem
 
 There are three things SDR Manager does. Just ask in your own words, or use the shortcut if you prefer.
 
-| What you want | What to type | Shortcut in Claude | Name in other AI tools |
-|---|---|---|---|
-| Set up or change your team | "Set up SDR Manager for my team" | `/sdr-manager:setup` | `sdr-setup` |
-| Get the weekly report | "Run my SDR scorecard" | `/sdr-manager:scorecard` | `sdr-scorecard` |
-| Prepare for a 1:1 | "Prepare my 1:1 with Chloe" | `/sdr-manager:one-on-one` | `sdr-one-on-one` |
-| Record what you agreed | "Log my 1:1 with Chloe" | `/sdr-manager:one-on-one Chloe --log` | `sdr-one-on-one` |
+| What you want | What to type | Shortcut |
+|---|---|---|
+| Set up or change your team | "Set up SDR Manager for my team" | `/sdr-setup` |
+| Get the weekly report | "Run my SDR scorecard" | `/sdr-scorecard` |
+| Prepare for a 1:1 | "Prepare my 1:1 with Chloe" | `/sdr-one-on-one Chloe` |
+| Record what you agreed | "Log my 1:1 with Chloe" | `/sdr-one-on-one Chloe --log` |
+
+Not every AI tool has shortcuts, but plain English works everywhere.
 
 ### Set up your team
 
@@ -520,11 +509,11 @@ This is covered by your agreement with your AI tool. For Claude, that's your Cla
 
 ## Common questions
 
-**I can't find Customize or Plugins in Claude.**
-Make sure the Claude app is up to date and you're on a paid plan. If your company manages your account, your administrator may need to allow it.
+**The Code tab asks me to upgrade.**
+You need a paid Claude plan to use the Code tab. If your company manages your account, ask your administrator.
 
-**SDR Manager doesn't appear, or Claude doesn't know what it is.**
-Close the Claude app completely and open it again. Then, in the **Code** tab, click **+** next to the message box and choose **Add plugins**. If you see **Plugins** instead, choose that, then **Browse plugins**. Find **sdr-manager** and add it for your user account. If it still isn't there, use the message under [Using a different AI tool?](#using-a-different-ai-tool), which also works in Claude.
+**Claude doesn't know what SDR Manager is.**
+Start a new session in the **Code** tab and try again. If Claude still doesn't know it, close the Claude app completely, open it again, and paste the [install message](#step-3-ask-claude-to-install-it) once more.
 
 **Claude says Python is missing.**
 It's free and safe to install:
@@ -546,8 +535,8 @@ That means it couldn't find Chrome or Edge. Open the file in any browser, choose
 **My Excel file won't open.**
 In Excel, choose **Save As**, pick **CSV**, then try again.
 
-**Can I use the Cowork tab instead of the Code tab?**
-It should work, but it hasn't been tested yet. It may give you a web page instead of a PDF. The Code tab is the tested route.
+**Can I use the Chat or Cowork tab instead of the Code tab?**
+Not yet. SDR Manager has only been tested in the Code tab, and the install above is made for it.
 
 **Why does it say "Not enough data"?**
 Claude won't judge a rep on just a few calls or meetings, because that wouldn't be fair. Download more weeks and try again.
@@ -561,8 +550,17 @@ The report calls this a team pattern. When everyone struggles at the same step, 
 **How do I change the name on the reports?**
 Reports are branded Andy Gheewalla. To use your own name, ask whoever looks after your technical setup to follow the [technical guide](docs/technical-guide.md).
 
+**How do I update SDR Manager?**
+Paste the [install message](#step-3-ask-claude-to-install-it) again. Your team's folder and reports aren't touched.
+
 **How do I remove SDR Manager?**
-Open **Customize**, then **Plugins**, and remove it. Your team's folder and reports stay on your computer.
+Paste this into the **Code** tab. Your team's folder and reports stay on your computer.
+
+```text
+Please remove SDR Manager from this computer. Download
+https://github.com/mangollc/claude-SDR-Manager-plugin and follow the
+"Update or remove" section of docs/technical-guide.md.
+```
 
 **Something else went wrong.**
 Tell Claude what happened in your own words. It can usually work it out. If not, [let us know here](https://github.com/mangollc/claude-SDR-Manager-plugin/issues).
@@ -574,10 +572,10 @@ We want to be upfront about this, because the plugin is new.
 | Area | Status |
 |---|---|
 | Reports, coaching focus, and 1:1 sheets | Tested in full with the sample team |
-| Using it in plain English in Claude Code on a Mac | Tested in full |
+| Installing it with the message above, on a Mac | Tested in full, using the Claude Code built into the Claude app |
+| Using it in plain English, on a Mac | Tested in full, using the Claude Code built into the Claude app |
 | Installing it from GitHub with Claude Code commands | Tested in full |
-| Installing it with the paste-in message | Tested in Claude Code, but not yet in other AI tools |
-| Adding it through the Claude app's Plugins screen | **Not tested yet.** The steps come from Anthropic's help pages |
+| Adding it through the Claude app's Plugins screen | **Not working in our test.** Every click worked, but SDR Manager never reached the Code tab |
 | Cowork | **Not tested yet** |
 | Windows | **Not tested yet** |
 | Cursor, Codex, and VS Code with Copilot | **Not tested in full.** Their official guides confirm how skills are installed |

@@ -7,6 +7,7 @@ This guide is for IT teams, developers, and AI assistants. If you're a sales man
 - [External services, API keys, and environment variables](#external-services-api-keys-and-environment-variables)
 - [Instructions for AI assistants](#instructions-for-ai-assistants)
 - [Install in Claude Code](#install-in-claude-code)
+- [Add it through the Claude app's Plugins screen](#add-it-through-the-claude-apps-plugins-screen)
 - [Install in other tools](#install-in-other-tools)
 - [Update or remove](#update-or-remove)
 - [Allowing it in a managed Claude organization](#allowing-it-in-a-managed-claude-organization)
@@ -58,7 +59,7 @@ A person asked you to install SDR Manager so it's available in all their project
 
 5. **Delete the temporary folder.** The installer copied everything it needs to `~/.sdr-manager`.
 
-6. **Tell the person** to close and reopen their AI tool, then say: *"Set up SDR Manager with the sample team."* Give them that sentence only, with no commands.
+6. **Tell the person** they can now say: *"Set up SDR Manager with the sample team."* Give them that sentence only, with no commands. In a tool other than Claude, tell them to close and reopen it first.
 
 ## Install in Claude Code
 
@@ -72,6 +73,17 @@ claude plugin install sdr-manager@mango-plugins
 To do the same inside a session, start each line with `/plugin` instead of `claude plugin`.
 
 Commands appear as `/sdr-manager:setup`, `/sdr-manager:scorecard`, and `/sdr-manager:one-on-one`.
+
+## Add it through the Claude app's Plugins screen
+
+This is Anthropic's click-through route. The README doesn't use it, because in our one test on macOS every click worked, but SDR Manager didn't reach a new Code tab session, and a full plugin sync in the app found nothing to download. We don't know the cause yet.
+
+1. Click **Customize** in the left sidebar, then the **Plugins** tab.
+2. Click **Add**, then **Add marketplace**.
+3. Choose **Add from a repository**, and enter `mangollc/claude-SDR-Manager-plugin`.
+4. Open the **Discover** tab, find **sdr-manager**, and click **Add**.
+
+Anthropic also documents adding plugins from the Code tab: click **+** next to the message box, then **Add plugins**, or **Plugins** and **Browse plugins**. We haven't tested that route.
 
 ## Install in other tools
 
@@ -130,6 +142,8 @@ For a tool with no skills feature, install with `install.py`, then tell it: *"Fo
 | Remove | `claude plugin uninstall sdr-manager@mango-plugins` | `install.py --uninstall` |
 
 Removing it never touches a team's workspace folder. If you used `--tool` or `--skills-dir`, pass the same option to `--uninstall`.
+
+The README's paste-in message installs with `--tool claude` in the Claude app. To update that install, run the installer again from a new download. To remove it, download the code again, run `python3 install.py --tool claude --uninstall`, then delete the download.
 
 When you publish a change, raise `version` in `.claude-plugin/plugin.json`. Plugin installs only update when that number changes.
 
@@ -214,12 +228,12 @@ The tests need nothing installed. To regenerate the sample data, run `python3 te
 |---|---|
 | Claude Code plugin on macOS | Tested end to end with real sessions, including install from GitHub |
 | Standalone skills from `install.py` | Tested end to end in a real session |
-| The README's paste-in install message | Tested against the published repo in Claude Code on macOS |
+| The README's paste-in install message | Tested against the published repo on macOS, using the Claude Code built into the Claude app, followed by the full README walkthrough |
 | Python 3.9 and 3.12 | Over 450 automated tests pass, with 97% coverage of `scripts/` |
 | PDF creation with Chrome | Tested |
 | Gemini CLI | Confirmed it discovers the skills. No full session has been run |
 | Codex, Cursor, and VS Code Copilot | Folder confirmed from official docs. No full session has been run |
-| Adding through the Claude app's Plugins screen | Not tested. Steps come from Anthropic's help center |
+| Adding through the Claude app's Plugins screen | Every click worked on macOS, but SDR Manager didn't reach a new Code tab session |
 | Windows and Linux | Not tested |
 | Edge, Chromium, and Brave for PDFs | Not tested |
 | Cowork | Not tested. Its sandbox may lack a browser, in which case reports stay as HTML |

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Install the SDR Manager skills globally for Codex, Cursor, VS Code, and other agent tools.
+"""Install the SDR Manager skills globally for Claude, Codex, Cursor, and other agent tools.
 
-Claude Code users should install the plugin instead, because it stays up to date on its own.
-See docs/technical-guide.md for both routes.
+This is the route the README uses. See docs/technical-guide.md for the plugin route.
 
 This file skips `from __future__ import annotations` on purpose: the version check below has
 to run before anything that a very old Python can't compile.

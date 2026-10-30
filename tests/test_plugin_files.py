@@ -200,26 +200,26 @@ class ReadmeTests(unittest.TestCase):
         self.assertIn("Costs, accounts, and API keys", self.text)
         self.assertIn("no API keys, no environment variables, and no external services", self.text)
 
-    def test_explains_the_click_by_click_install(self):
-        for step in ("**Customize**", "**Plugins**", "**Add marketplace**", "**Discover**"):
+    def test_explains_the_install_that_reached_the_code_tab(self):
+        for step in ("**Code**", "**Local**", "**Open folder…**", "Instructions for AI assistants"):
             self.assertIn(step, self.text, step)
         self.assertIn("mangollc/claude-SDR-Manager-plugin", self.text)
+
+    def test_leaves_out_the_route_that_did_not_reach_the_code_tab(self):
+        self.assertNotIn("**Add marketplace**", self.text)
 
     def test_covers_every_tool_and_operating_system_it_promises(self):
         for topic in ("Mac", "Windows", "Claude", "Codex", "Cursor", "VS Code", "Gemini CLI"):
             self.assertIn(topic, self.text, topic)
 
     def test_documents_every_user_command(self):
-        for command in (
-            "/sdr-manager:setup",
-            "/sdr-manager:scorecard",
-            "/sdr-manager:one-on-one",
-            "--log",
-            "sdr-setup",
-            "sdr-scorecard",
-            "sdr-one-on-one",
-        ):
+        for command in ("/sdr-setup", "/sdr-scorecard", "/sdr-one-on-one", "--log"):
             self.assertIn(command, self.text, command)
+        self.assertNotIn("/sdr-manager:", self.text)
+
+    def test_explains_how_to_update_and_remove_it(self):
+        for topic in ("How do I update SDR Manager?", "How do I remove SDR Manager?"):
+            self.assertIn(topic, self.text, topic)
 
     def test_keeps_developer_steps_out(self):
         for term in (
@@ -264,6 +264,13 @@ class TechnicalGuideTests(unittest.TestCase):
     def test_has_install_steps_for_each_operating_system(self):
         for topic in ("### Mac", "### Windows", "python3 install.py", "py -3 install.py"):
             self.assertIn(topic, self.text, topic)
+
+    def test_keeps_the_plugins_screen_route_and_what_happened(self):
+        for topic in ("**Add marketplace**", "**Discover**", "didn't reach"):
+            self.assertIn(topic, self.text, topic)
+
+    def test_explains_how_to_remove_a_paste_in_install(self):
+        self.assertIn("install.py --tool claude --uninstall", self.text)
 
     def test_gives_ai_assistants_steps_they_can_follow(self):
         self.assertIn("## Instructions for AI assistants", self.text)

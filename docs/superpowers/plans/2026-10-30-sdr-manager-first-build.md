@@ -1005,3 +1005,4 @@ The tasks above are the original plan. These changes came out of building and te
 - **Plain English:** the README now speaks to non-technical managers and installs by clicks, with technical material moved to `docs/technical-guide.md`. Skills give managers a sentence to type instead of a slash command, which works in every tool, so `install.py` no longer rewrites those references.
 - **Full paths:** a real session saved team files in the plugin's folder, because the program repeated back a short folder name. Every path it reports is now complete.
 - **Time off:** `metrics` now refuses to calculate until the week's time off is saved, after a session skipped the question.
+- **Install route:** a real test showed that adding the plugin through the Claude app's Plugins screen didn't reach a new Code tab session, so the README now leads with the paste-in message, which installs the standalone skills and passed a full walkthrough with the app's own Claude Code.
