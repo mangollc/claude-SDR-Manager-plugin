@@ -76,7 +76,7 @@ Commands appear as `/sdr-manager:setup`, `/sdr-manager:scorecard`, and `/sdr-man
 
 ## Add it through the Claude app's Plugins screen
 
-This is Anthropic's click-through route. The README doesn't use it, because in our one test on macOS every click worked, but SDR Manager didn't reach a new Code tab session, and a full plugin sync in the app found nothing to download. We don't know the cause yet.
+This is Anthropic's click-through route. The README doesn't use it, because in our one test on macOS the clicks went through, but SDR Manager wasn't listed under **Plugins** afterward and didn't reach a new Code tab session. A full plugin sync in the app also found nothing to download. We don't know the cause yet.
 
 1. Click **Customize** in the left sidebar, then the **Plugins** tab.
 2. Click **Add**, then **Add marketplace**.
@@ -233,7 +233,7 @@ The tests need nothing installed. To regenerate the sample data, run `python3 te
 | PDF creation with Chrome | Tested |
 | Gemini CLI | Confirmed it discovers the skills. No full session has been run |
 | Codex, Cursor, and VS Code Copilot | Folder confirmed from official docs. No full session has been run |
-| Adding through the Claude app's Plugins screen | Every click worked on macOS, but SDR Manager didn't reach a new Code tab session |
+| Adding through the Claude app's Plugins screen | The clicks went through on macOS, but SDR Manager wasn't listed afterward and didn't reach a new Code tab session |
 | Windows and Linux | Not tested |
 | Edge, Chromium, and Brave for PDFs | Not tested |
 | Cowork | Not tested. Its sandbox may lack a browser, in which case reports stay as HTML |

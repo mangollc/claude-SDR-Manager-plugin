@@ -575,7 +575,7 @@ We want to be upfront about this, because the plugin is new.
 | Installing it with the message above, on a Mac | Tested in full, using the Claude Code built into the Claude app |
 | Using it in plain English, on a Mac | Tested in full, using the Claude Code built into the Claude app |
 | Installing it from GitHub with Claude Code commands | Tested in full |
-| Adding it through the Claude app's Plugins screen | **Not working in our test.** Every click worked, but SDR Manager never reached the Code tab |
+| Adding it through the Claude app's Plugins screen | **Not working in our test.** The clicks went through, but SDR Manager wasn't listed afterward and never reached the Code tab |
 | Cowork | **Not tested yet** |
 | Windows | **Not tested yet** |
 | Cursor, Codex, and VS Code with Copilot | **Not tested in full.** Their official guides confirm how skills are installed |
