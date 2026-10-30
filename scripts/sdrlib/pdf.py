@@ -1,8 +1,9 @@
 """Print an HTML report to PDF with a browser already on the computer."""
+
 from __future__ import annotations
 
 import shutil
-import subprocess
+import subprocess  # nosec B404  (only ever runs a browser with a fixed argument list)
 import tempfile
 from pathlib import Path
 from typing import Callable
@@ -41,7 +42,7 @@ def print_to_pdf(
         html_path.resolve().as_uri(),
     ]
     try:
-        runner(command, capture_output=True, timeout=PRINT_TIMEOUT_SECONDS, check=False)
+        runner(command, capture_output=True, timeout=PRINT_TIMEOUT_SECONDS, check=False)  # nosec
     except (OSError, subprocess.SubprocessError):
         return False
     finally:

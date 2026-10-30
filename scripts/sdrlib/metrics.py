@@ -1,8 +1,9 @@
 """Pure calculations for rep metrics and window targets."""
+
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from datetime import date, timedelta
-from typing import Iterable, Sequence
 
 from .history import ACTIVITY_COUNTS, week_bounds
 from .targets import (

@@ -1,4 +1,5 @@
 """Read exported tables and preview them without exposing prospect details."""
+
 from __future__ import annotations
 
 import csv
@@ -7,10 +8,10 @@ import importlib.util
 import io
 import json
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
-from typing import Sequence
 
 PREVIEW_LINES = 10
 MAX_DISTINCT_VALUES = 30
@@ -163,7 +164,9 @@ def table_from_rows(rows: Sequence[Sequence[str]], header_row: int = 1) -> Table
         raise UnsupportedFile(f"This file has no line {header_row}.")
     headers = _clean_headers(rows[header_row - 1])
     records = tuple(
-        _record(headers, cells) for cells in rows[header_row:] if any(cell.strip() for cell in cells)
+        _record(headers, cells)
+        for cells in rows[header_row:]
+        if any(cell.strip() for cell in cells)
     )
     return Table(headers, records)
 

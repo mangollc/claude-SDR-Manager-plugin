@@ -5,10 +5,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import make_workspace, run_cli
-
 from sdrlib import history
 from sdrlib.narrative_check import allowed_numbers, check_narrative, extract_numbers
+from tests.helpers import make_workspace, run_cli
 
 METRICS = {
     "generated_at": "2026-10-30T12:00:00",
@@ -25,9 +24,7 @@ METRICS = {
 
 class ExtractNumberTests(unittest.TestCase):
     def test_finds_percentages_and_counts(self):
-        self.assertEqual(
-            extract_numbers("Connect rate hit 5.5% on 880 dials"), ["5.5%", "880"]
-        )
+        self.assertEqual(extract_numbers("Connect rate hit 5.5% on 880 dials"), ["5.5%", "880"])
 
     def test_ignores_dates_week_names_steps_and_one_on_ones(self):
         text = "On 2026-10-30, in 2026-W44, on Oct 30 and October 30, 2026, Step 3 came up in a 1:1"
@@ -94,7 +91,10 @@ class CheckNarrativeTests(unittest.TestCase):
         self.assertEqual(len(self.problems("Agreed to 50 dials")), 1)
 
     def test_nested_text_is_checked_and_located(self):
-        narrative = {"observations": ["Fine", "Booked 77 meetings"], "rep_notes": {"Ava": "Made 66"}}
+        narrative = {
+            "observations": ["Fine", "Booked 77 meetings"],
+            "rep_notes": {"Ava": "Made 66"},
+        }
 
         problems = check_narrative(narrative, METRICS)
 

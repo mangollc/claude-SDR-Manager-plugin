@@ -8,9 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-from tests.helpers import make_workspace, run_cli, window_meetings
-from tests.test_scorecard import seed_activity
-
 from sdrlib import history, reports
 from sdrlib.reports import (
     format_value,
@@ -20,6 +17,8 @@ from sdrlib.reports import (
     sparkline,
 )
 from sdrlib.scorecard import build_scorecard
+from tests.helpers import make_workspace, run_cli, window_meetings
+from tests.test_scorecard import seed_activity
 
 NOW = datetime(2026, 10, 30, 12, 0, 0)
 BRAND = "Andy Gheewalla"
@@ -374,9 +373,7 @@ class ReportCommandTests(ReportTest):
         self.assertIn("rep", output["error"])
 
     def test_one_on_one_saves_a_file_named_for_the_rep(self):
-        code, output = self.run_report(
-            "one-on-one", ONE_ON_ONE_NARRATIVE, "--rep", "Ava Reyes"
-        )
+        code, output = self.run_report("one-on-one", ONE_ON_ONE_NARRATIVE, "--rep", "Ava Reyes")
 
         self.assertEqual(code, 0)
         self.assertIn("one-on-one-ava-reyes", output["html"])

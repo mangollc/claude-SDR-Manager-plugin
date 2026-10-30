@@ -1,11 +1,12 @@
 """Assemble a week's metrics, statuses, and coaching focus, then save them."""
+
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Sequence
 
 from . import focus, history, metrics
 from .profile import VALID_CHANNELS, active_reps, load_profile, rep_slug
@@ -74,17 +75,12 @@ def _month_in_role(rep: dict, week: str) -> int | None:
     return month_in_role(date.fromisoformat(start), history.week_bounds(week)[1])
 
 
-def _rep_metrics(
+def _rep_window(
     rep: dict, rows: Sequence[dict], meetings: list[dict] | None, context: _Context
 ) -> dict:
-    name = rep["name"]
-    week_start, week_end = history.week_bounds(context.week)
+    """Return a rep's four-week numbers and the targets they're measured against."""
     window_start, _ = history.week_bounds(context.weeks[0])
-    settings = context.settings
-
-    days_this_week = metrics.working_days(
-        context.week, context.time_off[context.week], name, context.partial_last_date
-    )
+    _, week_end = history.week_bounds(context.week)
     targets_for_window = metrics.window_targets(
         rep,
         context.weeks,
@@ -92,9 +88,9 @@ def _rep_metrics(
         context.targets,
         context.channels,
         context.partial_last_date,
-        settings["ramp"],
+        context.settings["ramp"],
     )
-    window = {
+    return {
         **_period(rows, meetings, window_start, week_end),
         "working_days": targets_for_window["working_days"],
         "targets": {
@@ -102,12 +98,29 @@ def _rep_metrics(
             "meetings_held": targets_for_window["meetings_held"],
         },
     }
-    this_week = {
+
+
+def _rep_this_week(
+    rep: dict, rows: Sequence[dict], meetings: list[dict] | None, context: _Context
+) -> dict:
+    """Return a rep's numbers for the selected week."""
+    week_start, week_end = history.week_bounds(context.week)
+    days = metrics.working_days(
+        context.week, context.time_off[context.week], rep["name"], context.partial_last_date
+    )
+    return {
         **_period(_rows_in_week(rows, context.week), meetings, week_start, week_end),
-        "working_days": days_this_week,
-        "out": days_this_week == 0,
+        "working_days": days,
+        "out": days == 0,
     }
 
+
+def _rep_metrics(
+    rep: dict, rows: Sequence[dict], meetings: list[dict] | None, context: _Context
+) -> dict:
+    name = rep["name"]
+    settings = context.settings
+    window = _rep_window(rep, rows, meetings, context)
     month = _month_in_role(rep, context.week)
     steps = focus.evaluate_steps(
         window, context.targets, settings["minimums"], settings["near_band"]
@@ -120,16 +133,18 @@ def _rep_metrics(
         "slug": rep_slug(name),
         "status": decision["status"],
         "month_in_role": month,
-        "this_week": this_week,
+        "this_week": _rep_this_week(rep, rows, meetings, context),
         "window": window,
         "steps": steps,
         "outcome": outcome,
         "focus": decision["focus"],
         "trend": _trend(rows, meetings, context.weeks),
         "flags": ["bounce_warning"] if focus.bounce_flag(window, context.targets) else [],
-        "notes": [] if rep.get("start_date") else [
-            "This rep has no start date, so they're treated as fully ramped."
-        ],
+        "notes": (
+            []
+            if rep.get("start_date")
+            else ["This rep has no start date, so they're treated as fully ramped."]
+        ),
     }
 
 
@@ -192,6 +207,58 @@ def _partial_last_date(rows: Sequence[dict], week: str) -> date | None:
     return max(daily) if max(daily) < friday else None
 
 
+def _make_context(
+    workspace: Path, team: dict, week: str, weeks: tuple[str, ...], activity: Sequence[dict]
+) -> _Context:
+    present = {row["channel"] for row in activity}
+    channels = tuple(channel for channel in VALID_CHANNELS if channel in present)
+    return _Context(
+        week=week,
+        weeks=weeks,
+        targets=resolve_targets({**team, "channels": list(channels)}),
+        settings=load_defaults(),
+        channels=channels,
+        time_off={item: history.read_time_off(workspace, item) for item in weeks},
+        partial_last_date=_partial_last_date(_rows_in_week(activity, week), week),
+    )
+
+
+def _assemble(
+    context: _Context,
+    reps: list[dict],
+    activity: Sequence[dict],
+    meetings: list[dict] | None,
+    sources: list[dict],
+    notes: list[str],
+    now: datetime,
+) -> dict:
+    """Put a finished week's results into the shape every report reads."""
+    week_start, week_end = history.week_bounds(context.week)
+    window_start, _ = history.week_bounds(context.weeks[0])
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "week": context.week,
+        "week_start": week_start.isoformat(),
+        "week_end": week_end.isoformat(),
+        "window_start": window_start.isoformat(),
+        "window_end": week_end.isoformat(),
+        "generated_at": now.isoformat(timespec="seconds"),
+        "partial_week": context.partial_last_date is not None,
+        "last_activity_date": max(row["date"] for row in _rows_in_week(activity, context.week)),
+        "channels_present": list(context.channels),
+        "sources": sources,
+        "targets": context.targets,
+        "minimums": context.settings["minimums"],
+        "team": _team_summary(reps, activity, meetings, window_start, week_end),
+        "reps": reps,
+        "notes": notes,
+    }
+
+
+def _only_rep(rows: list[dict] | None, name: str) -> list[dict] | None:
+    return None if rows is None else [row for row in rows if row["rep"] == name]
+
+
 def build_scorecard(workspace: Path, week: str | None = None, now: datetime | None = None) -> dict:
     """Calculate a week's scorecard and save it to the workspace."""
     team = load_profile(workspace)
@@ -199,63 +266,37 @@ def build_scorecard(workspace: Path, week: str | None = None, now: datetime | No
     if selected is None:
         raise ValueError("There's no stored activity yet. Import some exports first.")
     weeks = tuple(history.previous_weeks(selected, WINDOW_WEEKS))
-    week_start, week_end = history.week_bounds(selected)
-    window_start, _ = history.week_bounds(weeks[0])
 
     reps = active_reps(team)
     names = {rep["name"] for rep in reps}
     stored = [row for row in history.read_activity(workspace, weeks) if row["rep"] in names]
     activity = [row for row in stored if row["channel"] in team["channels"]]
-    selected_rows = _rows_in_week(activity, selected)
-    if not selected_rows:
+    if not _rows_in_week(activity, selected):
         raise ValueError(f"There's no activity stored for {selected}.")
 
-    present = {row["channel"] for row in activity}
-    channels = tuple(channel for channel in VALID_CHANNELS if channel in present)
-    all_meetings = history.read_latest_meetings(workspace)
+    saved_meetings = history.read_latest_meetings(workspace)
     meetings = (
-        None if all_meetings is None else [row for row in all_meetings if row["rep"] in names]
+        None if saved_meetings is None else [row for row in saved_meetings if row["rep"] in names]
     )
-    partial_date = _partial_last_date(selected_rows, selected)
-    context = _Context(
-        week=selected,
-        weeks=weeks,
-        targets=resolve_targets({**team, "channels": list(channels)}),
-        settings=load_defaults(),
-        channels=channels,
-        time_off={item: history.read_time_off(workspace, item) for item in weeks},
-        partial_last_date=partial_date,
-    )
-
+    context = _make_context(workspace, team, selected, weeks, activity)
     rep_results = [
         _rep_metrics(
-            rep,
-            [row for row in activity if row["rep"] == rep["name"]],
-            None if meetings is None else [row for row in meetings if row["rep"] == rep["name"]],
-            context,
+            rep, _only_rep(activity, rep["name"]), _only_rep(meetings, rep["name"]), context
         )
         for rep in reps
     ]
-    scorecard = {
-        "schema_version": SCHEMA_VERSION,
-        "week": selected,
-        "week_start": week_start.isoformat(),
-        "week_end": week_end.isoformat(),
-        "window_start": window_start.isoformat(),
-        "window_end": week_end.isoformat(),
-        "generated_at": (now or datetime.now()).isoformat(timespec="seconds"),
-        "partial_week": partial_date is not None,
-        "last_activity_date": max(row["date"] for row in selected_rows),
-        "channels_present": list(channels),
-        "sources": history.read_sources(workspace, selected),
-        "targets": context.targets,
-        "minimums": context.settings["minimums"],
-        "team": _team_summary(rep_results, activity, meetings, window_start, week_end),
-        "reps": rep_results,
-        "notes": _team_notes(
-            {row["channel"] for row in stored}, team["channels"], channels, meetings
-        ),
-    }
+    notes = _team_notes(
+        {row["channel"] for row in stored}, team["channels"], context.channels, meetings
+    )
+    scorecard = _assemble(
+        context,
+        rep_results,
+        activity,
+        meetings,
+        history.read_sources(workspace, selected),
+        notes,
+        now or datetime.now(),
+    )
     history.write_metrics(workspace, selected, scorecard)
     return scorecard
 

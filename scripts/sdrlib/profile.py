@@ -1,4 +1,5 @@
 """Load the team profile and match the names found in exports."""
+
 from __future__ import annotations
 
 import hashlib

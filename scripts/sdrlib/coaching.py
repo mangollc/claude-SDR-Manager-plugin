@@ -1,4 +1,5 @@
 """Keep a dated coaching history for each rep."""
+
 from __future__ import annotations
 
 from datetime import date

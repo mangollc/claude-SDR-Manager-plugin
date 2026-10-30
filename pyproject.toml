@@ -1,5 +1,6 @@
 [tool.black]
 line-length = 100
+target-version = ["py39"]
 
 [tool.isort]
 profile = "black"
@@ -8,7 +9,18 @@ known_first_party = ["sdr", "sdrlib", "tests"]
 
 [tool.ruff]
 line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint.isort]
+known-first-party = ["sdr", "sdrlib", "tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/make_sample_data.py" = ["C408"]
+"tests/*" = ["RUF012", "SIM117"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["scripts", "."]
+
+[tool.coverage.run]
+source = ["scripts"]

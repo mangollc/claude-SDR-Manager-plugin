@@ -1,4 +1,5 @@
 """Create team workspaces and load the sample team."""
+
 from __future__ import annotations
 
 import json

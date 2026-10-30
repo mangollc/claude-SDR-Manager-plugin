@@ -4,8 +4,6 @@ import copy
 import unittest
 from datetime import date
 
-from tests.helpers import REPO_ROOT  # noqa: F401  (sets up the import path)
-
 from sdrlib import targets
 
 ALL_CHANNELS = ["call", "email", "linkedin"]

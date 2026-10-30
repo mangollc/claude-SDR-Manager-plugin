@@ -1,19 +1,15 @@
 """Shared test helpers."""
+
 from __future__ import annotations
 
 import contextlib
 import io
 import json
-import sys
 from pathlib import Path
 
+import sdr
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS_DIR = REPO_ROOT / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-
-import sdr  # noqa: E402
-
 
 DEFAULT_PROFILE = {
     "company": "Example Co",
@@ -44,8 +40,13 @@ WINDOW_COUNTS = {
 }
 
 
-def meeting(status: str, accepted: str = "", booked: str = "2026-10-13", due: str = "2026-10-15",
-            rep: str = "Ava Reyes") -> dict:
+def meeting(
+    status: str,
+    accepted: str = "",
+    booked: str = "2026-10-13",
+    due: str = "2026-10-15",
+    rep: str = "Ava Reyes",
+) -> dict:
     """Build one stored meeting row."""
     return {
         "rep": rep,

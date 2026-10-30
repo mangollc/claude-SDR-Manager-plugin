@@ -4,6 +4,7 @@ Run from the repository root:
 
     python3 tests/make_sample_data.py
 """
+
 from __future__ import annotations
 
 import csv
@@ -30,7 +31,12 @@ SAMPLE_PROFILE = {
     "channels": ["call", "email", "linkedin"],
     "reps": [
         {"name": "Ava Reyes", "start_date": "2025-02-03", "aliases": [], "active": True},
-        {"name": "Ben Carter", "start_date": "2025-06-16", "aliases": ["B. Carter"], "active": True},
+        {
+            "name": "Ben Carter",
+            "start_date": "2025-06-16",
+            "aliases": ["B. Carter"],
+            "active": True,
+        },
         {"name": "Chloe Nguyen", "start_date": "2025-04-07", "aliases": [], "active": True},
         {"name": "Diego Marin", "start_date": "2025-09-01", "aliases": [], "active": True},
         {"name": "Nina Patel", "start_date": "2026-10-12", "aliases": [], "active": True},
@@ -43,20 +49,83 @@ SAMPLE_PROFILE = {
 
 # Weekly activity for each rep. Each rep shows one problem, so every status can be tried.
 ACTIVITY = {
-    "Ava Reyes": dict(dials=230, connected=16, emails=210, replies=11, bounces=2,
-                      requests=50, accepted=15, messages=50, li_replies=6),
-    "Ben Carter": dict(dials=100, connected=6, emails=100, replies=4, bounces=1,
-                       requests=20, accepted=6, messages=20, li_replies=2),
-    "Chloe Nguyen": dict(dials=240, connected=7, emails=230, replies=3, bounces=7,
-                         requests=50, accepted=15, messages=50, li_replies=6),
-    "Diego Marin": dict(dials=225, connected=16, emails=210, replies=10, bounces=2,
-                        requests=50, accepted=15, messages=50, li_replies=6),
-    "Nina Patel": dict(dials=120, connected=5, emails=100, replies=3, bounces=1,
-                       requests=20, accepted=5, messages=20, li_replies=2),
-    "Priya Shah": dict(dials=225, connected=16, emails=210, replies=10, bounces=2,
-                       requests=50, accepted=15, messages=50, li_replies=6),
-    "Sam Okafor": dict(dials=225, connected=16, emails=210, replies=10, bounces=2,
-                       requests=50, accepted=15, messages=50, li_replies=6),
+    "Ava Reyes": dict(
+        dials=230,
+        connected=16,
+        emails=210,
+        replies=11,
+        bounces=2,
+        requests=50,
+        accepted=15,
+        messages=50,
+        li_replies=6,
+    ),
+    "Ben Carter": dict(
+        dials=100,
+        connected=6,
+        emails=100,
+        replies=4,
+        bounces=1,
+        requests=20,
+        accepted=6,
+        messages=20,
+        li_replies=2,
+    ),
+    "Chloe Nguyen": dict(
+        dials=240,
+        connected=7,
+        emails=230,
+        replies=3,
+        bounces=7,
+        requests=50,
+        accepted=15,
+        messages=50,
+        li_replies=6,
+    ),
+    "Diego Marin": dict(
+        dials=225,
+        connected=16,
+        emails=210,
+        replies=10,
+        bounces=2,
+        requests=50,
+        accepted=15,
+        messages=50,
+        li_replies=6,
+    ),
+    "Nina Patel": dict(
+        dials=120,
+        connected=5,
+        emails=100,
+        replies=3,
+        bounces=1,
+        requests=20,
+        accepted=5,
+        messages=20,
+        li_replies=2,
+    ),
+    "Priya Shah": dict(
+        dials=225,
+        connected=16,
+        emails=210,
+        replies=10,
+        bounces=2,
+        requests=50,
+        accepted=15,
+        messages=50,
+        li_replies=6,
+    ),
+    "Sam Okafor": dict(
+        dials=225,
+        connected=16,
+        emails=210,
+        replies=10,
+        bounces=2,
+        requests=50,
+        accepted=15,
+        messages=50,
+        li_replies=6,
+    ),
 }
 FIRST_ACTIVE_WEEK = {"Nina Patel": 2}  # Nina started in the third week of data.
 NAME_IN_SEQUENCER = {"Ben Carter": "B. Carter"}

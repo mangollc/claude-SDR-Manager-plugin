@@ -5,12 +5,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import make_workspace, run_cli
-
 from sdrlib import history
 from sdrlib.file_reader import header_signature
 from sdrlib.history import ACTIVITY_COUNTS, ACTIVITY_FIELDS, MEETING_FIELDS
 from sdrlib.normalize import channel_conflicts, find_mapping, normalize_file, normalize_files
+from tests.helpers import make_workspace, run_cli
 
 REPS = {"ava reyes": "Ava Reyes", "a. reyes": "Ava Reyes", "morgan lee": None}
 
@@ -88,7 +87,9 @@ class RowCountTests(NormalizeTest):
                     "date_format": "%Y-%m-%d",
                     "columns": {"date": "Date", "rep": "Rep"},
                     "fixed": {"action": action},
-                    "flags": {flag: {"column": "Hit", "true": ["yes"], "false": []}} if flag else {},
+                    "flags": (
+                        {flag: {"column": "Hit", "true": ["yes"], "false": []}} if flag else {}
+                    ),
                 }
 
                 row = normalize_file(path, mapping, REPS).activity[0]
@@ -267,7 +268,7 @@ class SummaryTests(NormalizeTest):
     def test_splits_a_row_by_channel_and_marks_it_weekly(self):
         path = self.write(
             "a.csv",
-            "Week,Rep,Calls,Connects,Sent,Replies\n2026-10-26,Ava Reyes,\"1,200\",60,300,10\n",
+            'Week,Rep,Calls,Connects,Sent,Replies\n2026-10-26,Ava Reyes,"1,200",60,300,10\n',
         )
 
         rows = normalize_file(path, self.mapping, REPS).activity
@@ -332,9 +333,13 @@ class MeetingTests(NormalizeTest):
         self.assertTrue(result.notes)
 
     def test_blank_acceptance_is_pending(self):
-        path = self.write("m.csv", "Owner,Booked,Due,State,AE\nAva Reyes,2026-10-20,2026-10-22,Done,\n")
+        path = self.write(
+            "m.csv", "Owner,Booked,Due,State,AE\nAva Reyes,2026-10-20,2026-10-22,Done,\n"
+        )
 
-        self.assertEqual(normalize_file(path, MEETING_MAPPING, REPS).meetings[0]["accepted"], "pending")
+        self.assertEqual(
+            normalize_file(path, MEETING_MAPPING, REPS).meetings[0]["accepted"], "pending"
+        )
 
     def test_no_acceptance_column_stores_blank(self):
         columns = {k: v for k, v in MEETING_MAPPING["columns"].items() if k != "accepted"}
@@ -344,7 +349,9 @@ class MeetingTests(NormalizeTest):
         self.assertEqual(normalize_file(path, mapping, REPS).meetings[0]["accepted"], "")
 
     def test_reports_a_new_status(self):
-        path = self.write("m.csv", "Owner,Booked,Due,State,AE\nAva Reyes,2026-10-20,2026-10-22,Lost,\n")
+        path = self.write(
+            "m.csv", "Owner,Booked,Due,State,AE\nAva Reyes,2026-10-20,2026-10-22,Lost,\n"
+        )
 
         self.assertEqual(normalize_file(path, MEETING_MAPPING, REPS).unmapped, {"State": ("Lost",)})
 
@@ -503,9 +510,7 @@ class NormalizeFilesTests(NormalizeTest):
         normalize_files(self.workspace, [path])
 
         stored = "".join(
-            item.read_text()
-            for item in (self.workspace / "history").rglob("*")
-            if item.is_file()
+            item.read_text() for item in (self.workspace / "history").rglob("*") if item.is_file()
         )
         self.assertNotIn("Jane Doe", stored)
         self.assertNotIn("jane@acme.io", stored)

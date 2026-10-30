@@ -1,12 +1,13 @@
 """Read and write the team's stored history, and work with ISO weeks."""
+
 from __future__ import annotations
 
 import csv
 import json
 import re
+from collections.abc import Iterable, Sequence
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Iterable, Sequence
 
 ACTIVITY_COUNTS = (
     "dials",
@@ -64,8 +65,7 @@ def _covered_days(rows: Iterable[dict]) -> set[tuple[str, date]]:
         if row["granularity"] == "week":
             monday = day - timedelta(days=day.weekday())
             covered.update(
-                (row["channel"], monday + timedelta(days=offset))
-                for offset in range(DAYS_PER_WEEK)
+                (row["channel"], monday + timedelta(days=offset)) for offset in range(DAYS_PER_WEEK)
             )
         else:
             daily.setdefault(row["channel"], []).append(day)

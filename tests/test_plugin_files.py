@@ -4,9 +4,8 @@ import json
 import re
 import unittest
 
-from tests.helpers import REPO_ROOT
-
 import sdr
+from tests.helpers import REPO_ROOT
 
 SKILLS = ("setup", "scorecard", "one-on-one")
 REFERENCES = ("file-mapping-guide.md", "metric-definitions.md", "coaching-playbook.md")

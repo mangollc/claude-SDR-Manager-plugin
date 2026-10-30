@@ -3,9 +3,8 @@ from __future__ import annotations
 import unittest
 from datetime import date
 
-from tests.helpers import WINDOW_COUNTS, activity_row, meeting, window_meetings
-
 from sdrlib import metrics, targets
+from tests.helpers import WINDOW_COUNTS, activity_row, meeting, window_meetings
 
 WINDOW_START = date(2026, 10, 5)
 WINDOW_END = date(2026, 11, 1)
@@ -170,9 +169,7 @@ class WorkingDayTests(unittest.TestCase):
         self.assertEqual(result, 3)
 
     def test_data_ending_on_the_weekend_is_a_full_week(self):
-        result = metrics.working_days(
-            "2026-W44", self.no_time_off, "Ben Carter", date(2026, 11, 1)
-        )
+        result = metrics.working_days("2026-W44", self.no_time_off, "Ben Carter", date(2026, 11, 1))
 
         self.assertEqual(result, 5)
 

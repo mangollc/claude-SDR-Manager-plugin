@@ -1,11 +1,12 @@
 """Checks for what the plugin needs on the manager's computer."""
+
 from __future__ import annotations
 
 import importlib.util
 import platform
 import shutil
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 MINIMUM_PYTHON = (3, 9)
 

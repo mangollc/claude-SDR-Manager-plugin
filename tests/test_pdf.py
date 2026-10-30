@@ -6,8 +6,6 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.helpers import REPO_ROOT  # noqa: F401  (sets up the import path)
-
 from sdrlib import pdf
 from sdrlib.pdf import print_to_pdf
 

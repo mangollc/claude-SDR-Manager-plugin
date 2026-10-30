@@ -6,8 +6,6 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.helpers import run_cli
-
 from sdrlib import file_reader
 from sdrlib.file_reader import (
     UnsupportedFile,
@@ -17,6 +15,7 @@ from sdrlib.file_reader import (
     mask_text,
     read_table,
 )
+from tests.helpers import run_cli
 
 
 class TempFileTest(unittest.TestCase):

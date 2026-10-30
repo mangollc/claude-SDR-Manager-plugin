@@ -4,20 +4,21 @@
 This file skips `from __future__ import annotations` on purpose: the version check
 below has to run before anything that a very old Python can't compile.
 """
+
 import sys
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 9):  # noqa: UP036  Deliberately checks for an unsupported Python.
     sys.stdout.write('{"status": "error", "error": "sdr-manager needs Python 3.9 or newer."}\n')
     sys.exit(3)
 
-import argparse  # noqa: E402
-import json  # noqa: E402
-from datetime import date  # noqa: E402
-from pathlib import Path  # noqa: E402
+import argparse
+import json
+from datetime import date
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from sdrlib import (  # noqa: E402
+from sdrlib import (
     coaching,
     environment,
     file_reader,
@@ -30,7 +31,7 @@ from sdrlib import (  # noqa: E402
     scorecard,
     targets,
 )
-from sdrlib.workspace import init_workspace  # noqa: E402
+from sdrlib.workspace import init_workspace
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -148,60 +149,70 @@ def run_log_coaching(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, {"status": "ok", "path": str(path)}
 
 
+WORKSPACE = (("--workspace",), {"required": True})
+WEEK = (("--week",), {"required": True})
+OPTIONAL_WEEK = (("--week",), {})
+NARRATIVE = (("--narrative",), {"required": True})
+OPTIONAL_REP = (("--rep",), {})
+
+# Each command: name, handler, help text, and its arguments.
+COMMANDS = (
+    ("check-env", run_check_env, "Check Python, openpyxl, and browser", ()),
+    (
+        "init-workspace",
+        run_init_workspace,
+        "Create a workspace for a team",
+        ((("--path",), {"required": True}), (("--sample",), {"action": "store_true"})),
+    ),
+    (
+        "inspect",
+        run_inspect,
+        "Preview an export safely",
+        ((("file",), {}), (("--header-row",), {"type": int}), (("--workspace",), {})),
+    ),
+    ("targets", run_targets, "Check the profile and print targets", (WORKSPACE,)),
+    (
+        "normalize",
+        run_normalize,
+        "Store counts from exports",
+        (WORKSPACE, (("--files",), {"nargs": "+", "required": True}), OPTIONAL_WEEK),
+    ),
+    ("metrics", run_metrics, "Build and save a week's scorecard data", (WORKSPACE, OPTIONAL_WEEK)),
+    (
+        "check-narrative",
+        run_check_narrative,
+        "Check Claude's written numbers",
+        (WORKSPACE, WEEK, NARRATIVE, OPTIONAL_REP),
+    ),
+    (
+        "report",
+        run_report,
+        "Build a team or one-on-one PDF",
+        (
+            (("kind",), {"choices": ["team", "one-on-one"]}),
+            WORKSPACE,
+            WEEK,
+            NARRATIVE,
+            OPTIONAL_REP,
+        ),
+    ),
+    (
+        "log-coaching",
+        run_log_coaching,
+        "Add a coaching history entry",
+        (WORKSPACE, (("--rep",), {"required": True}), (("--entry-file",), {"required": True})),
+    ),
+)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = JsonArgumentParser(prog="sdr.py", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-
-    check_env = commands.add_parser("check-env", help="Check Python, openpyxl, and browser")
-    check_env.set_defaults(handler=run_check_env)
-
-    init = commands.add_parser("init-workspace", help="Create a workspace for a team")
-    init.add_argument("--path", required=True)
-    init.add_argument("--sample", action="store_true")
-    init.set_defaults(handler=run_init_workspace)
-
-    inspect = commands.add_parser("inspect", help="Preview an export safely")
-    inspect.add_argument("file")
-    inspect.add_argument("--header-row", type=int)
-    inspect.add_argument("--workspace")
-    inspect.set_defaults(handler=run_inspect)
-
-    show_targets = commands.add_parser("targets", help="Check the profile and print targets")
-    show_targets.add_argument("--workspace", required=True)
-    show_targets.set_defaults(handler=run_targets)
-
-    normalize_exports = commands.add_parser("normalize", help="Store counts from exports")
-    normalize_exports.add_argument("--workspace", required=True)
-    normalize_exports.add_argument("--files", nargs="+", required=True)
-    normalize_exports.add_argument("--week")
-    normalize_exports.set_defaults(handler=run_normalize)
-
-    build_metrics = commands.add_parser("metrics", help="Build and save a week's scorecard data")
-    build_metrics.add_argument("--workspace", required=True)
-    build_metrics.add_argument("--week")
-    build_metrics.set_defaults(handler=run_metrics)
-
-    check_text = commands.add_parser("check-narrative", help="Check Claude's written numbers")
-    check_text.add_argument("--workspace", required=True)
-    check_text.add_argument("--week", required=True)
-    check_text.add_argument("--narrative", required=True)
-    check_text.add_argument("--rep")
-    check_text.set_defaults(handler=run_check_narrative)
-
-    report = commands.add_parser("report", help="Build a team or one-on-one PDF")
-    report.add_argument("kind", choices=["team", "one-on-one"])
-    report.add_argument("--workspace", required=True)
-    report.add_argument("--week", required=True)
-    report.add_argument("--narrative", required=True)
-    report.add_argument("--rep")
-    report.set_defaults(handler=run_report)
-
-    log_coaching = commands.add_parser("log-coaching", help="Add a coaching history entry")
-    log_coaching.add_argument("--workspace", required=True)
-    log_coaching.add_argument("--rep", required=True)
-    log_coaching.add_argument("--entry-file", required=True)
-    log_coaching.set_defaults(handler=run_log_coaching)
-
+    for name, handler, help_text, arguments in COMMANDS:
+        command = commands.add_parser(name, help=help_text)
+        for flags, options in arguments:
+            command.add_argument(*flags, **options)
+        command.set_defaults(handler=handler)
     return parser
 
 
@@ -212,7 +223,7 @@ def main(argv: "list[str] | None" = None) -> int:
         code, payload = args.handler(args)
     except (UsageError, *EXPECTED_ERRORS) as error:
         code, payload = EXIT_NEEDS_INPUT, {"status": "error", "error": str(error)}
-    except Exception as error:  # A last resort, so skills never see a raw traceback.
+    except Exception as error:  # noqa: BLE001  A last resort, so skills never see a traceback.
         code, payload = EXIT_ERROR, {"status": "error", "error": f"{type(error).__name__}: {error}"}
     sys.stdout.write(json.dumps(payload, indent=2) + "\n")
     return code

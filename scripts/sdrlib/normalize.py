@@ -1,12 +1,13 @@
 """Apply saved mappings to exports, then store counts without prospect details."""
+
 from __future__ import annotations
 
 import json
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Sequence
 
 from . import history
 from .file_reader import (
@@ -205,8 +206,9 @@ def _read_summary(table: Table, mapping: dict, reps: dict, problems: _Problems) 
     return rows
 
 
-def _standard_value(raw: str, column: str, translations: dict, allowed: Sequence[str],
-                    problems: _Problems) -> str | None:
+def _standard_value(
+    raw: str, column: str, translations: dict, allowed: Sequence[str], problems: _Problems
+) -> str | None:
     value = translations.get(raw, raw)
     if value in allowed:
         return value
@@ -281,9 +283,7 @@ def _check_mapping(path: Path, mapping: dict, table: Table) -> None:
         raise ValueError(f"The mapping for {path.name} needs an action.")
     if fixed_action and fixed_action != SKIP_ACTION and fixed_action not in ACTION_COUNTS:
         raise ValueError(f"The mapping for {path.name} has an unknown action: {fixed_action}.")
-    wanted = list(columns.values()) + [
-        spec["column"] for spec in mapping.get("flags", {}).values()
-    ]
+    wanted = list(columns.values()) + [spec["column"] for spec in mapping.get("flags", {}).values()]
     missing = [name for name in wanted if name not in table.headers]
     if missing:
         raise ValueError(f"{path.name} has no column named: {', '.join(missing)}.")
@@ -373,8 +373,9 @@ def _source_entry(result: FileResult) -> dict:
     }
 
 
-def _build_report(results: Sequence[FileResult], without_mapping: Sequence[str],
-                  week: str | None) -> dict:
+def _build_report(
+    results: Sequence[FileResult], without_mapping: Sequence[str], week: str | None
+) -> dict:
     unknown: Counter = Counter()
     unmapped: dict[str, set[str]] = {}
     for result in results:

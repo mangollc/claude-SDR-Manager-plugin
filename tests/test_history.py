@@ -6,9 +6,8 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from tests.helpers import activity_row
-
 from sdrlib import history
+from tests.helpers import activity_row
 
 
 class WeekTests(unittest.TestCase):
@@ -16,9 +15,7 @@ class WeekTests(unittest.TestCase):
         self.assertEqual(history.iso_week(date(2026, 10, 26)), "2026-W44")
 
     def test_finds_week_bounds(self):
-        self.assertEqual(
-            history.week_bounds("2026-W44"), (date(2026, 10, 26), date(2026, 11, 1))
-        )
+        self.assertEqual(history.week_bounds("2026-W44"), (date(2026, 10, 26), date(2026, 11, 1)))
 
     def test_rejects_a_badly_formed_week(self):
         with self.assertRaisesRegex(ValueError, "2026-W44"):
@@ -161,9 +158,7 @@ class MeetingStorageTests(StorageTest):
 
     def test_returns_the_newest_snapshot(self):
         history.write_meetings(self.workspace, "2026-W43", [self.meeting])
-        history.write_meetings(
-            self.workspace, "2026-W44", [{**self.meeting, "status": "no_show"}]
-        )
+        history.write_meetings(self.workspace, "2026-W44", [{**self.meeting, "status": "no_show"}])
 
         rows = history.read_latest_meetings(self.workspace)
 

@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import DEFAULT_PROFILE, make_workspace, run_cli
-
 from sdrlib.profile import ProfileError, active_reps, load_profile, rep_lookup, rep_slug
+from tests.helpers import DEFAULT_PROFILE, make_workspace, run_cli
 
 
 class ProfileTest(unittest.TestCase):

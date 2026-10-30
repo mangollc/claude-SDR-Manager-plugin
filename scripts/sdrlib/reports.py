@@ -1,11 +1,12 @@
 """Fill the report templates. Every value from data passes through escape()."""
+
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from datetime import date
 from html import escape
 from string import Template
-from typing import Sequence
 
 from .focus import (
     BELOW,
@@ -87,7 +88,7 @@ def _load_css() -> str:
     return (TEMPLATES_DIR / "report.css").read_text(encoding="utf-8")
 
 
-def format_value(metric: str, value: float | int | None) -> str:
+def format_value(metric: str, value: float | None) -> str:
     """Format a number for display, showing missing data as words, never as zero."""
     if value is None:
         return NOT_AVAILABLE
@@ -97,7 +98,7 @@ def format_value(metric: str, value: float | int | None) -> str:
     return f"{int(rounded):,}" if rounded.is_integer() else f"{rounded:,.1f}"
 
 
-def format_target(metric: str, value: float | int | None) -> str:
+def format_target(metric: str, value: float | None) -> str:
     """Format a target exactly, so 3.41% against 3.43% can't both read as 3.4%."""
     if value is None or metric not in RATE_METRICS:
         return format_value(metric, value)
@@ -219,18 +220,24 @@ def _team_numbers(metrics: dict) -> str:
             for name in ("connect_rate", "email_reply_rate", "li_accept_rate", "li_reply_rate")
         ),
         _team_row(
-            "Meeting rate", "meeting_rate", team["rates"]["meeting_rate"],
+            "Meeting rate",
+            "meeting_rate",
+            team["rates"]["meeting_rate"],
             targets["meeting_rate"]["value"],
         ),
         _team_row(
-            "Meetings held", "meetings_held", meetings.get("held"),
+            "Meetings held",
+            "meetings_held",
+            meetings.get("held"),
             team["targets"]["meetings_held"],
         ),
         _team_row(
             "Show rate", "show_rate", meetings.get("show_rate"), targets["show_rate"]["value"]
         ),
         _team_row(
-            "Acceptance rate", "acceptance_rate", meetings.get("acceptance_rate"),
+            "Acceptance rate",
+            "acceptance_rate",
+            meetings.get("acceptance_rate"),
             targets["acceptance_rate"]["value"],
         ),
     ]
@@ -357,7 +364,10 @@ def _rate_rows(rep: dict, targets: dict) -> list[str]:
     this_rates, window_rates = rep["this_week"]["rates"], rep["window"]["rates"]
     return [
         _number_row(
-            METRIC_LABELS[name], name, this_rates[name], window_rates[name],
+            METRIC_LABELS[name],
+            name,
+            this_rates[name],
+            window_rates[name],
             format_target(name, targets[name]["value"]),
         )
         for name in (
@@ -376,13 +386,20 @@ def _meeting_rows(rep: dict, targets: dict) -> list[str]:
     held_target = format_value("held", rep["window"]["targets"]["meetings_held"])
     return [
         _number_row("Meetings booked", "booked", this_week.get("booked"), window.get("booked"), ""),
-        _number_row("Meetings held", "held", this_week.get("held"), window.get("held"), held_target),
         _number_row(
-            "Show rate", "show_rate", this_week.get("show_rate"), window.get("show_rate"),
+            "Meetings held", "held", this_week.get("held"), window.get("held"), held_target
+        ),
+        _number_row(
+            "Show rate",
+            "show_rate",
+            this_week.get("show_rate"),
+            window.get("show_rate"),
             format_target("show_rate", targets["show_rate"]["value"]),
         ),
         _number_row(
-            "Acceptance rate", "acceptance_rate", this_week.get("acceptance_rate"),
+            "Acceptance rate",
+            "acceptance_rate",
+            this_week.get("acceptance_rate"),
             window.get("acceptance_rate"),
             format_target("acceptance_rate", targets["acceptance_rate"]["value"]),
         ),
@@ -512,9 +529,7 @@ def render_team(metrics: dict, narrative: dict) -> str:
 def _latest_commitments(coaching_text: str) -> list[str]:
     latest = coaching_text.split("## ")[-1] if "## " in coaching_text else ""
     prefix = "- Agreed: "
-    return [
-        line[len(prefix):].strip() for line in latest.splitlines() if line.startswith(prefix)
-    ]
+    return [line[len(prefix) :].strip() for line in latest.splitlines() if line.startswith(prefix)]
 
 
 def _agenda_rows(topics: Sequence[str]) -> str:

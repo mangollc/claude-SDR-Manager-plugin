@@ -6,13 +6,12 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
-from tests import make_sample_data
-from tests.helpers import REPO_ROOT
-
 from sdrlib.file_reader import header_signature, read_table
 from sdrlib.normalize import normalize_files
 from sdrlib.scorecard import build_scorecard
 from sdrlib.workspace import SAMPLE_WEEK, init_workspace
+from tests import make_sample_data
+from tests.helpers import REPO_ROOT
 
 FIXTURES = REPO_ROOT / "tests" / "fixtures" / "sample-mappings"
 NOW = datetime(2026, 11, 2, 9, 0, 0)

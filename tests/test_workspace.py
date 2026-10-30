@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import run_cli
-
 from sdrlib.workspace import SAMPLE_WEEK, init_workspace
+from tests.helpers import run_cli
 
 
 class WorkspaceTest(unittest.TestCase):

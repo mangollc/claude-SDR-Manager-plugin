@@ -6,9 +6,8 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from tests.helpers import make_workspace, run_cli
-
 from sdrlib.coaching import append_entry, coaching_path, read_history
+from tests.helpers import make_workspace, run_cli
 
 ENTRY = {
     "focus": "Response (connect rate)",

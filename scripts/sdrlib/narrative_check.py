@@ -1,8 +1,9 @@
 """Confirm that every number in Claude's written text came from the calculator."""
+
 from __future__ import annotations
 
 import re
-from typing import Iterator
+from collections.abc import Iterator
 
 MONTHS = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?"
 IGNORED_TEXT = re.compile(

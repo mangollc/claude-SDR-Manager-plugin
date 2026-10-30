@@ -3,8 +3,6 @@ from __future__ import annotations
 import unittest
 from datetime import date
 
-from tests.helpers import WINDOW_COUNTS, window_meetings
-
 from sdrlib import focus, metrics, targets
 from sdrlib.focus import (
     BELOW,
@@ -20,6 +18,7 @@ from sdrlib.focus import (
     stretch_focus,
     team_pattern,
 )
+from tests.helpers import WINDOW_COUNTS, window_meetings
 
 TARGETS = targets.resolve_targets({"channels": ["call", "email", "linkedin"], "targets": {}})
 MINIMUMS = targets.load_defaults()["minimums"]
@@ -336,18 +335,12 @@ class TeamPatternTests(unittest.TestCase):
         self.assertIsNone(team_pattern([rep(step=2)] * 3 + [rep("On track")] * 4))
 
     def test_unjudged_reps_are_left_out_of_the_count(self):
-        reps = (
-            [rep(step=2)] * 3
-            + [rep("On track")] * 3
-            + [rep("Onboarding"), rep("Limited data")]
-        )
+        reps = [rep(step=2)] * 3 + [rep("On track")] * 3 + [rep("Onboarding"), rep("Limited data")]
 
         self.assertEqual(team_pattern(reps)["step"], 2)
 
     def test_stretch_focus_never_counts_as_sharing_a_step(self):
-        reps = [
-            {"status": "On track", "focus": {"step": 2, "kind": "stretch"}} for _ in range(4)
-        ]
+        reps = [{"status": "On track", "focus": {"step": 2, "kind": "stretch"}} for _ in range(4)]
 
         self.assertIsNone(team_pattern(reps))
 

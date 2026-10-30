@@ -6,10 +6,9 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
-from tests.helpers import activity_row, make_workspace, run_cli, window_meetings
-
 from sdrlib import history
 from sdrlib.scorecard import build_scorecard
+from tests.helpers import activity_row, make_workspace, run_cli, window_meetings
 
 NOW = datetime(2026, 10, 30, 12, 0, 0)
 FRIDAY = "2026-10-30"
@@ -307,9 +306,7 @@ class NoMeetingsTests(ScorecardTest):
 
         rep = self.rep(result)
         self.assertIsNone(rep["window"]["meetings"])
-        self.assertEqual(
-            [step["status"] for step in rep["steps"][2:]], ["Not available"] * 3
-        )
+        self.assertEqual([step["status"] for step in rep["steps"][2:]], ["Not available"] * 3)
         self.assertEqual(rep["status"], "Watch")
         self.assertTrue(any("meetings" in note.lower() for note in result["notes"]))
         self.assertEqual(rep["trend"]["meetings_held"], [None] * 4)

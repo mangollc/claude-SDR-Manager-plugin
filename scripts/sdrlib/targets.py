@@ -1,4 +1,5 @@
 """Starting targets, team overrides, derived targets, and new-hire ramp."""
+
 from __future__ import annotations
 
 import json

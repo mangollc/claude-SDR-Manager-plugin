@@ -1,7 +1,8 @@
 """Turn a rep's numbers into step statuses, a rep status, and one coaching focus."""
+
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 ON_TARGET = "On target"
 NEAR = "Near"
@@ -196,9 +197,7 @@ def team_pattern(reps: Sequence[dict]) -> dict | None:
     """Return a focus step shared by at least half of the judged reps, if there is one."""
     judged = [rep for rep in reps if rep["status"] not in UNJUDGED_STATUSES]
     shared_steps = [
-        rep["focus"]["step"]
-        for rep in judged
-        if rep.get("focus") and rep["focus"]["kind"] == "gap"
+        rep["focus"]["step"] for rep in judged if rep.get("focus") and rep["focus"]["kind"] == "gap"
     ]
     for step in sorted(set(shared_steps)):
         count = shared_steps.count(step)
