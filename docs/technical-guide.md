@@ -76,12 +76,14 @@ Commands appear as `/sdr-manager:setup`, `/sdr-manager:scorecard`, and `/sdr-man
 
 ## Add it through the Claude app's Plugins screen
 
-This is Anthropic's click-through route. The README doesn't use it, because in our one test on macOS the clicks went through, but SDR Manager wasn't listed under **Plugins** afterward and didn't reach a new Code tab session. A full plugin sync in the app also found nothing to download. We don't know the cause yet.
+This is Anthropic's click-through route. The README doesn't use it, because in our one test on macOS the clicks went through, but SDR Manager wasn't listed under **Plugins** afterward and didn't reach a new Code tab session. The source was also missing from that Mac's Claude Code records, so adding it didn't take effect. We don't know why yet.
 
-1. Click **Customize** in the left sidebar, then the **Plugins** tab.
+1. Open **Settings**, then click **Plugins** under **Customize**.
 2. Click **Add**, then **Add marketplace**.
 3. Choose **Add from a repository**, and enter `mangollc/claude-SDR-Manager-plugin`.
 4. Open the **Discover** tab, find **sdr-manager**, and click **Add**.
+
+Once it's added, it should appear on the **Yours** tab under **From marketplaces you added**. On our test Mac, that list matched the plugins Claude Code had installed, and those plugins reached the Code tab.
 
 Anthropic also documents adding plugins from the Code tab: click **+** next to the message box, then **Add plugins**, or **Plugins** and **Browse plugins**. We haven't tested that route.
 
