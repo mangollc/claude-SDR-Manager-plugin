@@ -10,6 +10,7 @@ Each rep gets one focus: the first of five steps that's behind target. Fixing an
 - Coach one thing at a time.
 - Describe behavior, never character. Say "calls ended before an ask", not "lacks confidence".
 - Never compare a rep with teammates.
+- Refer to reps by name or as "they". Never guess anyone's gender from a name.
 - Never suggest hiring, firing, pay, or formal performance action. Offer the facts and suggest involving HR.
 - Agree a small, specific action and a date to check it.
 

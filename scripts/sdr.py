@@ -13,7 +13,7 @@ if sys.version_info < (3, 9):  # noqa: UP036  Deliberately checks for an unsuppo
 
 import argparse
 import json
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -31,7 +31,7 @@ from sdrlib import (
     scorecard,
     targets,
 )
-from sdrlib.workspace import init_workspace
+from sdrlib.workspace import describe_workspace, find_workspaces, init_workspace
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -57,6 +57,15 @@ def run_check_env(_args: argparse.Namespace) -> tuple[int, dict]:
 
 def run_init_workspace(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, init_workspace(Path(args.path), args.sample)
+
+
+def run_status(args: argparse.Namespace) -> tuple[int, dict]:
+    found = [Path(args.workspace)] if args.workspace else find_workspaces(Path.cwd())
+    if not found:
+        message = "There's no team workspace in this folder. Run /sdr-manager:setup first."
+        return EXIT_NEEDS_INPUT, {"status": "needs_input", "error": message}
+    others = [str(path) for path in found[1:]]
+    return EXIT_OK, {**describe_workspace(found[0], datetime.now()), "other_workspaces": others}
 
 
 def run_inspect(args: argparse.Namespace) -> tuple[int, dict]:
@@ -162,6 +171,12 @@ COMMANDS = (
         run_init_workspace,
         "Create a workspace for a team",
         ((("--path",), {"required": True}), (("--sample",), {"action": "store_true"})),
+    ),
+    (
+        "status",
+        run_status,
+        "Find the workspace and its latest scorecard",
+        ((("--workspace",), {}),),
     ),
     (
         "inspect",

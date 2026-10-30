@@ -406,7 +406,13 @@ class CalculatedFactsTests(ReportTest):
         self.assertIn("<li>Meetings held: 9 against 9.2</li>", self.render())
 
     def test_a_focus_with_a_weekly_trend_shows_each_week(self):
-        focus = {"step": 2, "metric": "connect_rate", "actual": 0.05, "target": 0.054, "kind": "gap"}
+        focus = {
+            "step": 2,
+            "metric": "connect_rate",
+            "actual": 0.05,
+            "target": 0.054,
+            "kind": "gap",
+        }
         rep = {**self.metrics["reps"][0], "focus": focus}
 
         self.assertIn("Connect rate by week:", self.render(rep))

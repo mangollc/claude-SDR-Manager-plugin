@@ -67,7 +67,10 @@ class CheckNarrativeTests(unittest.TestCase):
         self.assertEqual(found, ["Thirteen", "three"])
 
     def test_problems_say_where_they_are(self):
-        narrative = {"observations": ["Fine", "Booked 77 meetings"], "rep_notes": {"Ava": "Made 66"}}
+        narrative = {
+            "observations": ["Fine", "Booked 77 meetings"],
+            "rep_notes": {"Ava": "Made 66"},
+        }
 
         fields = {problem["field"]: problem["number"] for problem in check_narrative(narrative)}
 

@@ -25,15 +25,18 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 - **Never open an export file directly.** Use `inspect`, which masks prospect details. Full exports only ever go through the scripts.
 - **Never write a statistic.** The report's tables show every number, so your text carries judgment only. Quoting a number in the wrong place is the worst mistake this plugin can make.
 - **Never rank reps** or compare them with each other in your text.
+- **Refer to reps by name or as "they".** Never guess anyone's gender from a name.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts and suggest involving HR.
 - **Never send anything or change anything in a sales tool.**
 
 ## Step 1: Find the workspace and exports
 
-Look for `team-profile.json` in `sdr-workspace`, `sdr-demo`, or the current folder. If there's none, send the manager to `/sdr-manager:setup`.
+Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
 
-Use any folder or files given as arguments. Otherwise look in `imports/<week>/` inside the workspace, then ask.
+If `status` exits with code 2, send the manager to `/sdr-manager:setup`. If `other_workspaces` isn't empty, say which workspace you're using.
+
+Use any folder or files given as arguments. Otherwise use the exports listed under `imports`, then ask.
 
 On a first run, ask for the last four full weeks plus the current week, so trends work from the start. Always ask for a meetings export that covers at least the last six weeks, because meeting statuses change after booking.
 

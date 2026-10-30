@@ -106,6 +106,14 @@ class SafetyRuleTests(unittest.TestCase):
     def test_scorecard_forbids_ranking_reps(self):
         self.assertIn("Never rank", skill_text("scorecard"))
 
+    def test_skills_that_write_about_reps_avoid_guessing_gender(self):
+        for name in ("scorecard", "one-on-one"):
+            self.assertIn("never guess", skill_text(name).lower(), name)
+
+    def test_skills_find_the_workspace_with_the_status_command(self):
+        for name in ("scorecard", "one-on-one"):
+            self.assertIn("Run `status`", skill_text(name), name)
+
 
 class ReadmeTests(unittest.TestCase):
     def setUp(self):

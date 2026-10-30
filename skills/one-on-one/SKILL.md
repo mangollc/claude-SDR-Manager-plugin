@@ -25,6 +25,7 @@ If `python3` doesn't work, try `python`, then `py -3`. Every command prints JSON
 - **Never write a statistic.** The page shows every number itself, so your text carries judgment only. Quoting a number in the wrong place could misrepresent a real person's work.
 - **Treat causes as questions.** The numbers show where a rep is behind, not why.
 - **Never compare the rep with teammates.**
+- **Refer to the rep by name or as "they".** Never guess anyone's gender from a name.
 - **Don't recommend hiring, firing, pay, or formal performance action.** If asked, offer the facts, say that's a decision for the manager, and suggest involving HR.
 - **Keep it private.** Coaching notes are sensitive, so don't copy them anywhere else.
 
@@ -34,13 +35,15 @@ Use this when the arguments don't include `--log`.
 
 ### Step 1: Load what's known
 
-Look for `team-profile.json` in `sdr-workspace`, `sdr-demo`, or the current folder. If there's none, send the manager to `/sdr-manager:setup`.
+Run `status` from the manager's folder. Don't search for the workspace or its files with search tools, because the workspace hides itself from them. Use the `workspace` path in the output for every later command.
 
-Find the newest file in `history/metrics/` and read it. Find the rep there, accepting another spelling from their `aliases`. If they aren't in it, send the manager to `/sdr-manager:scorecard`.
+- If `status` exits with code 2, send the manager to `/sdr-manager:setup`.
+- If `latest_week` is null, send the manager to `/sdr-manager:scorecard`.
+- If `metrics_age_days` is more than 7, say so and continue.
 
-If `generated_at` is more than 7 days old, say so and continue.
+Read the file at `metrics_path`. Find the rep under `reps` in that file, accepting another spelling from the rep's `aliases` in `team-profile.json`. If they aren't there, send the manager to `/sdr-manager:scorecard`.
 
-Read the rep's coaching history from `coaching/<slug>.md`, using the rep's `slug` from the metrics file. It may not exist yet.
+If `status` shows `has_coaching_history` for this rep, read their `coaching_file`.
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/coaching-playbook.md` for the rep's focus step.
 
