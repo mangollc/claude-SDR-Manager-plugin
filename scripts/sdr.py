@@ -16,7 +16,7 @@ from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from sdrlib import environment, file_reader, normalize, profile, targets  # noqa: E402
+from sdrlib import environment, file_reader, normalize, profile, scorecard, targets  # noqa: E402
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -56,6 +56,11 @@ def run_normalize(args: argparse.Namespace) -> tuple[int, dict]:
     return (EXIT_OK if report["status"] == "ok" else EXIT_NEEDS_INPUT), report
 
 
+def run_metrics(args: argparse.Namespace) -> tuple[int, dict]:
+    workspace = Path(args.workspace)
+    return EXIT_OK, scorecard.summarize(scorecard.build_scorecard(workspace, args.week), workspace)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = JsonArgumentParser(prog="sdr.py", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -78,6 +83,11 @@ def build_parser() -> argparse.ArgumentParser:
     normalize_exports.add_argument("--files", nargs="+", required=True)
     normalize_exports.add_argument("--week")
     normalize_exports.set_defaults(handler=run_normalize)
+
+    build_metrics = commands.add_parser("metrics", help="Build and save a week's scorecard data")
+    build_metrics.add_argument("--workspace", required=True)
+    build_metrics.add_argument("--week")
+    build_metrics.set_defaults(handler=run_metrics)
 
     return parser
 

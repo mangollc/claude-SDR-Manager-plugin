@@ -157,6 +157,32 @@ def read_latest_meetings(workspace: Path) -> list[dict] | None:
     return _read_csv(snapshots[-1]) if snapshots else None
 
 
+def metrics_path(workspace: Path, week: str) -> Path:
+    """Return where a week's metrics file lives."""
+    return _folder(workspace, "metrics") / f"{week}.json"
+
+
+def write_metrics(workspace: Path, week: str, metrics: dict) -> None:
+    """Save a week's metrics file."""
+    path = metrics_path(workspace, week)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+
+
+def read_metrics(workspace: Path, week: str) -> dict:
+    """Return a saved metrics file."""
+    path = metrics_path(workspace, week)
+    if not path.exists():
+        raise ValueError(f"There's no scorecard for {week} yet. Run the scorecard first.")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def latest_metrics_week(workspace: Path) -> str | None:
+    """Return the newest week with a saved scorecard."""
+    weeks = sorted(path.stem for path in _folder(workspace, "metrics").glob("*.json"))
+    return weeks[-1] if weeks else None
+
+
 def read_sources(workspace: Path, week: str) -> list[dict]:
     """Return the files that fed a week's numbers."""
     path = _folder(workspace, "sources") / f"{week}.json"
