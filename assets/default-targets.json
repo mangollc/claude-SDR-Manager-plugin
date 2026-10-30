@@ -1,0 +1,104 @@
+{
+  "targets": {
+    "dials_per_day": {
+      "value": 44,
+      "stretch": null,
+      "label": "Dials per working day",
+      "source": "Bridge Group 2025, median",
+      "as_of": "2025"
+    },
+    "emails_per_day": {
+      "value": 41,
+      "stretch": null,
+      "label": "Emails per working day",
+      "source": "Bridge Group 2025, median",
+      "as_of": "2025"
+    },
+    "linkedin_touches_per_day": {
+      "value": 19,
+      "stretch": null,
+      "label": "LinkedIn touches per working day",
+      "source": "Bridge Group 2025, median",
+      "as_of": "2025"
+    },
+    "connect_rate": {
+      "value": 0.054,
+      "stretch": 0.133,
+      "label": "Connect rate",
+      "source": "Gong Labs 2024, average and top quartile",
+      "as_of": "2024-07"
+    },
+    "email_reply_rate": {
+      "value": 0.0343,
+      "stretch": 0.055,
+      "label": "Email reply rate",
+      "source": "Instantly 2026, average and top 25%",
+      "as_of": "2025-12"
+    },
+    "li_accept_rate": {
+      "value": 0.285,
+      "stretch": null,
+      "label": "LinkedIn acceptance rate",
+      "source": "Expandi 2026, platform average",
+      "as_of": "2026-04"
+    },
+    "li_reply_rate": {
+      "value": 0.104,
+      "stretch": null,
+      "label": "LinkedIn reply rate",
+      "source": "Expandi 2026, platform average",
+      "as_of": "2026-04"
+    },
+    "meeting_rate": {
+      "value": null,
+      "derived": true,
+      "stretch": null,
+      "label": "Meeting rate",
+      "source": "Calculated from the other targets",
+      "as_of": "2026-10-30"
+    },
+    "meetings_held_per_month": {
+      "value": 10,
+      "stretch": null,
+      "label": "Meetings held per month",
+      "source": "Bridge Group 2025, median quota",
+      "as_of": "2025"
+    },
+    "show_rate": {
+      "value": 0.8,
+      "stretch": null,
+      "label": "Show rate",
+      "source": "Operatix 2021, a 20% dropout rate",
+      "as_of": "2021-07"
+    },
+    "acceptance_rate": {
+      "value": 0.6,
+      "stretch": null,
+      "label": "Acceptance rate",
+      "source": "Derived from Bridge Group 2025 median quotas (6 converted out of 10 held)",
+      "as_of": "2025"
+    },
+    "bounce_limit": {
+      "value": 0.02,
+      "stretch": null,
+      "label": "Email bounce rate limit",
+      "source": "Instantly 2026",
+      "as_of": "2025-12"
+    }
+  },
+  "minimums": {
+    "connect_rate": 100,
+    "email_reply_rate": 100,
+    "li_accept_rate": 30,
+    "li_reply_rate": 30,
+    "meeting_rate": 20,
+    "show_rate": 5,
+    "acceptance_rate": 5
+  },
+  "ramp": {
+    "1": 0.0,
+    "2": 0.5,
+    "3": 0.75
+  },
+  "near_band": 0.85
+}
