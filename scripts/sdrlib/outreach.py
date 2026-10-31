@@ -31,17 +31,13 @@ LIMITS_FILE = "outreach-limits.json"
 
 # Each sales tool writes these differently, so a rewrite has to copy them exactly.
 PLACEHOLDER = re.compile(
-    "|".join(
-        (
-            r"\{\{\{.+?\}\}\}",  # {{{Recipient.FirstName}}}
-            r"\{\{.+?\}\}",  # {{first_name}} and {{first_name|there}}
-            r"\{!.+?\}",  # {!Contact.FirstName}
-            r"\[\[.+?\]\]",  # [[first name]]
-            r"\[[^\[\]\n]{1,40}\]",  # [Company]
-            r"<<.+?>>",  # <<First Name>>
-            r"%[A-Za-z_][\w.]*%",  # %first_name%
-        )
-    )
+    r"\{\{\{.+?\}\}\}"  # {{{Recipient.FirstName}}}
+    r"|\{\{.+?\}\}"  # {{first_name}} and {{first_name|there}}
+    r"|\{!.+?\}"  # {!Contact.FirstName}
+    r"|\[\[.+?\]\]"  # [[first name]]
+    r"|\[[^\[\]\n]{1,40}\]"  # [Company]
+    r"|<<.+?>>"  # <<First Name>>
+    r"|%[A-Za-z_][\w.]*%"  # %first_name%
 )
 # A placeholder like this may fill in the opt-out line or postal address when the email is sent.
 FOOTER_PLACEHOLDER = re.compile(r"unsub|opt[ _-]?out|signature|footer|address", re.IGNORECASE)
@@ -61,16 +57,12 @@ RECORDING = re.compile(
 )
 # Case-sensitive street words, so "3 stores in one place" isn't taken for an address.
 ADDRESS = re.compile(
-    "|".join(
-        (
-            r"(?i:\bp\.?\s?o\.?\s+box\b)",
-            r"\b\d{1,6}\s+(?:[A-Z0-9][\w.'-]*\s+){0,4}"
-            r"(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct"
-            r"|Suite|Ste|Highway|Hwy|Parkway|Pkwy)\b",
-            r"\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b",  # IL 60606
-            r"\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b",  # SW1A 1AA
-        )
-    )
+    r"(?i:\bp\.?\s?o\.?\s+box\b)"
+    r"|\b\d{1,6}\s+(?:[A-Z0-9][\w.'-]*\s+){0,4}"
+    r"(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct"
+    r"|Suite|Ste|Highway|Hwy|Parkway|Pkwy)\b"
+    r"|\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b"  # IL 60606
+    r"|\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b"  # SW1A 1AA
 )
 PROTECTED = (OPT_OUT, RECORDING, ADDRESS)
 
@@ -96,9 +88,9 @@ FALSE_HISTORY = re.compile(
 
 NAME = re.compile(r"[A-Z][\w'&-]*(?:\s+[A-Z][\w'&-]*)*")
 WORD = re.compile(r"[A-Za-z0-9][\w'&-]*")
-ALWAYS_CAPITALIZED = frozenset(
-    "i i'm i'd i'll i've monday tuesday wednesday thursday friday saturday sunday january "
-    "february march april may june july august september october november december".split()
+ALWAYS_CAPITALIZED = re.compile(
+    r"i(?:'m|'d|'ll|'ve)?|(?:mon|tues|wednes|thurs|fri|satur|sun)day"
+    r"|january|february|march|april|may|june|july|august|september|october|november|december"
 )
 
 FIXES = {
@@ -173,7 +165,7 @@ def _new_names(message: str, known: set[str]) -> list[str]:
             words = match.group().split()
             checked = words[1:] if match.start() == 0 else words
             plain = [_plain_word(word) for word in checked]
-            if any(word not in known and word not in ALWAYS_CAPITALIZED for word in plain):
+            if any(word not in known and not ALWAYS_CAPITALIZED.fullmatch(word) for word in plain):
                 found.append(" ".join(checked))
     return _unique(found)
 
@@ -185,7 +177,10 @@ def _new_number_words(message: str, known: set[str]) -> list[str]:
 
 
 def _validated(draft: dict) -> dict:
-    """Return a complete copy of the draft, or explain what's wrong with it."""
+    """Return a complete copy of the draft, or explain what's wrong with it.
+
+    Every problem raises ValueError, because the command line reports that in plain words.
+    """
     if draft.get("kind") not in KINDS:
         raise ValueError(f"The draft's kind must be one of: {', '.join(KINDS)}.")
     for field in ("name", "original", "body"):
@@ -194,7 +189,7 @@ def _validated(draft: dict) -> dict:
             raise ValueError(f"The draft's {field} can't be blank.")
     for field in ("subject", "footer"):
         if not isinstance(draft.get(field, ""), str):
-            raise ValueError(f"The draft's {field} must be text.")
+            raise ValueError(f"The draft's {field} must be text.")  # noqa: TRY004
     changes = draft.get("changes", [])
     if not isinstance(changes, list) or not all(isinstance(item, str) for item in changes):
         raise ValueError("The draft's changes must be a list of short sentences.")
@@ -311,7 +306,7 @@ def load_draft(path: Path) -> dict:
     except ValueError as error:
         raise ValueError(problem) from error
     if not isinstance(draft, dict):
-        raise ValueError(problem)
+        raise ValueError(problem)  # noqa: TRY004
     return draft
 
 
