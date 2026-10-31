@@ -186,6 +186,10 @@ def run_check_outreach(args: argparse.Namespace) -> tuple[int, dict]:
     }
 
 
+def run_discard_draft(args: argparse.Namespace) -> tuple[int, dict]:
+    return EXIT_OK, {"status": "ok", "removed": outreach.discard_draft(Path(args.workspace))}
+
+
 def full_path(value: str) -> Path:
     """Expand a short folder name, because skills save files beside the paths reported here."""
     return Path(value).absolute()
@@ -260,6 +264,7 @@ COMMANDS = (
         "Check a rewritten message, and save it if it passes",
         (WORKSPACE, (("--draft",), {"required": True, "type": full_path})),
     ),
+    ("discard-draft", run_discard_draft, "Delete a draft that won't be finished", (WORKSPACE,)),
 )
 
 

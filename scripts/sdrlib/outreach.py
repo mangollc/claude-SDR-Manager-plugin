@@ -12,6 +12,7 @@ from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
 
+from .file_reader import EMAIL_PATTERN, PHONE_PATTERN
 from .narrative_check import check_narrative, extract_number_words
 from .profile import rep_slug
 from .targets import ASSETS_DIR
@@ -27,66 +28,107 @@ KIND_TITLES = {
     "linkedin_message": "LinkedIn message",
 }
 OUTREACH_FOLDER = "outreach"
+DRAFT_FILE = "draft.json"
 LIMITS_FILE = "outreach-limits.json"
+MAX_FILE_NAME = 60
 
 # Each sales tool writes these differently, so a rewrite has to copy them exactly.
 PLACEHOLDER = re.compile(
     r"\{\{\{.+?\}\}\}"  # {{{Recipient.FirstName}}}
     r"|\{\{.+?\}\}"  # {{first_name}} and {{first_name|there}}
     r"|\{!.+?\}"  # {!Contact.FirstName}
+    r"|\$\{.+?\}"  # ${Leads.First Name}
+    r"|\{[A-Za-z_][\w. ]*\}"  # {first_name}
     r"|\[\[.+?\]\]"  # [[first name]]
-    r"|\[[^\[\]\n]{1,40}\]"  # [Company]
+    r"|\[[^\[\]\n]{1,100}\]"  # [Company]
     r"|<<.+?>>"  # <<First Name>>
+    r"|\*\|.+?\|\*"  # *|FNAME|*
+    r"|%%[A-Za-z_][\w.]*%%"  # %%first_name%%
     r"|%[A-Za-z_][\w.]*%"  # %first_name%
 )
-# A placeholder like this may fill in the opt-out line or postal address when the email is sent.
-FOOTER_PLACEHOLDER = re.compile(r"unsub|opt[ _-]?out|signature|footer|address", re.IGNORECASE)
+# These may fill in a line when the email is sent. {{company.address}} is the prospect's own.
+OPT_OUT_PLACEHOLDER = re.compile(r"unsub|opt[ _-]?out", re.IGNORECASE)
+POSTAL_PLACEHOLDER = re.compile(r"postal|mailing", re.IGNORECASE)
+GENERAL_FOOTER_PLACEHOLDER = re.compile(r"signature|footer", re.IGNORECASE)
 
 # Only a lowercase letter or digit ends a sentence, so "P.O. Box" stays in one piece.
 SENTENCE_BREAK = re.compile(r"(?<=[a-z0-9)\"'][.!?])\s+|\n+")
+SUBJECT_LINE = re.compile(r"^\s*subject:.*$", re.IGNORECASE | re.MULTILINE)
+# Each rule asks for wording aimed at the reader, so "Stop getting surprised by stockouts" and
+# "unsubscribe rates" stay free to change.
 OPT_OUT = re.compile(
-    r"\bunsubscrib|\bopt(?:ing)?[ -]?out\b|\bstop (?:receiving|hearing|getting)\b"
-    r"|\bremove you from\b|\bremove me\b|\breply stop\b",
+    r"\bunsubscrib(?:e|ing)\b(?!\s+(?:numbers?|rates?|requests?|trends?)\b)"
+    r"|\bopt(?:ing)?[ -]?out\b(?!\s+of\b)"
+    r"|\bopt(?:ing)?[ -]?out of (?:all|any|emails?|future|further|marketing|messages|our|these|this)\b"
+    r"|\bstop (?:getting|hearing|receiving)\b[^.!?\n]*\b(?:calls?|emails?|mail|messages?|from (?:me|us))\b"
+    r"|\b(?:don['’]?t want|do not want|no longer (?:want|wish)|prefer not|rather not)(?: to)?"
+    r" (?:be contacted|get|hear|receive)\b"
+    r"|\bremove (?:me|you) from\b[^.!?\n]*\b(?:emails?|lists?|mailing|sequence)\b"
+    r"|\bremove me\b|\breply stop\b",
     re.IGNORECASE,
 )
-# "Recorded" rather than "recording", so a product that records calls isn't caught.
+# Each rule names this call, so a product that records calls isn't caught.
 RECORDING = re.compile(
-    r"\b(?:call|conversation)s?\b[^.!?\n]*\brecorded\b"
-    r"|\brecording (?:this|our|the) (?:call|conversation)\b",
+    r"\b(?:our|the|this|your) (?:call|conversation|line)\b[^.!?\n]*\brecorded\b"
+    r"|\bcalls? (?:may|might|will) be\b[^.!?\n]*\brecorded\b"
+    r"|\brecord(?:ing)? (?:our|the|this) (?:call|conversation)\b"
+    r"|\bconsent to (?:being |the )?record(?:ed|ing)\b",
     re.IGNORECASE,
 )
-# Case-sensitive street words, so "3 stores in one place" isn't taken for an address.
+US_STATE = (
+    r"(?:A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI"
+    r"|S[CD]|T[NX]|UT|V[AT]|W[AIVY])"
+)
+# Street words are case-sensitive and must end the address, so "3 stores in one place" and
+# "5 Ways To Drive Sales" aren't taken for one.
 ADDRESS = re.compile(
     r"(?i:\bp\.?\s?o\.?\s+box\b)"
     r"|\b\d{1,6}\s+(?:[A-Z0-9][\w.'-]*\s+){0,4}"
-    r"(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct"
-    r"|Suite|Ste|Highway|Hwy|Parkway|Pkwy)\b"
-    r"|\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b"  # IL 60606
+    r"(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct|Highway|Hwy"
+    r"|Parkway|Pkwy|Plaza|Place|Pl|Square|Sq|Circle|Cir|Terrace|Ter)\b(?=\s*(?:[,.\n]|$))"
+    r"|\b(?:Suite|Ste|Unit|Floor)\s+#?\d+\b"
+    rf"|\b{US_STATE}\s+\d{{5}}(?:-\d{{4}})?\b"  # IL 60606
     r"|\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b"  # SW1A 1AA
 )
 PROTECTED = (OPT_OUT, RECORDING, ADDRESS)
 
 # narrative_check's number finder misses "10x" and "$2M", the claims most likely to be made up.
-NUMBER = re.compile(r"(?<![A-Za-z0-9.])\d[\d,]*(?:\.\d+)?")
+NUMBER = re.compile(r"(?:(?<![A-Za-z0-9._])|(?<=\b[xX]))\d[\d,]*(?:\.\d+)?")
+# Only time the rep asks for is exempt. "Saves 40 hours a week" is a claim, and needs a source.
+MEETING_WORD = r"(?:call|chat|conversation|demo|intro|introduction|meeting|session|walkthrough)"
+ASK_WORD = r"(?:borrow|for|get|give me|got|grab|have|spare|take|worth)"
 MEETING_TIME = re.compile(
-    r"\b\d{1,3}[- ]?(?:min(?:ute)?s?|sec(?:ond)?s?|hours?|hrs?)\b"
+    rf"\b\d{{1,3}}[- ]?(?:min(?:ute)?s?|hours?|hrs?)[- ]{MEETING_WORD}\b"
+    rf"|\b{ASK_WORD}\s+(?:about\s+|just\s+|only\s+)?\d{{1,2}}[- ]?(?:min(?:ute)?s?|sec(?:ond)?s?)\b"
     r"|\b\d{1,2}:\d{2}(?:\s?(?:am|pm))?\b"
     r"|\b\d{1,2}\s?(?:am|pm)\b",
     re.IGNORECASE,
 )
-MULTIPLE_WORD = re.compile(r"\b(?:doubl|tripl|quadrupl)\w*", re.IGNORECASE)
+QUANTITY_WORD = re.compile(
+    r"\b(?:doubl|tripl|quadrupl)\w*"
+    r"|\b(?:two|three|four|five|six|seven|eight|nine|ten|hundred)fold\b"
+    r"|\b(?:billions?|dozens|hundreds|millions?|thousands|zero)\b",
+    re.IGNORECASE,
+)
 
 FAKE_REPLY = re.compile(r"\s*(?:re|fwd?)\s*:", re.IGNORECASE)
+PAST_CONTACT = (
+    r"(?:\w+ )?(?:call|chat|conversation|discussion|email|meeting|message|note|voicemail)"
+)
 FALSE_HISTORY = re.compile(
-    r"\bas (?:we )?discussed\b"
-    r"|\bper our (?:call|chat|conversation|discussion|meeting)\b"
-    r"|\bfollowing up on our (?:call|chat|conversation|discussion|meeting)\b"
-    r"|\b(?:great|good|nice|lovely) (?:chatting|meeting|speaking|talking) (?:to|with)\b"
-    r"|\b(?:when|since) we (?:last )?(?:met|spoke|talked)\b",
+    r"\bas (?:i |we )?(?:discussed|mentioned|spoke|talked)\b"
+    rf"|\bper (?:my|our) {PAST_CONTACT}\b"
+    rf"|\bfollowing up (?:after|from|on) (?:my|our|the) {PAST_CONTACT}\b"
+    rf"|\b(?:based on|following) our {PAST_CONTACT}\b"
+    r"|\b(?:good|great|lovely|nice) (?:chatting|meeting|speaking|talking)\b"
+    r"|\b(?:good|great|lovely|nice) to (?:chat|speak|talk)\b"
+    r"|\benjoyed (?:chatting|meeting|our|speaking|talking)\b"
+    r"|\bwe (?:last )?(?:met|spoke|talked)\b",
     re.IGNORECASE,
 )
 
 NAME = re.compile(r"[A-Z][\w'&-]*(?:\s+[A-Z][\w'&-]*)*")
+NAME_SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+|\n+")
 WORD = re.compile(r"[A-Za-z0-9][\w'&-]*")
 ALWAYS_CAPITALIZED = re.compile(
     r"i(?:'m|'d|'ll|'ve)?|(?:mon|tues|wednes|thurs|fri|satur|sun)day"
@@ -100,6 +142,7 @@ FIXES = {
     "too_long": "Shorten the message to fit the limit.",
     "fake_reply": "Remove this from the subject, because the prospect has never had an email.",
     "false_history": "Remove this, because there hasn't been a past conversation.",
+    "contact_detail": "Remove this, because it could belong to a prospect.",
     "statistic": "Say this in words, without a number.",
     "pronoun": 'Use "they" or a name.',
 }
@@ -107,8 +150,10 @@ CONFIRM_MESSAGES = {
     "new_name": '"{text}" is new in this version. Is that accurate?',
     "number_word": '"{text}" is new in this version. Is that accurate?',
     "new_placeholder": "{text} is new. Does it match how your sales tool writes it?",
+    "contact_detail": "{text} is in this message. Is it yours, and not a prospect's?",
     "no_opt_out": "I can't see an opt-out line. Does your sales tool add one?",
     "no_postal_address": "I can't see a postal address. Does your sales tool add one?",
+    "assumed_footer": "I'm assuming {text} adds your opt-out line and postal address. Is that right?",
 }
 
 
@@ -136,8 +181,12 @@ def _sentences(text: str) -> list[str]:
 
 
 def protected_text(original: str) -> list[str]:
-    """Return each sentence or line that holds an opt-out, recording notice, or address."""
-    return [item for item in _sentences(original) if any(rule.search(item) for rule in PROTECTED)]
+    """Return each sentence or line that holds an opt-out, recording notice, or address.
+
+    A pasted subject line is left out, because a subject is never a legal line.
+    """
+    pieces = _sentences(SUBJECT_LINE.sub("", original))
+    return [item for item in pieces if any(rule.search(item) for rule in PROTECTED)]
 
 
 def _unique(items: Iterable[str]) -> list[str]:
@@ -152,16 +201,24 @@ def _words(text: str) -> set[str]:
     return {_plain_word(word) for word in WORD.findall(text)}
 
 
-def _numbers(text: str) -> set[str]:
-    spare = MEETING_TIME.sub(" ", PLACEHOLDER.sub(" ", text))
-    return {token.replace(",", "") for token in NUMBER.findall(spare)}
+def _numbers(text: str, placeholders: Iterable[str] = ()) -> set[str]:
+    """Return the numbers in the text, leaving out the given placeholders and asks for time."""
+    spare = text
+    for token in placeholders:
+        spare = spare.replace(token, " ")
+    return {item.replace(",", "") for item in NUMBER.findall(MEETING_TIME.sub(" ", spare))}
+
+
+def _contact_details(text: str) -> list[str]:
+    return _unique(EMAIL_PATTERN.findall(text) + PHONE_PATTERN.findall(text))
 
 
 def _new_names(message: str, known: set[str]) -> list[str]:
     """Return capitalized names that appear in no approved source, past the start of a sentence."""
     found = []
-    for sentence in _sentences(PLACEHOLDER.sub(" ", message)):
-        for match in NAME.finditer(sentence):
+    # A stand-in word, so a sentence that ends in a placeholder still ends.
+    for sentence in NAME_SENTENCE_BREAK.split(PLACEHOLDER.sub("x", message)):
+        for match in NAME.finditer(sentence.strip()):
             words = match.group().split()
             checked = words[1:] if match.start() == 0 else words
             plain = [_plain_word(word) for word in checked]
@@ -172,7 +229,7 @@ def _new_names(message: str, known: set[str]) -> list[str]:
 
 def _new_number_words(message: str, known: set[str]) -> list[str]:
     spare = PLACEHOLDER.sub(" ", message)
-    spoken = extract_number_words(spare) + MULTIPLE_WORD.findall(spare)
+    spoken = extract_number_words(spare) + QUANTITY_WORD.findall(spare)
     return _unique(word.lower() for word in spoken if _plain_word(word) not in known)
 
 
@@ -202,8 +259,9 @@ def _message(draft: dict) -> str:
 
 
 def _approved_text(draft: dict, team: dict) -> str:
-    fields = (team.get(key, "") for key in ("company", "product", "ideal_customer"))
-    return "\n".join((draft["original"], *fields, *team.get("proof_points", [])))
+    fields = (team.get(key) for key in ("company", "product", "ideal_customer"))
+    known = [field for field in fields if isinstance(field, str)]
+    return "\n".join((draft["original"], *known, *team.get("proof_points", [])))
 
 
 def _measure(body: str, unit: str) -> int:
@@ -246,12 +304,15 @@ def _problems(draft: dict, approved: str, limit: dict, length: int) -> list[dict
         for item in protected_text(draft["original"])
         if item not in flat
     ]
-    new_numbers = _numbers(message) - _numbers(approved)
+    kept = find_placeholders(draft["original"])
+    new_numbers = _numbers(message, kept) - _numbers(approved)
     problems += [_problem("new_number", token) for token in sorted(new_numbers)]
     if length > limit["value"]:
         size = f"{length} {limit['unit']}, limit {limit['value']}"
         problems.append(_problem("too_long", size))
     problems += _first_contact_problems(draft)
+    labels = "\n".join((draft["name"], *draft["changes"]))
+    problems += [_problem("contact_detail", item) for item in _contact_details(labels)]
     return problems + [
         _problem(item["kind"], item["number"])
         for item in check_narrative({"changes": draft["changes"]})
@@ -259,10 +320,20 @@ def _problems(draft: dict, approved: str, limit: dict, length: int) -> list[dict
 
 
 def _footer_confirmations(message: str) -> list[dict]:
-    if any(FOOTER_PLACEHOLDER.search(token) for token in find_placeholders(message)):
-        return []
-    missing = (("no_opt_out", OPT_OUT), ("no_postal_address", ADDRESS))
-    return [_confirm(rule) for rule, pattern in missing if not pattern.search(message)]
+    tokens = sorted(find_placeholders(message))
+    needed = (
+        ("no_opt_out", OPT_OUT, OPT_OUT_PLACEHOLDER),
+        ("no_postal_address", ADDRESS, POSTAL_PLACEHOLDER),
+    )
+    missing = [
+        rule
+        for rule, visible, supplied in needed
+        if not visible.search(message) and not any(supplied.search(item) for item in tokens)
+    ]
+    general = [item for item in tokens if GENERAL_FOOTER_PLACEHOLDER.search(item)]
+    if missing and general:
+        return [_confirm("assumed_footer", general[0])]
+    return [_confirm(rule) for rule in missing]
 
 
 def _confirmations(draft: dict, approved: str) -> list[dict]:
@@ -273,6 +344,9 @@ def _confirmations(draft: dict, approved: str) -> list[dict]:
     if not find_placeholders(draft["original"]):
         tokens = sorted(find_placeholders(message))
         items += [_confirm("new_placeholder", token) for token in tokens]
+    # A signature in the footer is normal. In the message itself, it may be a prospect's.
+    typed = PLACEHOLDER.sub(" ", f"{draft['subject']}\n{draft['body']}")
+    items += [_confirm("contact_detail", item) for item in _contact_details(typed)]
     if draft["kind"] in EMAIL_KINDS:
         items += _footer_confirmations(message)
     return items
@@ -331,6 +405,21 @@ def save_rewrite(workspace: Path, draft: dict, confirm: list[dict], day: date) -
     """Save the new version. The same name on the same day replaces the earlier file."""
     folder = workspace / OUTREACH_FOLDER
     folder.mkdir(parents=True, exist_ok=True)
-    path = folder / f"{day.isoformat()}-{rep_slug(draft['name'])}.txt"
+    slug = rep_slug(draft["name"])[:MAX_FILE_NAME].rstrip("-")
+    path = folder / f"{day.isoformat()}-{slug}.txt"
     path.write_text(render_saved(draft, confirm, day), encoding="utf-8")
     return path
+
+
+def draft_path(workspace: Path) -> Path:
+    """Return where Claude keeps a draft while it's being checked."""
+    return workspace / OUTREACH_FOLDER / DRAFT_FILE
+
+
+def discard_draft(workspace: Path) -> bool:
+    """Delete a draft that won't be finished, because it may hold a pasted email."""
+    path = draft_path(workspace)
+    if not path.exists():
+        return False
+    path.unlink()
+    return True

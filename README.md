@@ -304,6 +304,7 @@ Claude:  Here's the new version:
 
          Please confirm
          - I can't see an opt-out line. Does your sales tool add one?
+         - I can't see a postal address. Does your sales tool add one?
 
          It's saved in your team's folder.
 ```
@@ -314,11 +315,11 @@ Claude:  Here's the new version:
 |---|---|
 | Placeholders like `{{first_name}}` stay exactly the same | Your sales tool fills these in, and a changed one can send broken text |
 | Opt-out lines, postal addresses, and call-recording notices stay word for word | These are often legal requirements |
-| No new numbers, unless they're in your message or your team's details. Meeting lengths like "15 minutes" are fine | Stops made-up results |
+| No new numbers, unless they're in your message or your team's details. Asking for time, like "a 15-minute call", is fine | Stops made-up results, including claims like "saves 40 hours a week" |
 | Each message stays within its limit | Short messages get more replies, and LinkedIn cuts off long notes |
 | A first message can't pretend you've spoken before, with no "Re:" subject or "as we discussed" | Misleading subject lines are illegal in the US |
 
-If a draft fails, Claude fixes it and tries again. Claude also asks you to confirm any new names, and whether your sales tool adds an opt-out line and postal address.
+If a draft fails, Claude fixes it and tries again. Claude also asks you to confirm any new names, any email address or phone number in the message, and whether your sales tool adds an opt-out line and postal address.
 
 **Starting limits:**
 
@@ -571,7 +572,7 @@ This is covered by your agreement with your AI tool. For Claude, that's your Cla
 - Activity counts and rep names. Prospect names, emails, phone numbers, and companies are not kept
 - Any downloaded files you leave in there. You can delete them whenever you like
 - Coaching notes, as simple text files
-- Rewritten messages, as simple text files. The message you pasted isn't kept
+- Rewritten messages, as simple text files. The message you pasted is deleted once the rewrite is saved, or if you stop
 
 **Please keep your team's folder private,** and out of shared drives. Coaching notes are sensitive.
 

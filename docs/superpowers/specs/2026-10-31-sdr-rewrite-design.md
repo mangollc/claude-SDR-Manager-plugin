@@ -34,7 +34,7 @@ No working SDR manager is available to test with yet, so this design relies on p
 | Approach | Claude writes and the program checks, because skill rules alone were skipped in testing |
 | Facts | Claude may only use the original, the team profile, and saved proof points |
 | Output | Chat plus a `.txt` file, because a rewrite must be copied into a sales tool |
-| Originals | Not saved, so a pasted email with prospect details doesn't stay on disk |
+| Originals | Held in the draft only while it's being checked, then deleted, so a pasted email with prospect details doesn't stay on disk |
 | Versions | One rewrite at a time. The manager can ask for changes |
 | Team folder | Required. With no folder, the skill sends the manager to setup |
 | Limits on Claude | Unchanged. It never sends anything or changes anything in a sales tool |
@@ -53,16 +53,16 @@ The manager says one of these and pastes the message:
 
 Pasted rough notes count as an original, so there's no separate way to write from nothing.
 
-1. Run `status` to find the team's folder. If it exits with code 2, or the profile has no `product`, send the manager to setup.
+1. Run `status` to find the team's folder. If it exits with code 2, or the profile has no `product`, send the manager to setup. If `leftover_draft` is set, delete it with `discard-draft`.
 2. Read `team-profile.json` and `references/outreach-playbook.md`.
 3. Get the message. Remind the manager to paste the template, not a sent email, so prospect details stay out.
 4. Ask at most two things:
    - What the message is, if that isn't clear
    - Once per team, when the profile has no `proof_points` key, which true results or customer names reps may mention. Save the answers to `team-profile.json`. If there are none, save an empty list, so the question isn't asked again
 5. Write the draft to `outreach/draft.json` in the team's folder, then run `check-outreach`.
-6. Fix every problem and check again. Never work around a failed check.
-7. Show the before and after, why it changed, anything to confirm, and where it was saved.
-8. Close with three points: read it before using it, these checks aren't legal advice, and the scorecard will show replies over time but can't say which message caused a change.
+6. Fix every problem and check again. Never work around a failed check. If the manager stops, or a problem can't be fixed, run `discard-draft`.
+7. Show the before and after, why it changed, anything to confirm, where it was saved, and a next step.
+8. Finish with a fixed paragraph: read it before using it, these checks aren't legal advice, and the scorecard will show replies over time but can't say which message caused a change. Real sessions dropped a point when asked to use their own words, so the skill gives the exact text.
 
 If the manager asks for a change, write a new draft and run the check again. The same name on the same day replaces the earlier file.
 
@@ -128,19 +128,22 @@ The skill reads sample messages from `${CLAUDE_PLUGIN_ROOT}/sample-data/outreach
 
 **How protected text is recognized:**
 
-- **Opt-out:** unsubscribe, opt out, stop receiving, stop hearing, stop getting, remove you from, remove me, or reply stop
-- **Call-recording notice:** a statement that the call or conversation is or may be recorded, so a product that records calls isn't caught
-- **Postal address:** a P.O. Box, a number followed by a capitalized street word such as Street or Ave, a US state and ZIP code, or a UK postcode
+- **Opt-out:** wording aimed at the reader, such as unsubscribe, opt out of these emails, stop receiving these emails, prefer not to receive, or remove you from our list. "Stop getting surprised by stockouts" and "unsubscribe rates" don't count
+- **Call-recording notice:** a statement that this call, conversation, or line is or may be recorded, or a request to record it, so a product that records calls isn't caught
+- **Postal address:** a P.O. Box, a number followed by a capitalized street word that ends the address, a suite or floor number, a US state and ZIP code, or a UK postcode
+
+A pasted `Subject:` line is never protected. The skill also tells Claude to keep any line that tells the reader how to stop hearing from them, however it's worded, because the program can't recognize every wording.
 
 ### 7.1 Rejected
 
 | Rule | Details |
 |---|---|
-| Placeholders | If the original has any, the new message must contain exactly the same set, spelled the same. Recognize `{{...}}` including spaces, dots, and fallbacks such as `{{first_name\|there}}`, plus `{{{...}}}`, `{!...}`, `[[...]]`, `[...]`, `<<...>>`, and `%word%` |
+| Placeholders | If the original has any, the new message must contain exactly the same set, spelled the same. Recognize `{{...}}` including spaces, dots, and fallbacks such as `{{first_name\|there}}`, plus `{{{...}}}`, `{!...}`, `${...}`, `{word}`, `[[...]]`, `[...]`, `<<...>>`, `*\|...\|*`, `%word%`, and `%%word%%` |
 | Protected text | Each sentence or line of the original that holds an opt-out, a call-recording notice, or a postal address must appear unchanged |
-| New numbers | Every number must appear in an approved source. Meeting lengths and clock times, such as "15 minutes" and "2pm", are allowed. `extract_numbers` from `narrative_check.py` can't be reused here, because it misses `10x` and `$2M`, the claims most likely to be made up. `outreach.py` finds any run of digits that doesn't sit inside a word, so `B2B` and `Q3` are left alone |
+| New numbers | Every number must appear in an approved source. Clock times are allowed, and so is time the rep asks for, such as "a 15-minute call" or "Got 30 seconds?". "Saves 40 hours a week" is a claim, so it needs a source. Digits inside a new placeholder count, so `[10x faster]` is rejected. `extract_numbers` from `narrative_check.py` can't be reused here, because it misses `10x` and `$2M`, the claims most likely to be made up. `outreach.py` finds any run of digits that doesn't sit inside a word, so `B2B` and `Q3` are left alone |
 | Length | See section 7.3 |
-| Honest first contact | For `first_email`, `linkedin_note`, and `call_script`: no subject starting with `Re:`, `Fwd:`, or `Fw:`, and no claim of a past conversation, such as "as we discussed", "per our conversation", or "following up on our call" |
+| Honest first contact | For `first_email`, `linkedin_note`, and `call_script`: no subject starting with `Re:`, `Fwd:`, or `Fw:`, and no claim of a past conversation, such as "as we discussed", "per our conversation", or "following up on our last call". Lines that are honest on a live call, such as "thanks for taking my call", are allowed |
+| Contact details in labels | No email address or phone number in `name` or `changes` |
 | Why it changed | `changes` goes through `check_narrative`, which rejects statistics and gendered pronouns |
 
 ### 7.2 Manager confirms
@@ -150,10 +153,12 @@ These don't stop the save. Claude must show each one.
 | Rule | Details |
 |---|---|
 | New names | A capitalized word mid-sentence that isn't in an approved source, leaving out days and months |
-| Spelled-out numbers | Number words that aren't in an approved source, using `extract_number_words`, plus words such as "doubled" and "tripled" |
+| Spelled-out numbers | Number words that aren't in an approved source, using `extract_number_words`, plus words such as "doubled", "tenfold", "hundreds", and "zero" |
 | New placeholders | Only when the original has none. Ask whether they match how the sales tool writes them |
-| Missing opt-out | For email, when no opt-out shows and no placeholder could supply one, such as `{{unsubscribe}}` or `{{signature}}` |
-| Missing postal address | For email, under the same conditions |
+| Contact details in the message | An email address or phone number in `subject` or `body`, which may be a prospect's. A signature in `footer` isn't questioned |
+| Missing opt-out | For email, when no opt-out shows and no placeholder such as `{{unsubscribe_link}}` could supply one |
+| Missing postal address | For email, when none shows and no placeholder such as `{{postal_address}}` could supply one. `{{company.address}}` doesn't count, because that's the prospect's |
+| Assumed footer | For email, when one of those is missing and a `{{signature}}` or `{{footer}}` placeholder might supply it. Name the placeholder and ask |
 
 ### 7.3 Starting limits
 
@@ -215,6 +220,8 @@ Please confirm
 |---|---|
 | No team folder, or no `product` in the profile | Send the manager to setup |
 | Draft file missing or not valid JSON | Exit with a plain message, and Claude writes it again |
+| Rewrite abandoned, or a problem can't be fixed | Claude runs `discard-draft`, and tells the manager what stopped it. If that doesn't happen, `status` reports `leftover_draft`, and the next rewrite deletes it |
+| A very long `name` | Shorten the file name |
 | Unknown `kind`, or a missing `name`, `original`, or `body` | Exit 2 with a plain message |
 | `proof_points` isn't a list of text, or a limit isn't a positive number | `ProfileError` with a plain message |
 | No `outreach` folder in an older workspace | Create it on save |
@@ -224,7 +231,8 @@ Please confirm
 ## 10. Privacy and safety
 
 - Pasted messages and proof points go to the AI tool's provider, like everything else read in chat. The README and technical guide must say so.
-- The saved file holds the new version only. The draft, which holds the original, is deleted on success.
+- The saved file holds the new version only. The draft, which holds the original, is deleted on success, and by `discard-draft` otherwise.
+- A sent email's details can still reach the saved file if Claude copies them. The skill forbids it, and the program questions any email address or phone number in the message.
 - The team's `.gitignore` already covers the new folder.
 - Claude never invents facts, customers, or familiarity with a prospect, such as "I loved your recent post". The program can't catch every case, so the skill states the rule too.
 - Checks catch common problems. They aren't legal advice, and the skill and README say so.

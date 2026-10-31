@@ -1,6 +1,6 @@
 # Outreach playbook
 
-Use this to rewrite one message. Last checked on 2026-10-31, and the sources are at the end.
+Use this to rewrite one message. Last checked on 2026-10-31, and the sources are at the end. The limits below are starting limits, and a team can replace them.
 
 A **cadence**, also called a sequence, is the planned series of emails, calls, and LinkedIn messages a rep sends one prospect. A **proof point** is a true result or customer name that reps may mention. A **placeholder** is text such as `{{first_name}}` that a sales tool fills in.
 
@@ -16,7 +16,7 @@ A **cadence**, also called a sequence, is the planned series of emails, calls, a
 
 ## First email
 
-The limit is 80 words, and shorter is fine.
+The starting limit is 80 words, and shorter is fine.
 
 1. **Subject:** a few plain words about their world, in sentence case. It must be honest about what's inside. Never use `Re:` or `Fwd:`, because they pretend to continue a conversation.
 2. **Opening:** one line on a problem people in their role tend to have. Ask about it rather than claiming to know their business.
@@ -26,11 +26,11 @@ The limit is 80 words, and shorter is fine.
 
 ## Follow-up email
 
-The limit is 125 words. A follow-up should add something new, such as another angle, a proof point, or a sharper question. Never write "just checking in". It may refer to the earlier email honestly, as in "my last email", and it may offer to stop reaching out. Leave the subject blank if the sales tool keeps it in the same thread.
+The starting limit is 125 words. A follow-up should add something new, such as another angle, a proof point, or a sharper question. Never write "just checking in". It may refer to the earlier email honestly, as in "my last email", and it may offer to stop reaching out. Leave the subject blank if the sales tool keeps it in the same thread.
 
 ## Cold call script
 
-The limit is 150 words, which is about a minute of talking.
+The starting limit is 150 words, which is about a minute of talking.
 
 1. **Recording notice:** if the original has one, keep it word for word, and keep it first.
 2. **Who:** the caller's name and company.
@@ -45,13 +45,13 @@ A voicemail is also a `call_script`. Keep it far shorter: who's calling, why, an
 
 ## LinkedIn connection note
 
-The limit is 200 characters, because that's LinkedIn's limit, and the program counts each placeholder as written. Say how you found the person or what you have in common, then why you'd like to connect now. Don't pitch, add a link, or ask for a meeting.
+The starting limit is 200 characters, because that's LinkedIn's limit, and the program counts each placeholder as written. Say why you'd like to connect now, using only what the original, the team's profile, or a proof point says. Don't claim a shared background, a profile visit, or a past meeting unless the original says so. Don't pitch, add a link, or ask for a meeting.
 
 Free LinkedIn accounts get only three personalized notes a month, so a rep on a free account should save them for the prospects who matter most. A rep sends these by hand, because LinkedIn doesn't permit third-party automation software.
 
 ## LinkedIn message
 
-The limit is 100 words. Write as you would to someone you've just met. Mention why you connected, ask one question, and leave the pitch for later.
+The starting limit is 100 words. Write as you would to someone you've just met. Mention why you connected, ask one question, and leave the pitch for later.
 
 ## Rough notes
 
@@ -66,5 +66,6 @@ Checked on 2026-10-31.
 - [Instantly, Cold Email Benchmark Report 2026](https://instantly.ai/cold-email-benchmark-report-2026): the best campaigns stayed under 80 words.
 - [Gong Labs, cold call opening lines](https://www.gong.io/blog/cold-call-opening-lines), April 2018, 90,380 calls: stating the reason for the call, and the openers to avoid.
 - [Gong Labs, best and worst openers](https://www.gong.io/blog/the-best-and-worst-cold-call-openers-backed-by-data-from-300m-calls), July 2024, 300M+ calls: permission-based openers, and the openers to avoid.
-- [LinkedIn Help, Personalize invitations to connect](https://www.linkedin.com/help/linkedin/answer/a563153): the 200-character limit, the monthly limit for free accounts, and what to include.
+- [LinkedIn Help, Personalize invitations to connect](https://www.linkedin.com/help/linkedin/answer/a563153): the 200-character limit, and the monthly limit for free accounts.
 - [LinkedIn Help, Prohibited software and extensions](https://www.linkedin.com/help/linkedin/answer/a1341387): third-party automation isn't permitted.
+- [Salesforce Help, Handlebars merge language](https://help.salesforce.com/s/articleView?language=en_US&id=sales.handlebars_template_language.htm&type=5), [HubSpot, personalization tokens](https://knowledge.hubspot.com/marketing-email/use-personalization-tokens), and [Instantly, dynamic fields](https://instantly.ai/blog/using-crm-fields-for-dynamic-cold-email-personalization/): placeholder formats. Salesforce's older `{!Contact.FirstName}` format and the other formats the program recognizes come from memory, and recognizing them does no harm if they're rarely seen.

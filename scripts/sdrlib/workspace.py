@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import coaching, history
+from .outreach import draft_path
 from .profile import PROFILE_FILE, VALID_CHANNELS, active_reps, load_profile, rep_slug
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[2]
@@ -87,6 +88,7 @@ def describe_workspace(path: Path, now: datetime) -> dict:
     age = None
     if scorecard:
         age = (now - datetime.fromisoformat(scorecard["generated_at"])).days
+    draft = draft_path(path)
     return {
         "status": "ok",
         "workspace": str(path),
@@ -95,4 +97,5 @@ def describe_workspace(path: Path, now: datetime) -> dict:
         "metrics_age_days": age,
         "reps": _rep_summaries(path, team, scorecard),
         "imports": _waiting_exports(path),
+        "leftover_draft": str(draft) if draft.exists() else None,
     }

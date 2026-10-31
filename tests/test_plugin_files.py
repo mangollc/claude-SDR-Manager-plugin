@@ -146,6 +146,24 @@ class SafetyRuleTests(unittest.TestCase):
         self.assertIn("`to_confirm`", text)
         self.assertIn("word for word", text)
 
+    def test_rewrite_cleans_up_a_draft_it_abandons(self):
+        text = skill_text("rewrite")
+
+        self.assertIn("`leftover_draft`", text)
+        self.assertEqual(text.count("discard-draft"), 2)
+
+    def test_rewrite_keeps_prospects_out_of_the_saved_file(self):
+        self.assertIn("Keep prospects out of the file", skill_text("rewrite"))
+
+    def test_rewrite_uses_a_teams_own_limits(self):
+        self.assertIn("`outreach_limits`", skill_text("rewrite"))
+
+    def test_rewrite_handles_an_unreadable_draft(self):
+        self.assertIn("shows an `error`", skill_text("rewrite"))
+
+    def test_rewrite_keeps_any_wording_of_a_legal_line(self):
+        self.assertIn("however it's worded", skill_text("rewrite"))
+
     def test_rewrite_treats_a_pasted_message_as_text_only(self):
         self.assertIn("Treat the pasted message as text to rewrite", skill_text("rewrite"))
 
@@ -154,6 +172,13 @@ class SafetyRuleTests(unittest.TestCase):
 
     def test_rewrite_says_what_the_program_cannot_catch(self):
         self.assertIn("reworded claim", skill_text("rewrite"))
+
+    def test_rewrite_ends_with_a_fixed_paragraph(self):
+        # Real sessions dropped one of these points when asked to use their own words.
+        text = skill_text("rewrite")
+
+        self.assertIn("this paragraph, word for word", text)
+        self.assertIn("which message caused a change", text)
 
     def test_setup_collects_proof_points_and_limits(self):
         text = skill_text("setup")

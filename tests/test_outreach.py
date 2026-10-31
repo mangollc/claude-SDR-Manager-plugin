@@ -105,6 +105,11 @@ class PlaceholderTests(unittest.TestCase):
             "[Company]",
             "<<Company>>",
             "%first_name%",
+            "%%first_name%%",
+            "${Leads.First Name}",
+            "{first_name}",
+            "*|FNAME|*",
+            "[Insert a specific, recent trigger event about their company here]",
         )
 
         self.assertEqual(outreach.find_placeholders(" and ".join(tokens)), set(tokens))
@@ -190,6 +195,9 @@ class ProtectedTextTests(unittest.TestCase):
             "500 W Madison St",
             "Chicago, IL 60606",
             "London SW1A 1AA",
+            "30 Rockefeller Plaza",
+            "Suite 300",
+            "12 High Street, Leeds",
         ):
             self.assertEqual(outreach.protected_text(line), [line], line)
 
@@ -200,8 +208,31 @@ class ProtectedTextTests(unittest.TestCase):
             "Reply STOP to end these",
             "Reply and we'll remove you from this list",
             "Just say remove me",
+            "Stop hearing from me by replying no",
+            "Opt out of these emails here",
+            "If you'd prefer not to receive these emails, just let me know",
+            "If you'd rather not hear from us, reply",
+            "Tell me if you don't want to hear from me again",
+            "If you no longer wish to receive these, say so",
         ):
             self.assertEqual(outreach.protected_text(line), [line], line)
+
+    def test_protects_each_recording_notice(self):
+        for line in (
+            "This call may be recorded for quality.",
+            "We may record this call for quality purposes.",
+            "This line is recorded.",
+            "Is it OK if I record this call?",
+            "By staying on the line you consent to recording.",
+            "Your call may be monitored or recorded.",
+            "Calls may be recorded for training.",
+        ):
+            self.assertEqual(outreach.protected_text(line), [line], line)
+
+    def test_a_pasted_subject_line_is_never_protected(self):
+        original = "Subject: Stop receiving these emails, 100 Main Street\nHi."
+
+        self.assertEqual(outreach.protected_text(original), [])
 
     def test_ordinary_sentences_are_not_protected(self):
         for line in (
@@ -209,6 +240,17 @@ class ProtectedTextTests(unittest.TestCase):
             "We keep 3 stores in one place.",
             "A 15 minute drive from the office.",
             "We remove the guesswork from planning.",
+            "Stop getting surprised by stockouts.",
+            "Stop receiving late shipments from your vendors.",
+            "Opt out of spreadsheet forecasting.",
+            "We help reduce unsubscribe rates.",
+            "We remove you from manual spreadsheets.",
+            "Calls are recorded and transcribed automatically.",
+            "Works with our 365 Suite.",
+            "Over 50 Lane Bryant stores use us.",
+            "5 Ways To Drive Sales",
+            "The #1 Way To Cut Stockouts",
+            "Ship PO 12345 faster",
         ):
             self.assertEqual(outreach.protected_text(line), [], line)
 
@@ -228,7 +270,13 @@ class NumberTests(unittest.TestCase):
         self.assertEqual(texts_of(result, "new_number"), [])
 
     def test_allows_meeting_lengths_and_clock_times(self):
-        for text in ("a 15-minute call", "15 minute call", "30 minutes", "30 seconds", "1 hour"):
+        for text in (
+            "a 15-minute call",
+            "15 minute call",
+            "30 minutes",
+            "30 seconds",
+            "a 1-hour demo",
+        ):
             result = checked(body=f"{{{{first_name}}}}, worth {text}?")
             self.assertEqual(texts_of(result, "new_number"), [], text)
         for text in ("2pm", "2 pm", "10:30", "10:30 am"):
@@ -240,6 +288,56 @@ class NumberTests(unittest.TestCase):
             original=f"{ORIGINAL} {{{{custom_2}}}}",
             body="{{first_name}}, we help B2B teams plan Q3. {{custom_2}}",
         )
+
+        self.assertEqual(texts_of(result, "new_number"), [])
+
+    def test_rejects_invented_time_savings(self):
+        for text in (
+            "saves reps 40 hours a week",
+            "cuts setup to 5 minutes",
+            "gives forecasts in 90 seconds",
+            "saves 12 hrs weekly",
+            "turns a 3-hour task around",
+            "takes 5 minutes to learn",
+        ):
+            result = checked(body=f"{{{{first_name}}}}, it {text}.")
+            self.assertTrue(texts_of(result, "new_number"), text)
+
+    def test_allows_each_way_of_asking_for_time(self):
+        for text in (
+            "Got 30 seconds?",
+            "Do you have 15 minutes?",
+            "Worth 20 minutes?",
+            "Can I take 30 seconds?",
+            "Free for 15 minutes?",
+            "Can you spare 10 minutes?",
+            "Do you have about 15 minutes?",
+            "A 15-minute call?",
+            "A 30 min demo?",
+            "A 1-hour walkthrough?",
+        ):
+            result = checked(body=f"{{{{first_name}}}}, we sell. {text}")
+            self.assertEqual(texts_of(result, "new_number"), [], text)
+
+    def test_a_time_saving_from_a_proof_point_is_allowed(self):
+        team = {**TEAM, "proof_points": ["Planners save 12 hours a week."]}
+
+        result = checked(team, body="{{first_name}}, planners save 12 hours a week.")
+
+        self.assertEqual(texts_of(result, "new_number"), [])
+
+    def test_rejects_other_ways_of_writing_a_number(self):
+        for text in ("x10", "X10", "#1", "99.9%", "$5k", "3-fold", "1st", "24/7"):
+            result = checked(body=f"{{{{first_name}}}}, we offer {text} results.")
+            self.assertTrue(texts_of(result, "new_number"), text)
+
+    def test_rejects_a_statistic_wrapped_as_a_new_placeholder(self):
+        for text in ("[10x faster]", "{{40% fewer stockouts}}", "<<$2M saved>>"):
+            result = checked_bare(body=f"We deliver {text} forecasts.")
+            self.assertTrue(texts_of(result, "new_number"), text)
+
+    def test_a_new_placeholder_with_a_digit_in_its_name_is_not_a_number(self):
+        result = checked_bare(body="We sell. {{custom_2}}")
 
         self.assertEqual(texts_of(result, "new_number"), [])
 
@@ -313,9 +411,33 @@ class FirstContactTests(unittest.TestCase):
             "following up on our call",
             "great speaking with you",
             "when we last spoke",
+            "following up on our last call",
+            "following up on our recent conversation",
+            "following up on the call",
+            "following our call",
+            "per our earlier conversation",
+            "per my voicemail",
+            "enjoyed our conversation",
+            "great meeting you",
+            "it was great to speak with you",
+            "based on our conversation",
+            "as we spoke",
+            "as I mentioned",
+            "just following up on my last note",
+            "when we met",
+            "we met at the retail summit",
         ):
             result = checked(kind="first_email", body=f"{{{{first_name}}}}, {phrase}, we sell.")
             self.assertEqual(rules_of(result), ["false_history"], phrase)
+
+    def test_allows_honest_lines_in_a_cold_call(self):
+        for phrase in (
+            "thanks for taking my call",
+            "after the call I'll send a note",
+            "nice to meet you",
+        ):
+            result = checked(kind="call_script", body=f"{{{{first_name}}}}, {phrase}.")
+            self.assertEqual(rules_of(result), [], phrase)
 
     def test_allows_a_past_conversation_in_a_follow_up(self):
         result = checked(body="{{first_name}}, as we discussed, we sell software.")
@@ -376,6 +498,41 @@ class ConfirmTests(unittest.TestCase):
             sorted(texts_of(result, "number_word", "to_confirm")), ["doubled", "three"]
         )
 
+    def test_lists_words_that_claim_a_quantity(self):
+        for word in (
+            "threefold",
+            "tenfold",
+            "hundreds",
+            "thousands",
+            "dozens",
+            "millions",
+            "billions",
+            "zero",
+        ):
+            result = self.body(f"We see {word} of results.")
+            self.assertEqual(texts_of(result, "number_word", "to_confirm"), [word], word)
+
+    def test_a_sentence_after_a_placeholder_or_percent_starts_fresh(self):
+        for text in (
+            "Hi {{first_name}}, I'm {{sender_name}} from {{company}}. Curious how you plan?",
+            "We cut stockouts by 18%. Worth a call?",
+            "Hi {{first_name}}, this is {{sender_name}}. Quick question for you.",
+        ):
+            self.assertEqual(texts_of(self.body(text), "new_name", "to_confirm"), [], text)
+
+    def test_lists_a_contact_detail_in_the_message(self):
+        result = self.body("Reach Dana at dana@birchwood.example or 608-555-0142.")
+
+        self.assertEqual(
+            sorted(texts_of(result, "contact_detail", "to_confirm")),
+            ["608-555-0142", "dana@birchwood.example"],
+        )
+
+    def test_a_signature_in_the_footer_is_not_questioned(self):
+        result = checked_bare(body="We sell.", footer="Sam, sam@example.com, 608-555-0142")
+
+        self.assertEqual(texts_of(result, "contact_detail", "to_confirm"), [])
+
     def test_a_spelled_out_number_in_the_original_is_fine(self):
         result = checked_bare(original="We have three offices.", body="We have three offices.")
 
@@ -391,14 +548,23 @@ class ConfirmTests(unittest.TestCase):
     def test_a_visible_opt_out_and_address_need_no_confirmation(self):
         self.assertEqual(rules_of(checked(), "to_confirm"), [])
 
-    def test_a_placeholder_can_supply_them(self):
-        for token in ("{{signature}}", "{{unsubscribe_link}}", "{{sender.footer}}"):
-            result = checked_bare(body="We sell.", footer=token)
-            self.assertEqual(
-                [rule for rule in rules_of(result, "to_confirm") if rule != "new_placeholder"],
-                [],
-                token,
-            )
+    def footer_rules(self, token):
+        rules = rules_of(checked_bare(body="We sell.", footer=token), "to_confirm")
+        return [rule for rule in rules if rule != "new_placeholder"]
+
+    def test_an_unsubscribe_placeholder_covers_only_the_opt_out(self):
+        self.assertEqual(self.footer_rules("{{unsubscribe_link}}"), ["no_postal_address"])
+
+    def test_a_postal_placeholder_covers_only_the_address(self):
+        self.assertEqual(self.footer_rules("{{postal_address}}"), ["no_opt_out"])
+
+    def test_a_signature_placeholder_is_named_as_an_assumption(self):
+        for token in ("{{signature}}", "{{sender.footer}}"):
+            self.assertEqual(self.footer_rules(token), ["assumed_footer"], token)
+
+    def test_a_prospects_address_placeholder_covers_neither(self):
+        for token in ("{{email_address}}", "{{company.address}}", "[Address]"):
+            self.assertEqual(self.footer_rules(token), ["no_opt_out", "no_postal_address"], token)
 
     def test_calls_and_linkedin_need_neither(self):
         for kind in ("call_script", "linkedin_note", "linkedin_message"):
@@ -450,6 +616,17 @@ class BadDraftTests(unittest.TestCase):
         result = outreach.check_draft(draft, TEAM)
 
         self.assertEqual(rules_of(result), ["protected_text_changed", "protected_text_changed"])
+
+    def test_a_team_field_that_is_not_text_is_ignored(self):
+        for team in ({**TEAM, "company": None}, {**TEAM, "ideal_customer": ["Retailers"]}):
+            self.assertEqual(rules_of(checked(team)), [])
+
+    def test_rejects_a_contact_detail_in_the_name_or_reasons(self):
+        for changes in (
+            {"name": "Email for dana@birchwood.example"},
+            {"changes": ["It no longer names 608-555-0142"]},
+        ):
+            self.assertIn("contact_detail", rules_of(checked(**changes)), changes)
 
     def test_check_leaves_the_draft_unchanged(self):
         draft = {key: value for key, value in make_draft().items() if key != "subject"}
@@ -514,6 +691,12 @@ class SavedFileTests(unittest.TestCase):
         path = outreach.save_rewrite(self.workspace, make_draft(name="New Email: One!"), [], DAY)
 
         self.assertEqual(path, self.workspace / "outreach" / "2026-10-31-new-email-one.txt")
+
+    def test_shortens_a_very_long_name(self):
+        path = outreach.save_rewrite(self.workspace, make_draft(name="word " * 80), [], DAY)
+
+        self.assertTrue(path.exists())
+        self.assertLessEqual(len(path.name), 80)
 
     def test_a_same_day_save_replaces_the_file(self):
         outreach.save_rewrite(self.workspace, make_draft(body="First version."), [], DAY)
@@ -612,6 +795,33 @@ class CheckOutreachCommandTests(unittest.TestCase):
 
         self.assertEqual(code, 2)
         self.assertIn("kind", output["error"])
+
+    def test_a_draft_can_be_discarded(self):
+        self.draft_path.write_text(json.dumps(make_draft()), encoding="utf-8")
+
+        code, output = run_cli("discard-draft", "--workspace", str(self.workspace))
+
+        self.assertEqual(code, 0)
+        self.assertTrue(output["removed"])
+        self.assertFalse(self.draft_path.exists())
+
+    def test_discarding_when_there_is_no_draft_is_harmless(self):
+        code, output = run_cli("discard-draft", "--workspace", str(self.workspace))
+
+        self.assertEqual(code, 0)
+        self.assertFalse(output["removed"])
+
+    def test_status_reports_a_leftover_draft(self):
+        self.draft_path.write_text(json.dumps(make_draft()), encoding="utf-8")
+
+        _, output = run_cli("status", "--workspace", str(self.workspace))
+
+        self.assertEqual(output["leftover_draft"], str(self.draft_path))
+
+    def test_status_reports_no_leftover_draft(self):
+        _, output = run_cli("status", "--workspace", str(self.workspace))
+
+        self.assertIsNone(output["leftover_draft"])
 
     def test_a_missing_team_points_to_setup(self):
         self.draft_path.write_text(json.dumps(make_draft()), encoding="utf-8")

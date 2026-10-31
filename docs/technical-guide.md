@@ -175,7 +175,7 @@ A team can replace any target or message limit without editing files, by asking 
 
 **Read by the AI tool, and sent to its provider:** those previews, `team-profile.json` with any proof points, the metrics JSON, coaching notes during 1:1 work, messages pasted for a rewrite, and anything typed in chat.
 
-**Stored in the workspace:** daily counts per rep, meeting rows without prospect details, generated reports, coaching notes, saved column mappings, and any exports left in `imports/`. Rewritten messages are stored in `outreach/`. The pasted original is held in `outreach/draft.json` only until the check passes, then deleted. The workspace has a `.gitignore` containing `*`.
+**Stored in the workspace:** daily counts per rep, meeting rows without prospect details, generated reports, coaching notes, saved column mappings, and any exports left in `imports/`. Rewritten messages are stored in `outreach/`. The pasted original is held in `outreach/draft.json` only until the check passes, then deleted. If a rewrite is abandoned, `status` reports the leftover draft, and the next rewrite deletes it. The workspace has a `.gitignore` containing `*`.
 
 ## How it's built
 
@@ -186,8 +186,8 @@ Skills hold the judgment, and scripts hold the math. Claude's written text can't
 skills/           setup, scorecard, one-on-one, rewrite
 references/       Coaching and outreach playbooks, metric definitions, file mapping guide
 scripts/          sdr.py and the sdrlib package (standard library only)
-assets/           Starting targets, brand, and report templates
-sample-data/      The made-up team and messy exports
+assets/           Starting targets, message limits, brand, and report templates
+sample-data/      The made-up team, messy exports, and weak messages
 install.py        Installer for tools other than the Claude Code plugin
 tests/            Test suite
 docs/             This guide, the design spec, and the build plan
@@ -219,6 +219,7 @@ Skills call `scripts/sdr.py`. Every command prints JSON. Exit codes: 0 success, 
 | `report one-on-one --workspace W --week W --rep NAME --narrative F` | Build the 1:1 PDF |
 | `log-coaching --workspace W --rep NAME --entry-file F` | Add a coaching entry |
 | `check-outreach --workspace W --draft F` | Check a rewritten message, then save it and delete the draft if it passes |
+| `discard-draft --workspace W` | Delete a draft that won't be finished |
 
 ## Tests
 
