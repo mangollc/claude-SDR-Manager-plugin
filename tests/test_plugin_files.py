@@ -7,8 +7,13 @@ import unittest
 import sdr
 from tests.helpers import REPO_ROOT
 
-SKILLS = ("setup", "scorecard", "one-on-one")
-REFERENCES = ("file-mapping-guide.md", "metric-definitions.md", "coaching-playbook.md")
+SKILLS = ("setup", "scorecard", "one-on-one", "rewrite")
+REFERENCES = (
+    "file-mapping-guide.md",
+    "metric-definitions.md",
+    "coaching-playbook.md",
+    "outreach-playbook.md",
+)
 MAX_SKILL_WORDS = 3000
 
 
@@ -111,8 +116,47 @@ class SafetyRuleTests(unittest.TestCase):
             self.assertIn("never guess", skill_text(name).lower(), name)
 
     def test_skills_find_the_workspace_with_the_status_command(self):
-        for name in ("scorecard", "one-on-one"):
+        for name in ("scorecard", "one-on-one", "rewrite"):
             self.assertIn("Run `status`", skill_text(name), name)
+
+    def test_rewrite_forbids_invented_facts_and_familiarity(self):
+        text = skill_text("rewrite")
+
+        self.assertIn("Never invent facts", text)
+        self.assertIn("Never invent familiarity", text)
+
+    def test_rewrite_gives_no_legal_advice(self):
+        text = skill_text("rewrite")
+
+        self.assertIn("Don't give legal advice", text)
+        self.assertIn("aren't legal advice", text)
+
+    def test_rewrite_asks_about_proof_points_only_once(self):
+        text = skill_text("rewrite")
+
+        self.assertIn("no `proof_points` key", text)
+        self.assertIn("save an empty list", text)
+
+    def test_rewrite_keeps_sent_emails_out(self):
+        self.assertIn("not an email already sent", skill_text("rewrite"))
+
+    def test_rewrite_shows_every_item_to_confirm_word_for_word(self):
+        text = skill_text("rewrite")
+
+        self.assertIn("`to_confirm`", text)
+        self.assertIn("word for word", text)
+
+    def test_rewrite_never_sends_anything(self):
+        self.assertIn("Never send anything", skill_text("rewrite"))
+
+    def test_rewrite_says_what_the_program_cannot_catch(self):
+        self.assertIn("reworded claim", skill_text("rewrite"))
+
+    def test_setup_collects_proof_points_and_limits(self):
+        text = skill_text("setup")
+
+        self.assertIn("proof_points", text)
+        self.assertIn("outreach_limits", text)
 
     def test_gender_rule_covers_chat_as_well_as_reports(self):
         for name in ("scorecard", "one-on-one"):
@@ -152,6 +196,10 @@ class PlainLanguageTests(unittest.TestCase):
             ("one-on-one", "Set up SDR Manager for my team."),
             ("one-on-one", "Run my SDR scorecard."),
             ("one-on-one", "Log my 1:1 with <name>."),
+            ("scorecard", "Rewrite our first email."),
+            ("rewrite", "Set up SDR Manager for my team."),
+            ("rewrite", "Rewrite our next email."),
+            ("rewrite", "Run my SDR scorecard."),
         ):
             self.assertIn(sentence, skill_text(name), sentence)
 
@@ -166,6 +214,12 @@ class PlainLanguageTests(unittest.TestCase):
             ("scorecard", "run my sdr scorecard"),
             ("one-on-one", "prepare my 1:1 with"),
             ("one-on-one", "log my 1:1"),
+            ("rewrite", "rewrite this email"),
+            ("rewrite", "rewrite this call script"),
+            ("rewrite", "rewrite this linkedin message"),
+            ("rewrite", "rewrite our first email"),
+            ("rewrite", "rewrite our next email"),
+            ("rewrite", "rewrite the sample email"),
         ):
             self.assertIn(sentence, skill_text(name).split("---")[1].lower(), sentence)
 
@@ -213,9 +267,22 @@ class ReadmeTests(unittest.TestCase):
             self.assertIn(topic, self.text, topic)
 
     def test_documents_every_user_command(self):
-        for command in ("/sdr-setup", "/sdr-scorecard", "/sdr-one-on-one", "--log"):
+        for command in ("/sdr-setup", "/sdr-scorecard", "/sdr-one-on-one", "--log", "/sdr-rewrite"):
             self.assertIn(command, self.text, command)
         self.assertNotIn("/sdr-manager:", self.text)
+
+    def test_is_honest_about_what_rewrites_can_and_cannot_do(self):
+        for phrase in (
+            "aren't legal advice",
+            "read every rewrite",
+            "reworded claim",
+            "made-up messages only",
+        ):
+            self.assertIn(phrase, self.text, phrase)
+
+    def test_lists_every_starting_limit_for_rewrites(self):
+        for phrase in ("80 words", "125 words", "150 words", "200 characters", "100 words"):
+            self.assertIn(phrase, self.text, phrase)
 
     def test_explains_how_to_update_and_remove_it(self):
         for topic in ("How do I update SDR Manager?", "How do I remove SDR Manager?"):
@@ -240,6 +307,8 @@ class ReadmeTests(unittest.TestCase):
             "Set up SDR Manager with the sample team.",
             "Run my SDR scorecard.",
             "Prepare my 1:1 with Chloe Nguyen.",
+            "Rewrite this email.",
+            "Rewrite the sample email.",
         ):
             self.assertIn(phrase, self.text, phrase)
 
@@ -271,6 +340,14 @@ class TechnicalGuideTests(unittest.TestCase):
 
     def test_explains_how_to_remove_a_paste_in_install(self):
         self.assertIn("install.py --tool claude --uninstall", self.text)
+
+    def test_names_the_rewrite_command_on_both_install_routes(self):
+        for name in ("/sdr-manager:rewrite", "sdr-rewrite/"):
+            self.assertIn(name, self.text, name)
+
+    def test_says_where_rewrites_and_proof_points_go(self):
+        for phrase in ("proof points", "Rewritten messages", "outreach-limits.json"):
+            self.assertIn(phrase, self.text, phrase)
 
     def test_gives_ai_assistants_steps_they_can_follow(self):
         self.assertIn("## Instructions for AI assistants", self.text)

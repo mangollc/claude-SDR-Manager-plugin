@@ -72,7 +72,7 @@ claude plugin install sdr-manager@mango-plugins
 
 To do the same inside a session, start each line with `/plugin` instead of `claude plugin`.
 
-Commands appear as `/sdr-manager:setup`, `/sdr-manager:scorecard`, and `/sdr-manager:one-on-one`.
+Commands appear as `/sdr-manager:setup`, `/sdr-manager:scorecard`, `/sdr-manager:one-on-one`, and `/sdr-manager:rewrite`.
 
 ## Add it through the Claude app's Plugins screen
 
@@ -116,6 +116,7 @@ It generates standalone copies of the skills, because the originals rely on `${C
    sdr-setup/
    sdr-scorecard/
    sdr-one-on-one/
+   sdr-rewrite/
  ~/.sdr-manager/              The program, copied here
 ```
 
@@ -160,28 +161,30 @@ On Team and Enterprise plans, an owner can limit which marketplaces members can 
 | Report brand name | `name` in `assets/brand.json` |
 | Report appearance | `assets/templates/report.css` |
 | Coaching advice | `references/coaching-playbook.md` |
+| Rewriting advice | `references/outreach-playbook.md` |
 | Starting targets | `assets/default-targets.json` |
+| Starting message limits | `assets/outreach-limits.json` |
 
 For the Claude Code plugin, fork the repository first, then install from your fork, or your changes will be lost on update.
 
-A team can replace any target without editing files, by asking the assistant to change it. Those changes are stored in the team's own `team-profile.json`.
+A team can replace any target or message limit without editing files, by asking the assistant to change it. Those changes are stored in the team's own `team-profile.json`.
 
 ## What gets sent where
 
 **Read locally only:** full export files. `sdr.py inspect` gives the assistant column names, row counts, up to 10 masked lines, and the distinct values of small, non-sensitive columns. Columns with prospect details or free text are masked, and so is any value that looks like an email address or phone number.
 
-**Read by the AI tool, and sent to its provider:** those previews, `team-profile.json`, the metrics JSON, coaching notes during 1:1 work, and anything typed in chat.
+**Read by the AI tool, and sent to its provider:** those previews, `team-profile.json` with any proof points, the metrics JSON, coaching notes during 1:1 work, messages pasted for a rewrite, and anything typed in chat.
 
-**Stored in the workspace:** daily counts per rep, meeting rows without prospect details, generated reports, coaching notes, saved column mappings, and any exports left in `imports/`. The workspace has a `.gitignore` containing `*`.
+**Stored in the workspace:** daily counts per rep, meeting rows without prospect details, generated reports, coaching notes, saved column mappings, and any exports left in `imports/`. Rewritten messages are stored in `outreach/`. The pasted original is held in `outreach/draft.json` only until the check passes, then deleted. The workspace has a `.gitignore` containing `*`.
 
 ## How it's built
 
-Skills hold the judgment, and scripts hold the math. Claude's written text can't state statistics, because `narrative_check.py` rejects them.
+Skills hold the judgment, and scripts hold the math. Claude's written text can't state statistics, because `narrative_check.py` rejects them. A rewritten message is saved only if `outreach.py` passes it.
 
 ```text
 .claude-plugin/   Plugin and marketplace manifests
-skills/           setup, scorecard, one-on-one
-references/       Coaching playbook, metric definitions, file mapping guide
+skills/           setup, scorecard, one-on-one, rewrite
+references/       Coaching and outreach playbooks, metric definitions, file mapping guide
 scripts/          sdr.py and the sdrlib package (standard library only)
 assets/           Starting targets, brand, and report templates
 sample-data/      The made-up team and messy exports
@@ -196,7 +199,7 @@ exports ─► inspect ─► confirmed mapping ─► normalize ─► daily co
         PDF ◄─ report ◄─ check-narrative ◄─ Claude's text ◄─ metrics
 ```
 
-The design is explained in the [spec](superpowers/specs/2026-10-30-sdr-manager-design.md).
+The design is explained in the [first build spec](superpowers/specs/2026-10-30-sdr-manager-design.md) and the [rewrite spec](superpowers/specs/2026-10-31-sdr-rewrite-design.md).
 
 ## Command-line tool
 
@@ -215,6 +218,7 @@ Skills call `scripts/sdr.py`. Every command prints JSON. Exit codes: 0 success, 
 | `report team --workspace W --week W --narrative F` | Build the team PDF |
 | `report one-on-one --workspace W --week W --rep NAME --narrative F` | Build the 1:1 PDF |
 | `log-coaching --workspace W --rep NAME --entry-file F` | Add a coaching entry |
+| `check-outreach --workspace W --draft F` | Check a rewritten message, then save it and delete the draft if it passes |
 
 ## Tests
 
@@ -231,7 +235,8 @@ The tests need nothing installed. To regenerate the sample data, run `python3 te
 | Claude Code plugin on macOS | Tested end to end with real sessions, including install from GitHub |
 | Standalone skills from `install.py` | Tested end to end in a real session |
 | The README's paste-in install message | Tested against the published repo on macOS, using the Claude Code built into the Claude app, followed by the full README walkthrough |
-| Python 3.9 and 3.12 | Over 450 automated tests pass, with 97% coverage of `scripts/` |
+| Rewriting messages | Tested in real sessions on macOS, on made-up messages only |
+| Python 3.9 and 3.12 | Over 580 automated tests pass, with 97% coverage of `scripts/` |
 | PDF creation with Chrome | Tested |
 | Gemini CLI | Confirmed it discovers the skills. No full session has been run |
 | Codex, Cursor, and VS Code Copilot | Folder confirmed from official docs. No full session has been run |

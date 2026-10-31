@@ -1,0 +1,7 @@
+This call may be recorded for quality purposes.
+
+Hi {{first_name}}, this is {{sender_name}} from Example Analytics. Did I catch you at a bad time? I hope you're having a great day so far.
+
+So, I'm calling because we're a leading provider of forecasting solutions and we work with all kinds of retailers on all kinds of things. We have demand forecasting, inventory optimization, automated replenishment, and advanced reporting. I could go through all of that with you now if you have a few minutes, or I could send over a brochure and follow up next week, or we could set up a demo, whatever you think makes the most sense for you and your team at {{company}}.
+
+We really think we could be a great partner and help you unlock a lot of value. We've been doing this for a long time and our customers are very happy with us and we'd love to add you to the list. So what do you think, would you be open to learning more about everything we do and how it could potentially help {{company}} going forward? I'd be happy to answer any questions you have about our platform, our pricing, or anything else at all.

@@ -137,3 +137,5 @@ Keep it short, and use the output of `metrics`:
 Don't add other numbers, and don't reword, convert, or round `focus_text`.
 
 Then suggest a 1:1 for the rep who needs it most, with a sentence to type: "Prepare my 1:1 with <name>."
+
+If `team_pattern` has a `step` of 2 or 3, the shared problem may be the messaging, so also suggest "Rewrite our first email."

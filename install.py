@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
-SKILLS = ("setup", "scorecard", "one-on-one")
+SKILLS = ("setup", "scorecard", "one-on-one", "rewrite")
 SKILL_PREFIX = "sdr-"
 RUNTIME_FOLDERS = ("scripts", "assets", "references", "sample-data")
 RUNTIME_FOLDER_NAME = ".sdr-manager"

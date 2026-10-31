@@ -13,7 +13,7 @@ from pathlib import Path
 import install
 from tests.helpers import REPO_ROOT
 
-SKILL_NAMES = ("sdr-setup", "sdr-scorecard", "sdr-one-on-one")
+SKILL_NAMES = ("sdr-setup", "sdr-scorecard", "sdr-one-on-one", "sdr-rewrite")
 
 
 def frontmatter(text):
@@ -60,7 +60,7 @@ class InstallTests(InstallerTest):
     def install(self, **options):
         return install.install_skills(self.skills, self.runtime, **options)
 
-    def test_writes_three_skills(self):
+    def test_writes_every_skill(self):
         self.install()
 
         for name in SKILL_NAMES:
@@ -79,7 +79,14 @@ class InstallTests(InstallerTest):
     def test_copies_everything_the_skills_need(self):
         self.install()
 
-        for name in ("scripts/sdr.py", "assets/brand.json", "references/coaching-playbook.md"):
+        for name in (
+            "scripts/sdr.py",
+            "assets/brand.json",
+            "assets/outreach-limits.json",
+            "references/coaching-playbook.md",
+            "references/outreach-playbook.md",
+            "sample-data/outreach/weak-email.txt",
+        ):
             self.assertTrue((self.runtime / name).exists(), name)
         self.assertTrue((self.runtime / "sample-data" / "exports" / "crm-calls.csv").exists())
 

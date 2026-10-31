@@ -28,6 +28,10 @@ SAMPLE_PROFILE = {
     "company": "Example Analytics",
     "product": "Forecasting software that helps retailers plan inventory.",
     "ideal_customer": "Operations leaders at retailers with 50 to 500 stores.",
+    "proof_points": [
+        "Northwind Stores cut stockouts by 18% in its first year.",
+        "Harbor Home Goods replaced its planning spreadsheets in under 90 days.",
+    ],
     "channels": ["call", "email", "linkedin"],
     "reps": [
         {"name": "Ava Reyes", "start_date": "2025-02-03", "aliases": [], "active": True},

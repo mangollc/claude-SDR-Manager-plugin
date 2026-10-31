@@ -16,6 +16,53 @@ class ProfileTest(unittest.TestCase):
         self.folder = Path(folder.name)
 
 
+class OutreachFieldTests(ProfileTest):
+    def test_accepts_proof_points_and_limits(self):
+        workspace = make_workspace(
+            self.folder,
+            proof_points=["Northwind Stores cut stockouts by 18%."],
+            outreach_limits={"linkedin_note": {"value": 300, "as_of": "2026-10-31"}},
+        )
+
+        self.assertEqual(len(load_profile(workspace)["proof_points"]), 1)
+
+    def test_a_team_that_has_not_been_asked_is_valid(self):
+        self.assertNotIn("proof_points", load_profile(make_workspace(self.folder)))
+
+    def test_a_team_with_no_proof_points_is_valid(self):
+        workspace = make_workspace(self.folder, proof_points=[])
+
+        self.assertEqual(load_profile(workspace)["proof_points"], [])
+
+    def test_rejects_proof_points_that_are_not_a_list_of_text(self):
+        for value in ("One sentence", ["Fine", ""], ["Fine", "  "], [5], None):
+            workspace = make_workspace(self.folder, proof_points=value)
+
+            with self.assertRaisesRegex(ProfileError, "proof_points"):
+                load_profile(workspace)
+
+    def test_rejects_limits_that_are_not_an_object(self):
+        workspace = make_workspace(self.folder, outreach_limits=[300])
+
+        with self.assertRaisesRegex(ProfileError, "outreach_limits"):
+            load_profile(workspace)
+
+    def test_rejects_a_limit_that_is_not_a_positive_number(self):
+        for value in (0, -5, "80", True, None):
+            workspace = make_workspace(
+                self.folder, outreach_limits={"first_email": {"value": value}}
+            )
+
+            with self.assertRaisesRegex(ProfileError, "first_email"):
+                load_profile(workspace)
+
+    def test_rejects_a_limit_without_a_value(self):
+        workspace = make_workspace(self.folder, outreach_limits={"first_email": 80})
+
+        with self.assertRaisesRegex(ProfileError, "first_email"):
+            load_profile(workspace)
+
+
 class LoadProfileTests(ProfileTest):
     def test_loads_a_valid_profile(self):
         workspace = make_workspace(self.folder)

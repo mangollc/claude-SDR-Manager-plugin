@@ -7,6 +7,7 @@ Download your team's activity from your sales tools, hand it to Claude, and get:
 - A scorecard for every rep
 - The one thing to coach each rep on
 - A one-page prep sheet for every 1:1
+- A stronger version of any weak email, call script, or LinkedIn message
 
 You don't need to be technical. There's no code to write, and you talk to it in normal English.
 
@@ -50,6 +51,7 @@ You don't need to be technical. There's no code to write, and you talk to it in 
 | Guessing why a rep's numbers are down | One clear thing to coach each rep on |
 | 1:1s that start from scratch | A prep sheet with what was agreed last time |
 | Numbers scattered across different tools | One report, from any sales tool |
+| Weak outreach nobody has time to fix | A stronger version, checked before it's saved |
 
 It covers cold calls, email, and LinkedIn. It works with any sales tool that lets you download your data, such as Salesforce, HubSpot, Outreach, Salesloft, or Apollo.
 
@@ -124,6 +126,12 @@ Stay in the **Code** tab, with your **SDR Reports** folder open.
    Prepare my 1:1 with Chloe Nguyen.
    ```
 
+8. To see a rewrite, type:
+
+   ```text
+   Rewrite the sample email.
+   ```
+
 The sample team shows each situation the plugin looks for:
 
 | Sample rep | What's going on | What SDR Manager says |
@@ -157,7 +165,7 @@ The first time, Claude checks that it understands your files. After that, it rem
 
 ## What you can ask for
 
-There are three things SDR Manager does. Just ask in your own words, or use the shortcut if you prefer.
+There are four things SDR Manager does. Just ask in your own words, or use the shortcut if you prefer.
 
 | What you want | What to type | Shortcut |
 |---|---|---|
@@ -165,6 +173,7 @@ There are three things SDR Manager does. Just ask in your own words, or use the 
 | Get the weekly report | "Run my SDR scorecard" | `/sdr-scorecard` |
 | Prepare for a 1:1 | "Prepare my 1:1 with Chloe" | `/sdr-one-on-one Chloe` |
 | Record what you agreed | "Log my 1:1 with Chloe" | `/sdr-one-on-one Chloe --log` |
+| Rewrite a weak message | "Rewrite this email" | `/sdr-rewrite` |
 
 Not every AI tool has shortcuts, but plain English works everywhere.
 
@@ -181,7 +190,8 @@ Not every AI tool has shortcuts, but plain English works everywhere.
 3. Your reps' names and start dates, and any other spelling of their names in your tools
 4. Which channels your team uses: calls, email, LinkedIn
 5. Anyone in your files who isn't a rep, such as you
-6. Whether to keep the starting targets or use your own
+6. Any true results or customer names your reps may mention
+7. Whether to keep the starting targets or use your own
 
 **Example:**
 
@@ -261,6 +271,70 @@ Claude:  Here's the entry. Shall I save it?
 You:     Yes.
 Claude:  Saved. It'll appear on Chloe's next prep sheet.
 ```
+
+### Rewrite a message
+
+**What it does:** turns one weak email, cold call script, or LinkedIn message into a stronger one, ready to copy into your sales tool. It saves the new version as a text file in your team's folder.
+
+**When to use it:** when a message isn't getting replies, or when your scorecard shows the whole team struggling to get replies or book meetings.
+
+**What Claude may ask:** what the message is, if that isn't clear. Once per team, it also asks whether there are true results or customer names your reps may mention. Sales teams call these proof points, and Claude uses only the ones you give it.
+
+**Example:**
+
+```text
+You:     Rewrite this email.
+
+         Hi {{first_name}}, I hope this finds you well. We are a leading
+         provider of forecasting solutions...
+
+Claude:  Is this the first email someone gets, or a follow-up?
+You:     The first.
+Claude:  Here's the new version:
+
+           Subject: Inventory planning at {{company}}
+
+           {{first_name}}, how does {{company}} plan inventory across
+           stores today? We build forecasting software for retailers.
+           Worth a 15-minute call?
+
+         Why it changed
+         - It opens with their problem instead of your company
+         - It drops "leading provider", which nothing backs up
+
+         Please confirm
+         - I can't see an opt-out line. Does your sales tool add one?
+
+         It's saved in your team's folder.
+```
+
+**What the program checks before saving:**
+
+| Check | Why it matters |
+|---|---|
+| Placeholders like `{{first_name}}` stay exactly the same | Your sales tool fills these in, and a changed one can send broken text |
+| Opt-out lines, postal addresses, and call-recording notices stay word for word | These are often legal requirements |
+| No new numbers, unless they're in your message or your team's details. Meeting lengths like "15 minutes" are fine | Stops made-up results |
+| Each message stays within its limit | Short messages get more replies, and LinkedIn cuts off long notes |
+| A first message can't pretend you've spoken before, with no "Re:" subject or "as we discussed" | Misleading subject lines are illegal in the US |
+
+If a draft fails, Claude fixes it and tries again. Claude also asks you to confirm any new names, and whether your sales tool adds an opt-out line and postal address.
+
+**Starting limits:**
+
+| Message | Limit | Source |
+|---|---|---|
+| First email | 80 words | [Instantly 2026](https://instantly.ai/cold-email-benchmark-report-2026): its best campaigns stayed under 80 |
+| Follow-up email | 125 words | Our starting point, based on vendor studies |
+| Cold call script | 150 words, about a minute of talking | Our starting point |
+| LinkedIn connection note | 200 characters | [LinkedIn's limit](https://www.linkedin.com/help/linkedin/answer/a563153) |
+| LinkedIn message | 100 words | Our starting point |
+
+To change one, just ask: *"Change our LinkedIn note limit to 300."* LinkedIn Premium accounts may allow longer notes.
+
+**Please read every rewrite before you use it.** The program catches new numbers and names, but it can't catch a reworded claim, such as "cuts stockouts" when nobody has said that. These checks catch common problems, but they aren't legal advice.
+
+Your scorecard shows replies over time, but it can't say which message caused a change.
 
 ## What the reports look like
 
@@ -487,6 +561,7 @@ Your files include real people's information, so here's exactly what happens to 
 - Your team details, including your reps' names and start dates
 - Each rep's numbers
 - Your coaching notes, when you prepare a 1:1
+- Any message you paste in for a rewrite, and your proof points
 - Anything you type into the chat
 
 This is covered by your agreement with your AI tool. For Claude, that's your Claude plan.
@@ -496,12 +571,14 @@ This is covered by your agreement with your AI tool. For Claude, that's your Cla
 - Activity counts and rep names. Prospect names, emails, phone numbers, and companies are not kept
 - Any downloaded files you leave in there. You can delete them whenever you like
 - Coaching notes, as simple text files
+- Rewritten messages, as simple text files. The message you pasted isn't kept
 
 **Please keep your team's folder private,** and out of shared drives. Coaching notes are sensitive.
 
 **What SDR Manager won't do:**
 
 - Send messages, or change anything in your sales tools
+- Give legal advice. Rewrite checks catch common problems, but they don't replace a lawyer
 - Rank your reps against each other
 - Recommend hiring, firing, pay, or formal performance action. If you ask, it gives you the facts and suggests involving HR
 - Make up numbers. A built-in check stops Claude writing its own statistics into a report, so every number comes from your data, or from your own coaching notes
@@ -544,6 +621,12 @@ Claude won't judge a rep on just a few calls or meetings, because that wouldn't 
 **Why does the report say "Partial week"?**
 Your files stop before the end of the week. It's fine to use, or you can download them again once the week is over.
 
+**Can it write a message from nothing?**
+Paste your rough notes and ask Claude to rewrite them. It only uses what you've told it, so give it the facts you want included.
+
+**What should I paste for a rewrite?**
+Paste the template with its placeholders, like `{{first_name}}`, not an email you've already sent to someone. That keeps prospect details out.
+
 **Every rep has the same problem. What does that mean?**
 The report calls this a team pattern. When everyone struggles at the same step, look at the prospect list, the messaging, or the targets before coaching each rep.
 
@@ -572,6 +655,7 @@ We want to be upfront about this, because the plugin is new.
 | Area | Status |
 |---|---|
 | Reports, coaching focus, and 1:1 sheets | Tested in full with the sample team |
+| Rewriting messages, on a Mac | Tested in real sessions, on made-up messages only |
 | Installing it with the message above, on a Mac | Tested in full, using the Claude Code built into the Claude app |
 | Using it in plain English, on a Mac | Tested in full, using the Claude Code built into the Claude app |
 | Installing it from GitHub with Claude Code commands | Tested in full |
@@ -590,7 +674,7 @@ If you're in IT, you're a developer, or you'd rather install it by hand, see the
 
 ## What's coming next
 
-- **Next:** review your outreach sequences, rewrite weak emails and call scripts, check email deliverability, and flag legal limits
+- **Next:** review your outreach sequences, check email deliverability, and flag legal limits by country
 - **After that:** new-hire onboarding plans, cold call practice, and call scoring
 - **Later:** team schedules, prospect journey maps, leadership slides, capacity planning, and direct connections to sales tools
 

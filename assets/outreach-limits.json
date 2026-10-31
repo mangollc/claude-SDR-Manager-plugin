@@ -1,0 +1,32 @@
+{
+  "first_email": {
+    "value": 80,
+    "unit": "words",
+    "source": "Instantly 2026, best campaigns stayed under 80 words",
+    "as_of": "2026"
+  },
+  "follow_up_email": {
+    "value": 125,
+    "unit": "words",
+    "source": "Plugin default, based on vendor studies",
+    "as_of": "2026-10-31"
+  },
+  "call_script": {
+    "value": 150,
+    "unit": "words",
+    "source": "Plugin default, about a minute of talking",
+    "as_of": "2026-10-31"
+  },
+  "linkedin_note": {
+    "value": 200,
+    "unit": "characters",
+    "source": "LinkedIn Help, the limit for a note",
+    "as_of": "2026-10-31"
+  },
+  "linkedin_message": {
+    "value": 100,
+    "unit": "words",
+    "source": "Plugin default",
+    "as_of": "2026-10-31"
+  }
+}

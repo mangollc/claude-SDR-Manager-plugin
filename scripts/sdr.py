@@ -25,6 +25,7 @@ from sdrlib import (
     history,
     narrative_check,
     normalize,
+    outreach,
     pdf,
     profile,
     reports,
@@ -166,6 +167,25 @@ def run_log_coaching(args: argparse.Namespace) -> tuple[int, dict]:
     return EXIT_OK, {"status": "ok", "path": str(path)}
 
 
+def run_check_outreach(args: argparse.Namespace) -> tuple[int, dict]:
+    workspace = Path(args.workspace)
+    team = profile.load_profile(workspace)
+    draft_path = Path(args.draft)
+    draft = outreach.load_draft(draft_path)
+    result = outreach.check_draft(draft, team)
+    if result["problems"]:
+        return EXIT_NEEDS_INPUT, {"status": "needs_input", "problems": result["problems"]}
+    path = outreach.save_rewrite(workspace, draft, result["to_confirm"], date.today())
+    # The draft holds the pasted original, which may have prospect details in it.
+    draft_path.unlink()
+    return EXIT_OK, {
+        "status": "ok",
+        "path": str(path),
+        "length": result["length"],
+        "to_confirm": result["to_confirm"],
+    }
+
+
 def full_path(value: str) -> Path:
     """Expand a short folder name, because skills save files beside the paths reported here."""
     return Path(value).absolute()
@@ -233,6 +253,12 @@ COMMANDS = (
         run_log_coaching,
         "Add a coaching history entry",
         (WORKSPACE, (("--rep",), {"required": True}), (("--entry-file",), {"required": True})),
+    ),
+    (
+        "check-outreach",
+        run_check_outreach,
+        "Check a rewritten message, and save it if it passes",
+        (WORKSPACE, (("--draft",), {"required": True, "type": full_path})),
     ),
 )
 

@@ -17,7 +17,23 @@ class ProfileError(Exception):
     """Raised when the team profile is missing or invalid. The message is for the manager."""
 
 
+def _validate_outreach(profile: dict) -> None:
+    points = profile.get("proof_points", [])
+    if not isinstance(points, list) or not all(
+        isinstance(item, str) and item.strip() for item in points
+    ):
+        raise ProfileError(f"proof_points in {PROFILE_FILE} must be a list of short sentences.")
+    limits = profile.get("outreach_limits", {})
+    if not isinstance(limits, dict):
+        raise ProfileError(f"outreach_limits in {PROFILE_FILE} must list each limit by name.")
+    for kind, limit in limits.items():
+        value = limit.get("value") if isinstance(limit, dict) else None
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+            raise ProfileError(f"The {kind} limit in {PROFILE_FILE} must be a positive number.")
+
+
 def _validate(profile: dict) -> None:
+    _validate_outreach(profile)
     invalid = [item for item in profile.get("channels", []) if item not in VALID_CHANNELS]
     if invalid:
         raise ProfileError(

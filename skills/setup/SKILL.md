@@ -1,6 +1,6 @@
 ---
 name: setup
-description: This skill should be used when an SDR manager says "set up SDR Manager for my team", "set up SDR Manager with the sample team", "add my team", "add a rep", "a rep left", "change a target", "update our targets", or "try the sample team". It creates or updates the team's folder and profile.
+description: This skill should be used when an SDR manager says "set up SDR Manager for my team", "set up SDR Manager with the sample team", "add my team", "add a rep", "a rep left", "change a target", "update our targets", "add a proof point", or "try the sample team". It creates or updates the team's folder and profile.
 argument-hint: "[sample]"
 ---
 
@@ -49,6 +49,7 @@ Ask in small batches, and don't ask for anything the manager already told you:
 3. Each rep's name and start date, plus any other spelling of their name used in sales tools
 4. Which channels the team uses: calls, email, LinkedIn
 5. Anyone who appears in exports but isn't a rep, such as the manager
+6. Any true results or customer names reps may mention in their outreach, which sales teams call proof points. It's fine if there are none
 
 Save the answers to `team-profile.json` in that folder:
 
@@ -57,6 +58,7 @@ Save the answers to `team-profile.json` in that folder:
   "company": "Example Analytics",
   "product": "Forecasting software for retailers",
   "ideal_customer": "Operations leaders at mid-size retailers",
+  "proof_points": ["Northwind Stores cut stockouts by 18% in its first year."],
   "channels": ["call", "email", "linkedin"],
   "reps": [
     {"name": "Ava Reyes", "start_date": "2025-02-03", "aliases": ["A. Reyes"], "active": true}
@@ -66,7 +68,7 @@ Save the answers to `team-profile.json` in that folder:
 }
 ```
 
-Use `YYYY-MM-DD` for dates. When a rep leaves, set `active` to `false` instead of deleting them. If a start date is unknown, leave it blank and say that the rep will be treated as fully ramped.
+Use `YYYY-MM-DD` for dates. When a rep leaves, set `active` to `false` instead of deleting them. If a start date is unknown, leave it blank and say that the rep will be treated as fully ramped. Save `proof_points` as a list of short sentences, or as an empty list if there are none, so the manager isn't asked again.
 
 ## Step 4: Agree the targets
 
@@ -81,6 +83,12 @@ If the manager wants to replace a target, add it under `targets`, using the key 
 ```
 
 Leave `meeting_rate` alone unless the team has its own number, because the plugin calculates it from the other targets. Run `targets` again to confirm.
+
+If the manager wants a different length limit for rewritten messages, add it under `outreach_limits`, using `first_email`, `follow_up_email`, `call_script`, `linkedin_note`, or `linkedin_message`. A team with LinkedIn Premium may want 300 for `linkedin_note`:
+
+```json
+{"outreach_limits": {"linkedin_note": {"value": 300, "as_of": "2026-10-30"}}}
+```
 
 ## Step 5: Finish
 
