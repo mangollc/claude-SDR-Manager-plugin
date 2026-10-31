@@ -184,3 +184,15 @@ python3 -m unittest discover -s tests -t . && /usr/bin/python3 -m unittest disco
 ```
 
 - [ ] **Step 4: Update the owner's own install**, using the documented route, so `/sdr-rewrite` appears for them.
+
+## What changed during the build
+
+The spec holds the final rules. These are the changes from the plan above, and why they were made.
+
+- **Time claims:** the plan exempted every number followed by a time word, so "saves 40 hours a week" passed. Only time the rep asks for is exempt now.
+- **Protected text:** loose patterns treated "Stop getting surprised by stockouts" as a legal line, which trapped rewrites. Each pattern now asks for wording aimed at the reader, and a pasted `Subject:` line is never protected.
+- **Abandoned drafts:** a draft that never passed kept the pasted email on disk. Added `discard-draft`, and `status` now reports a leftover draft.
+- **Footer placeholders:** `{{company.address}}` silenced the missing-address prompt. Each prompt now has its own placeholders, and a `{{signature}}` is named as an assumption.
+- **Prospect details:** the program now rejects an email address or phone number in `name` or `changes`, and questions one in the message.
+- **Closing:** real sessions dropped one of three closing points when asked to use their own words, so the skill now gives a fixed paragraph.
+- **Pasted text:** the skill treats a pasted message as text to rewrite, and a real session refused instructions hidden inside one.

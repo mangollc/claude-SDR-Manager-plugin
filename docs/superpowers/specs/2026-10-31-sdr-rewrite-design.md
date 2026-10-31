@@ -1,9 +1,9 @@
 # sdr-rewrite: Stage 2 First Piece Design
 
 - **Date:** 2026-10-31
-- **Status:** Design approved by the owner in chat. Not built
+- **Status:** Built, and tested in real sessions on made-up messages. Sections 7 to 10 changed after review, as noted there
 - **Command:** `/sdr-rewrite` from the paste-in install, `/sdr-manager:rewrite` from the plugin
-- **Planned version:** 0.2.0
+- **Version:** 0.2.0
 - **Builds on:** [the first build design](2026-10-30-sdr-manager-design.md)
 
 ## 1. Summary

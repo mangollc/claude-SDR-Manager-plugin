@@ -236,8 +236,8 @@ The tests need nothing installed. To regenerate the sample data, run `python3 te
 | Claude Code plugin on macOS | Tested end to end with real sessions, including install from GitHub |
 | Standalone skills from `install.py` | Tested end to end in a real session |
 | The README's paste-in install message | Tested against the published repo on macOS, using the Claude Code built into the Claude app, followed by the full README walkthrough |
-| Rewriting messages | Tested in real sessions on macOS, on made-up messages only |
-| Python 3.9 and 3.12 | Over 580 automated tests pass, with 97% coverage of `scripts/` |
+| Rewriting messages | Tested in real sessions on macOS, through both the plugin and `install.py`, on made-up messages only |
+| Python 3.9 and 3.12 | Over 600 automated tests pass, with 97% coverage of `scripts/` |
 | PDF creation with Chrome | Tested |
 | Gemini CLI | Confirmed it discovers the skills. No full session has been run |
 | Codex, Cursor, and VS Code Copilot | Folder confirmed from official docs. No full session has been run |
