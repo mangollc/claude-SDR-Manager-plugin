@@ -27,7 +27,7 @@ The core idea is that the scorecard follows every rep through the same five step
 | Lead types | Outbound only. |
 | First workflow | Team profile, weekly scorecards, and 1:1 prep. |
 | Report format | PDF. Slides arrive with leadership reports in stage 4. |
-| Report branding | Every report carries the brand name Andy Gheewalla. |
+| Report branding | Every report carries the team's own name, which setup asks for. |
 | Targets | Built-in starting targets, labeled with their source and editable by each team. |
 | Calculations | A bundled Python calculator does all the math. |
 | Limits on Claude | Claude analyzes and drafts. It never sends anything or changes anything in a sales tool. |
@@ -65,6 +65,7 @@ Run once, and again whenever the team changes.
 3. For a real team, ask where to keep team data. The default is `sdr-workspace` in the current folder. If a workspace already exists, update it instead of replacing it.
 4. Ask in small plain-language batches:
    - The company and product, in a sentence or two
+   - The name to show on reports
    - The ideal customer
    - Each rep's name, start date, and any other spelling of their name used in exports
    - The outreach channels the team uses
@@ -163,7 +164,6 @@ sdr-plugin/
 │       ├── pdf.py                 find a browser and print to PDF
 │       └── workspace.py           create workspaces, load the sample
 ├── assets/
-│   ├── brand.json                 the report brand name
 │   ├── default-targets.json
 │   └── templates/
 │       ├── team-report.html
@@ -207,6 +207,7 @@ An import replaces stored counts only for the channels and exact dates it contai
 `team-profile.json` holds:
 
 - `company`, `product`, and `ideal_customer`, as short text
+- `brand`: the name on the team's reports, in up to 60 characters
 - `channels`: any of `call`, `email`, and `linkedin`
 - `reps`: `name`, `start_date`, `aliases`, and `active`
 - `ignored_names`: names in exports that aren't reps, such as the manager
@@ -447,7 +448,7 @@ Judged reps are all reps except those marked Onboarding or Limited data. If at l
 
 Both reports use US Letter and system fonts, so they work offline. Status always appears as text as well as color, so reports still work in grayscale.
 
-**Branding:** every report shows the brand name Andy Gheewalla as a wordmark at the top of its first page, in the footer of every page, and in the PDF's document title. The name lives in one file, `assets/brand.json`. No logo or brand colors have been supplied, so the report keeps its own palette.
+**Branding:** every report shows the team's name as a wordmark at the top of its first page, in the footer of every page, and in the PDF's document title. Setup asks for the name and saves it as `brand` in `team-profile.json`. A team without one shows its company, then `SDR Manager`. Only the name can be set, so the report keeps its own logo-free palette.
 
 **Team report:**
 

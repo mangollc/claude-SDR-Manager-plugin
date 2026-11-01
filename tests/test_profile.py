@@ -5,7 +5,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from sdrlib.profile import ProfileError, active_reps, load_profile, rep_lookup, rep_slug
+from sdrlib.profile import (
+    DEFAULT_BRAND,
+    MAX_BRAND_LENGTH,
+    ProfileError,
+    active_reps,
+    load_profile,
+    rep_lookup,
+    rep_slug,
+    report_brand,
+)
 from tests.helpers import DEFAULT_PROFILE, make_workspace, run_cli
 
 
@@ -14,6 +23,33 @@ class ProfileTest(unittest.TestCase):
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
         self.folder = Path(folder.name)
+
+
+class ReportBrandTests(ProfileTest):
+    def test_uses_the_name_the_team_chose(self):
+        self.assertEqual(report_brand({"brand": "Bright Co", "company": "Other"}), "Bright Co")
+
+    def test_a_team_set_up_earlier_uses_its_company(self):
+        self.assertEqual(report_brand({"company": "Example Co"}), "Example Co")
+
+    def test_a_team_with_neither_uses_the_plugin_name(self):
+        for team in ({}, {"company": ""}, {"company": "  "}, {"company": None}, {"company": 5}):
+            self.assertEqual(report_brand(team), DEFAULT_BRAND, team)
+
+    def test_leaves_stray_spaces_off(self):
+        self.assertEqual(report_brand({"brand": "  Bright Co "}), "Bright Co")
+
+    def test_accepts_a_name_at_the_length_limit(self):
+        workspace = make_workspace(self.folder, brand="x" * MAX_BRAND_LENGTH)
+
+        self.assertEqual(len(report_brand(load_profile(workspace))), MAX_BRAND_LENGTH)
+
+    def test_rejects_a_name_that_would_not_fit_or_is_not_text(self):
+        for value in ("", "   ", 5, None, "x" * (MAX_BRAND_LENGTH + 1)):
+            workspace = make_workspace(self.folder, brand=value)
+
+            with self.assertRaisesRegex(ProfileError, "brand"):
+                load_profile(workspace)
 
 
 class OutreachFieldTests(ProfileTest):

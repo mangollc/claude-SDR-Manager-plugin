@@ -180,6 +180,12 @@ class SafetyRuleTests(unittest.TestCase):
         self.assertIn("this paragraph, word for word", text)
         self.assertIn("which message caused a change", text)
 
+    def test_setup_asks_what_name_goes_on_reports(self):
+        text = skill_text("setup")
+
+        self.assertIn("What name should go on your reports?", text)
+        self.assertIn('"brand"', text)
+
     def test_setup_collects_proof_points_and_limits(self):
         text = skill_text("setup")
 
@@ -239,6 +245,7 @@ class PlainLanguageTests(unittest.TestCase):
         for name, sentence in (
             ("setup", "set up sdr manager for my team"),
             ("setup", "set up sdr manager with the sample team"),
+            ("setup", "change the name on our reports"),
             ("scorecard", "run my sdr scorecard"),
             ("one-on-one", "prepare my 1:1 with"),
             ("one-on-one", "log my 1:1"),
@@ -271,7 +278,7 @@ class ReadmeTests(unittest.TestCase):
             "Privacy",
             "tested",
             "sample",
-            "Andy Gheewalla",
+            "The name to show on your reports",
         ):
             self.assertIn(topic, self.text, topic)
 
@@ -298,6 +305,13 @@ class ReadmeTests(unittest.TestCase):
         for command in ("/sdr-setup", "/sdr-scorecard", "/sdr-one-on-one", "--log", "/sdr-rewrite"):
             self.assertIn(command, self.text, command)
         self.assertNotIn("/sdr-manager:", self.text)
+
+    def test_explains_how_to_set_and_change_the_report_name(self):
+        for phrase in (
+            "What name should go on your reports?",
+            "Change the name on our reports to",
+        ):
+            self.assertIn(phrase, self.text, phrase)
 
     def test_is_honest_about_what_rewrites_can_and_cannot_do(self):
         for phrase in (
@@ -368,6 +382,10 @@ class TechnicalGuideTests(unittest.TestCase):
 
     def test_explains_how_to_remove_a_paste_in_install(self):
         self.assertIn("install.py --tool claude --uninstall", self.text)
+
+    def test_explains_where_the_report_name_comes_from(self):
+        self.assertIn("`brand`", self.text)
+        self.assertNotIn("brand.json", self.text)
 
     def test_names_the_rewrite_command_on_both_install_routes(self):
         for name in ("/sdr-manager:rewrite", "sdr-rewrite/"):

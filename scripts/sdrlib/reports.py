@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Sequence
 from datetime import date
 from html import escape
@@ -23,6 +22,7 @@ from .focus import (
     WATCH,
     compare,
 )
+from .profile import DEFAULT_BRAND
 from .targets import ASSETS_DIR
 
 TEMPLATES_DIR = ASSETS_DIR / "templates"
@@ -76,11 +76,6 @@ NO_FOCUS_TEXT = {
     REVIEW: "No step explains the gap. Check for timing, such as meetings booked but not held.",
     LIMITED_DATA: "There isn't enough data for a focus. See the notes on this page.",
 }
-
-
-def load_brand() -> str:
-    """Return the brand name shown on every report."""
-    return json.loads((ASSETS_DIR / "brand.json").read_text(encoding="utf-8"))["name"]
 
 
 def _load_template(name: str) -> Template:
@@ -522,9 +517,8 @@ def _targets_page(metrics: dict, brand: str) -> str:
     )
 
 
-def render_team(metrics: dict, narrative: dict) -> str:
+def render_team(metrics: dict, narrative: dict, brand: str = DEFAULT_BRAND) -> str:
     """Return the full team report as HTML."""
-    brand = load_brand()
     pages = [
         _summary_page(metrics, narrative, brand),
         *(_rep_page(rep, metrics, narrative, brand) for rep in metrics["reps"]),
@@ -582,12 +576,13 @@ def _evidence_lines(rep: dict) -> list[str]:
     return lines
 
 
-def render_one_on_one(metrics: dict, rep: str, narrative: dict, coaching_text: str) -> str:
+def render_one_on_one(
+    metrics: dict, rep: str, narrative: dict, coaching_text: str, brand: str = DEFAULT_BRAND
+) -> str:
     """Return the one-page 1:1 prep as HTML."""
     match = next((item for item in metrics["reps"] if item["name"] == rep), None)
     if match is None:
         raise ValueError(f"{rep} isn't in the scorecard for {metrics['week']}.")
-    brand = load_brand()
     commitments = _latest_commitments(coaching_text) or ["No earlier commitments on file."]
     return _load_template("one-on-one.html").substitute(
         title=escape(f'{brand}: 1:1 prep for {rep} {metrics["week"]}'),

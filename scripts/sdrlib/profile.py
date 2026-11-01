@@ -11,10 +11,22 @@ from pathlib import Path
 
 PROFILE_FILE = "team-profile.json"
 VALID_CHANNELS = ("call", "email", "linkedin")
+DEFAULT_BRAND = "SDR Manager"
+MAX_BRAND_LENGTH = 60
 
 
 class ProfileError(Exception):
     """Raised when the team profile is missing or invalid. The message is for the manager."""
+
+
+def _validate_brand(profile: dict) -> None:
+    if "brand" not in profile:
+        return
+    brand = profile["brand"]
+    if not isinstance(brand, str) or not brand.strip() or len(brand) > MAX_BRAND_LENGTH:
+        raise ProfileError(
+            f"brand in {PROFILE_FILE} must be a name of up to {MAX_BRAND_LENGTH} characters."
+        )
 
 
 def _validate_outreach(profile: dict) -> None:
@@ -33,6 +45,7 @@ def _validate_outreach(profile: dict) -> None:
 
 
 def _validate(profile: dict) -> None:
+    _validate_brand(profile)
     _validate_outreach(profile)
     invalid = [item for item in profile.get("channels", []) if item not in VALID_CHANNELS]
     if invalid:
@@ -76,6 +89,14 @@ def load_profile(workspace: Path) -> dict:
         raise ProfileError(f"{PROFILE_FILE} isn't valid JSON: {error}") from error
     _validate(profile)
     return profile
+
+
+def report_brand(profile: dict) -> str:
+    """Return the name on a team's reports. A team that was never asked shows its company."""
+    for value in (profile.get("brand"), profile.get("company")):
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return DEFAULT_BRAND
 
 
 def rep_lookup(profile: dict) -> dict[str, str | None]:

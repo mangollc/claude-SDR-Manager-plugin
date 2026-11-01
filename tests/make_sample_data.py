@@ -26,6 +26,7 @@ MANAGER_DIALS_PER_WEEK = 5
 
 SAMPLE_PROFILE = {
     "company": "Example Analytics",
+    "brand": "Example Analytics",
     "product": "Forecasting software that helps retailers plan inventory.",
     "ideal_customer": "Operations leaders at retailers with 50 to 500 stores.",
     "proof_points": [

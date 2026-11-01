@@ -158,7 +158,7 @@ On Team and Enterprise plans, an owner can limit which marketplaces members can 
 
 | To change | Edit |
 |---|---|
-| Report brand name | `name` in `assets/brand.json` |
+| Name on reports | `brand` in the team's `team-profile.json`. Setup asks for it |
 | Report appearance | `assets/templates/report.css` |
 | Coaching advice | `references/coaching-playbook.md` |
 | Rewriting advice | `references/outreach-playbook.md` |
@@ -167,7 +167,7 @@ On Team and Enterprise plans, an owner can limit which marketplaces members can 
 
 For the Claude Code plugin, fork the repository first, then install from your fork, or your changes will be lost on update.
 
-A team can replace any target or message limit without editing files, by asking the assistant to change it. Those changes are stored in the team's own `team-profile.json`.
+A team can replace any target or message limit, or the name on its reports, without editing files, by asking the assistant to change it. Those changes are stored in the team's own `team-profile.json`. A team with no `brand` shows its `company` on reports, and a team with neither shows `SDR Manager`.
 
 ## What gets sent where
 
@@ -186,7 +186,7 @@ Skills hold the judgment, and scripts hold the math. Claude's written text can't
 skills/           setup, scorecard, one-on-one, rewrite
 references/       Coaching and outreach playbooks, metric definitions, file mapping guide
 scripts/          sdr.py and the sdrlib package (standard library only)
-assets/           Starting targets, message limits, brand, and report templates
+assets/           Starting targets, message limits, and report templates
 sample-data/      The made-up team, messy exports, and weak messages
 install.py        Installer for tools other than the Claude Code plugin
 tests/            Test suite

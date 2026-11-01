@@ -81,7 +81,6 @@ class InstallTests(InstallerTest):
 
         for name in (
             "scripts/sdr.py",
-            "assets/brand.json",
             "assets/outreach-limits.json",
             "references/coaching-playbook.md",
             "references/outreach-playbook.md",

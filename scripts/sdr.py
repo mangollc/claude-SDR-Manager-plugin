@@ -129,11 +129,12 @@ def _render_report(args: argparse.Namespace, workspace: Path) -> tuple[str, str]
     """Return a report's HTML and its file name without the extension."""
     metrics_file = history.read_metrics(workspace, args.week)
     narrative = _read_json(args.narrative)
+    brand = profile.report_brand(profile.load_profile(workspace))
     if args.kind == "team":
-        return reports.render_team(metrics_file, narrative), "team-report"
+        return reports.render_team(metrics_file, narrative, brand), "team-report"
     rep = _known_rep(workspace, args.rep)
     text = reports.render_one_on_one(
-        metrics_file, rep, narrative, coaching.read_history(workspace, rep)
+        metrics_file, rep, narrative, coaching.read_history(workspace, rep), brand
     )
     return text, f"one-on-one-{profile.rep_slug(rep)}-{date.today().isoformat()}"
 

@@ -45,6 +45,11 @@ class SampleDataTests(unittest.TestCase):
         for name, text in make_sample_data.build_exports().items():
             self.assertEqual((folder / name).read_text(encoding="utf-8"), text, name)
 
+    def test_sample_reports_carry_the_sample_company(self):
+        self.assertEqual(
+            make_sample_data.SAMPLE_PROFILE["brand"], make_sample_data.SAMPLE_PROFILE["company"]
+        )
+
     def test_saved_profile_matches_the_generator(self):
         saved = json.loads((REPO_ROOT / "sample-data" / "team-profile.json").read_text())
 

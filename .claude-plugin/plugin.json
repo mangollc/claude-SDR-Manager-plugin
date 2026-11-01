@@ -1,6 +1,6 @@
 {
   "name": "sdr-manager",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Coach SDR teams from exported sales data: weekly scorecards, one coaching focus per rep, 1:1 prep, and checked outreach rewrites.",
   "author": {
     "name": "Manish Singh"

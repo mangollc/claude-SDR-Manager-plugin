@@ -22,7 +22,7 @@
 - Prospect names, emails, phones, and companies never reach stored history.
 - Claude never sends messages or changes anything in a sales tool.
 - Reports show status as text as well as color, list reps alphabetically, and contain no rankings.
-- Every report shows the brand name from `assets/brand.json`, which is `Andy Gheewalla`, at the top of its first page, in every page footer, and in the document title.
+- Every report shows the team's brand name at the top of its first page, in every page footer, and in the document title.
 - Python files stay under 800 lines and functions under 50 lines. Functions return new objects and don't mutate their inputs.
 - Git: work on branch `first-build`, commit after each task, and use `<type>: <description>` messages. No attribution lines, because the user's git rule disables them.
 
@@ -46,7 +46,6 @@ sdr-plugin/
 ├── skills/{setup,scorecard,one-on-one}/SKILL.md
 ├── references/{file-mapping-guide,metric-definitions,coaching-playbook}.md
 ├── assets/
-│   ├── brand.json             the report brand name
 │   ├── default-targets.json
 │   └── templates/{team-report.html,one-on-one.html,report.css}
 ├── scripts/
@@ -718,7 +717,7 @@ Compare after removing commas.
 ### Task 8: Reports and PDF
 
 **Files:**
-- Create: `assets/brand.json`, `assets/templates/team-report.html`, `assets/templates/one-on-one.html`, `assets/templates/report.css`, `scripts/sdrlib/reports.py`, `scripts/sdrlib/pdf.py`, `tests/test_reports.py`, `tests/test_pdf.py`
+- Create: `assets/templates/team-report.html`, `assets/templates/one-on-one.html`, `assets/templates/report.css`, `scripts/sdrlib/reports.py`, `scripts/sdrlib/pdf.py`, `tests/test_reports.py`, `tests/test_pdf.py`
 - Modify: `scripts/sdr.py` (add `report`)
 
 **Interfaces:**
@@ -738,7 +737,7 @@ def print_to_pdf(html_path: Path, pdf_path: Path, browser: str | None = None,
 
 Render with `string.Template`. Every data value goes through `html.escape`. The `report` command first runs the number check and exits 2 if it fails. It saves HTML to `reports/<week>/`, then the PDF, and reports `pdf`, `html`, and `fallback`.
 
-**Branding:** `assets/brand.json` contains `{"name": "Andy Gheewalla"}`. `load_brand` reads it. Show the name as a wordmark above the report title on the first page, as `Andy Gheewalla | Team report | 2026-W44` in the footer of every `.page` section, and at the start of the HTML `<title>`, which becomes the PDF document title. The 1:1 footer uses `Andy Gheewalla | 1:1 prep | <rep> | <week>`.
+**Branding:** this first held one fixed name in `assets/brand.json`. Setup now asks each team for its own. Show the name as a wordmark above the report title on the first page, as `<brand> | Team report | 2026-W44` in the footer of every `.page` section, and at the start of the HTML `<title>`, which becomes the PDF document title. The 1:1 footer uses `<brand> | 1:1 prep | <rep> | <week>`.
 
 **Visual direction:** a printed ledger. Georgia headings, system sans-serif tabular numbers, thin rules instead of boxes, and a generous left column for the rep's focus. Colors are defined once as custom properties in `report.css`.
 
@@ -756,7 +755,6 @@ Status uses text plus a shape: `● On target`, `◐ Near`, `○ Below`, `– No
 
 | Case | Expected |
 |---|---|
-| `load_brand()` | `Andy Gheewalla` |
 | Team report with 3 reps | Brand appears in the first-page header and in the footer of all 5 pages |
 | 1:1 report | Brand appears in the header and the footer |
 | Both reports | `<title>` starts with the brand name |
@@ -983,7 +981,7 @@ Confirm each of the six criteria in spec section 14 with evidence, and list anyt
 ## Not included in this plan
 
 - Publishing to GitHub or a marketplace, and choosing a license. This needs its own approval.
-- A logo or brand colors. Only the brand name has been supplied, and teams can't yet set their own.
+- A logo or brand colors. Teams can set only the name on their reports.
 - Testing on Windows, Linux, or Cowork. The README states what was tested.
 - Stages 2 to 4 from the spec.
 

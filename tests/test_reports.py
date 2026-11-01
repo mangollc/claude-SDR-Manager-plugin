@@ -11,7 +11,6 @@ from unittest import mock
 from sdrlib import history, reports
 from sdrlib.reports import (
     format_value,
-    load_brand,
     render_one_on_one,
     render_team,
     sparkline,
@@ -21,7 +20,7 @@ from tests.helpers import make_workspace, run_cli, window_meetings
 from tests.test_scorecard import seed_activity
 
 NOW = datetime(2026, 10, 30, 12, 0, 0)
-BRAND = "Andy Gheewalla"
+BRAND = "Harbor Point Sales"
 TEAM_NARRATIVE = {
     "headline": "A steady week with one clear gap",
     "observations": ["First note", "Second note"],
@@ -128,17 +127,14 @@ class SparklineTests(unittest.TestCase):
 
 
 class BrandTests(ReportTest):
-    def test_brand_file_names_the_brand(self):
-        self.assertEqual(load_brand(), BRAND)
-
     def test_team_report_shows_the_brand_on_the_first_page(self):
-        output = render_team(self.metrics, TEAM_NARRATIVE)
+        output = render_team(self.metrics, TEAM_NARRATIVE, BRAND)
 
         first_page = output[output.index("<section") : output.index("</section>")]
         self.assertIn(f'class="wordmark">{BRAND}<', first_page)
 
     def test_team_report_footer_on_every_page(self):
-        output = render_team(self.metrics, TEAM_NARRATIVE)
+        output = render_team(self.metrics, TEAM_NARRATIVE, BRAND)
 
         footers = re.findall(r'<footer class="page-footer">(.*?)</footer>', output)
         self.assertEqual(len(footers), 5)
@@ -147,7 +143,7 @@ class BrandTests(ReportTest):
             self.assertIn("2026-W44", footer)
 
     def test_one_on_one_shows_the_brand_in_header_and_footer(self):
-        output = render_one_on_one(self.metrics, "Ava Reyes", ONE_ON_ONE_NARRATIVE, "")
+        output = render_one_on_one(self.metrics, "Ava Reyes", ONE_ON_ONE_NARRATIVE, "", BRAND)
 
         self.assertIn(f'class="wordmark">{BRAND}<', output)
         footer = re.search(r'<footer class="page-footer">(.*?)</footer>', output).group(1)
@@ -155,18 +151,17 @@ class BrandTests(ReportTest):
         self.assertIn("Ava Reyes", footer)
 
     def test_titles_start_with_the_brand(self):
-        team = render_team(self.metrics, TEAM_NARRATIVE)
-        one_on_one = render_one_on_one(self.metrics, "Ava Reyes", ONE_ON_ONE_NARRATIVE, "")
+        team = render_team(self.metrics, TEAM_NARRATIVE, BRAND)
+        one_on_one = render_one_on_one(self.metrics, "Ava Reyes", ONE_ON_ONE_NARRATIVE, "", BRAND)
 
         self.assertIn(f"<title>{BRAND}", team)
         self.assertIn(f"<title>{BRAND}", one_on_one)
 
     def test_brand_text_is_escaped(self):
-        with mock.patch.object(reports, "load_brand", return_value="Andy & Co"):
-            output = render_team(self.metrics, TEAM_NARRATIVE)
+        output = render_team(self.metrics, TEAM_NARRATIVE, "Bright & Co <script>")
 
-        self.assertIn("Andy &amp; Co", output)
-        self.assertNotIn("Andy & Co", output)
+        self.assertIn("Bright &amp; Co &lt;script&gt;", output)
+        self.assertNotIn("Bright & Co", output)
 
 
 class TeamReportTests(ReportTest):
@@ -458,6 +453,25 @@ class ReportCommandTests(ReportTest):
         arguments += ("--week", "2026-W44", "--narrative", str(path)) + extra
         with mock.patch("sdrlib.pdf.print_to_pdf", return_value=False):
             return run_cli(*arguments)
+
+    def wordmark(self, output):
+        html = Path(output["html"]).read_text(encoding="utf-8")
+        return re.search(r'class="wordmark">(.*?)<', html).group(1)
+
+    def test_reports_carry_the_name_the_team_chose(self):
+        path = self.workspace / "team-profile.json"
+        path.write_text(json.dumps({**json.loads(path.read_text()), "brand": BRAND}))
+
+        _, team = self.run_report("team", TEAM_NARRATIVE)
+        _, one_on_one = self.run_report("one-on-one", ONE_ON_ONE_NARRATIVE, "--rep", "Ava Reyes")
+
+        self.assertEqual(self.wordmark(team), BRAND)
+        self.assertEqual(self.wordmark(one_on_one), BRAND)
+
+    def test_a_team_set_up_earlier_sees_its_company_on_reports(self):
+        _, output = self.run_report("team", TEAM_NARRATIVE)
+
+        self.assertEqual(self.wordmark(output), "Example Co")
 
     def test_team_report_saves_html_and_reports_the_fallback(self):
         code, output = self.run_report("team", TEAM_NARRATIVE)

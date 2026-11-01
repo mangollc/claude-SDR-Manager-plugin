@@ -3,7 +3,7 @@
 - **Date:** 2026-10-31
 - **Status:** Built, and tested in real sessions on made-up messages. Sections 7 to 10 changed after review, as noted there
 - **Command:** `/sdr-rewrite` from the paste-in install, `/sdr-manager:rewrite` from the plugin
-- **Version:** 0.2.0
+- **Version:** 0.2.0, the first version with this command
 - **Builds on:** [the first build design](2026-10-30-sdr-manager-design.md)
 
 ## 1. Summary

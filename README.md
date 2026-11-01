@@ -153,7 +153,7 @@ The sample team shows each situation the plugin looks for:
    Set up SDR Manager for my team.
    ```
 
-3. Answer a few questions about your product, your customers, and your reps.
+3. Answer a few questions about your product, your customers, your reps, and the name to show on your reports.
 4. Download your files. See [what to download](#what-to-download-from-your-sales-tools).
 5. Type this, using wherever you saved your files:
 
@@ -186,12 +186,13 @@ Not every AI tool has shortcuts, but plain English works everywhere.
 **What Claude asks:**
 
 1. What your company sells
-2. Who your ideal customer is
-3. Your reps' names and start dates, and any other spelling of their names in your tools
-4. Which channels your team uses: calls, email, LinkedIn
-5. Anyone in your files who isn't a rep, such as you
-6. Any true results or customer names your reps may mention
-7. Whether to keep the starting targets or use your own
+2. The name to show on your reports
+3. Who your ideal customer is
+4. Your reps' names and start dates, and any other spelling of their names in your tools
+5. Which channels your team uses: calls, email, LinkedIn
+6. Anyone in your files who isn't a rep, such as you
+7. Any true results or customer names your reps may mention
+8. Whether to keep the starting targets or use your own
 
 **Example:**
 
@@ -202,6 +203,9 @@ Claude:  Your computer is ready. Where should I keep your team's data?
 You:     That's fine.
 Claude:  What does your company sell, and who's your ideal customer?
 You:     Scheduling software for dental clinics with 5 to 50 staff.
+Claude:  What name should go on your reports? Most teams use their company
+         name.
+You:     Example Dental.
 Claude:  Who's on your team? I need each rep's name and start date.
 You:     Maria Lopez, March 2025. Tom Becker, started two weeks ago.
 Claude:  Thanks. Here are your starting targets and where each comes from...
@@ -344,7 +348,7 @@ These are simplified versions. The real reports are formatted PDFs. All the numb
 ### Team report: first page
 
 ```text
- Andy Gheewalla                                         SDR TEAM REPORT
+ Example Analytics                                      SDR TEAM REPORT
  ══════════════════════════════════════════════════════════════════════
  2026-W44 | OCT 26 TO NOV 1, 2026
  One rep is on track while the team has gaps across the funnel.
@@ -374,7 +378,7 @@ These are simplified versions. The real reports are formatted PDFs. All the numb
                                   1.3% against a target of 3.43%.
  Nina Patel     Onboarding        Numbers shown without judgment.   1/none
  ──────────────────────────────────────────────────────────────────────
- Andy Gheewalla | Team report | 2026-W44
+ Example Analytics | Team report | 2026-W44
 ```
 
 ### Team report: one page per rep
@@ -408,7 +412,7 @@ The last page of the report lists the files used and where every target comes fr
 ### 1:1 prep sheet
 
 ```text
- Andy Gheewalla                                               1:1 PREP
+ Example Analytics                                            1:1 PREP
  ══════════════════════════════════════════════════════════════════════
  Chloe Nguyen                                        Needs attention
  ══════════════════════════════════════════════════════════════════════
@@ -437,7 +441,7 @@ The last page of the report lists the files used and where every target comes fr
  10 min   Coaching focus             ..................................
   5 min   Next steps                 ..................................
  ──────────────────────────────────────────────────────────────────────
- Andy Gheewalla | 1:1 prep | Chloe Nguyen | 2026-W44
+ Example Analytics | 1:1 prep | Chloe Nguyen | 2026-W44
 ```
 
 ## How it decides what to coach
@@ -632,7 +636,7 @@ Paste the template with its placeholders, like `{{first_name}}`, not an email yo
 The report calls this a team pattern. When everyone struggles at the same step, look at the prospect list, the messaging, or the targets before coaching each rep.
 
 **How do I change the name on the reports?**
-Reports are branded Andy Gheewalla. To use your own name, ask whoever looks after your technical setup to follow the [technical guide](docs/technical-guide.md).
+Claude asks for this when you set up your team. To change it later, just ask: *"Change the name on our reports to Example Dental."*
 
 **How do I update SDR Manager?**
 Paste the [install message](#step-3-ask-claude-to-install-it) again. Your team's folder and reports aren't touched.
